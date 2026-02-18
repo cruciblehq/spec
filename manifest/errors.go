@@ -36,6 +36,7 @@ var (
 	// Stage
 	ErrMissingFrom       = errors.New("stage missing base image")
 	ErrInvalidFromFormat = errors.New("invalid from format")
+	ErrNumericStageName  = errors.New("stage name must not be numeric")
 
 	// Source
 	ErrUnknownSourceType = errors.New("unknown source type")

@@ -1,6 +1,9 @@
 package manifest
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
 // A build stage in a recipe.
 //
@@ -39,6 +42,12 @@ type Stage struct {
 // The base image source is parsed and validated. Each step is validated
 // recursively with positional context.
 func (s *Stage) Validate() error {
+	if s.Name != "" {
+		if _, err := strconv.Atoi(s.Name); err == nil {
+			return wrap(ErrInvalidStage, ErrNumericStageName)
+		}
+	}
+
 	src, err := s.ParseFrom()
 	if err != nil {
 		return wrap(ErrInvalidStage, err)
