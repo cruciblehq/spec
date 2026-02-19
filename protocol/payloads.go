@@ -17,6 +17,7 @@ type BuildRequest struct {
 	Output     string           `json:"output"`               // Directory for the final build artifact.
 	Root       string           `json:"root"`                 // Project root, for resolving copy sources.
 	Entrypoint []string         `json:"entrypoint,omitempty"` // OCI entrypoint to set on the output image.
+	Platforms  []string         `json:"platforms,omitempty"`  // Target platforms (e.g., ["linux/amd64"]). Defaults to host.
 }
 
 // Checks that all required build fields are present, validates the recipe,
