@@ -41,4 +41,29 @@
 // Every type in the package exposes a Validate method that checks structural
 // correctness. Validation cascades from [Manifest.Validate] down through
 // [Resource], the config type, [Recipe], [Stage], and [Step].
+//
+// Encoding a manifest:
+//
+//	m := &manifest.Manifest{
+//		Resource: manifest.Resource{
+//			Type:    manifest.TypeService,
+//			Name:    "crucible/hub",
+//			Version: "1.0.0",
+//		},
+//		Config: &manifest.Service{ /* ... */ },
+//	}
+//	data, err := manifest.Encode(m)
+//
+// Decoding a manifest:
+//
+//	m, err := manifest.Decode(data)
+//	if err != nil {
+//		log.Fatal(err) // malformed YAML or validation failure
+//	}
+//	switch cfg := m.Config.(type) {
+//	case *manifest.Service:
+//		fmt.Println("service", cfg)
+//	case *manifest.Runtime:
+//		fmt.Println("runtime", cfg)
+//	}
 package manifest

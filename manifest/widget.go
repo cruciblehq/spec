@@ -1,5 +1,7 @@
 package manifest
 
+import "github.com/cruciblehq/crex"
+
 // Holds configuration specific to widget resources.
 //
 // Widget resources are frontend components that can be embedded into apps.
@@ -17,7 +19,7 @@ type Widget struct {
 // The main entry point is required.
 func (w *Widget) Validate() error {
 	if w.Main == "" {
-		return wrap(ErrInvalidWidget, ErrMissingMain)
+		return crex.Wrap(ErrInvalidWidget, ErrMissingMain)
 	}
 	return nil
 }

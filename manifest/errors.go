@@ -1,9 +1,6 @@
 package manifest
 
-import (
-	"errors"
-	"fmt"
-)
+import "errors"
 
 var (
 
@@ -17,6 +14,10 @@ var (
 	ErrInvalidStep         = errors.New("invalid step")
 	ErrInvalidService      = errors.New("invalid service")
 	ErrInvalidWidget       = errors.New("invalid widget")
+
+	// Codec
+	ErrEncodeFailed = errors.New("failed to encode manifest")
+	ErrDecodeFailed = errors.New("failed to decode manifest")
 
 	// Manifest
 	ErrUnsupportedVersion = errors.New("unsupported manifest version")
@@ -57,9 +58,3 @@ var (
 	// Widget
 	ErrMissingMain = errors.New("widget missing main entry point")
 )
-
-// Combines a sentinel error with a specific error to provide both broad
-// categorization and detailed context.
-func wrap(sentinel, err error) error {
-	return fmt.Errorf("%w: %w", sentinel, err)
-}

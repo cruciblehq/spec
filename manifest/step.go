@@ -1,6 +1,6 @@
 package manifest
 
-import "fmt"
+import "github.com/cruciblehq/crex"
 
 // A build step in a recipe stage.
 //
@@ -73,18 +73,18 @@ type Step struct {
 // compatibility, then recursively validates child steps.
 func (s *Step) Validate() error {
 	if err := s.validateStructure(); err != nil {
-		return wrap(ErrInvalidStep, err)
+		return crex.Wrap(ErrInvalidStep, err)
 	}
 	if err := s.validateModifiers(); err != nil {
-		return wrap(ErrInvalidStep, err)
+		return crex.Wrap(ErrInvalidStep, err)
 	}
 
 	for i := range s.Steps {
 		if s.Steps[i].Platform != "" {
-			return wrap(ErrInvalidStep, fmt.Errorf("step %d: %w", i+1, ErrNestedPlatformGroup))
+			return crex.Wrapf(ErrInvalidStep, "step %d: %w", i+1, ErrNestedPlatformGroup)
 		}
 		if err := s.Steps[i].Validate(); err != nil {
-			return fmt.Errorf("step %d: %w", i+1, err)
+			return crex.Wrapf(ErrInvalidStep, "step %d: %w", i+1, err)
 		}
 	}
 

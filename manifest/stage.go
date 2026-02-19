@@ -1,8 +1,9 @@
 package manifest
 
 import (
-	"fmt"
 	"strconv"
+
+	"github.com/cruciblehq/crex"
 )
 
 // A build stage in a recipe.
@@ -44,22 +45,22 @@ type Stage struct {
 func (s *Stage) Validate() error {
 	if s.Name != "" {
 		if _, err := strconv.Atoi(s.Name); err == nil {
-			return wrap(ErrInvalidStage, ErrNumericStageName)
+			return crex.Wrap(ErrInvalidStage, ErrNumericStageName)
 		}
 	}
 
 	src, err := s.ParseFrom()
 	if err != nil {
-		return wrap(ErrInvalidStage, err)
+		return crex.Wrap(ErrInvalidStage, err)
 	}
 
 	if err := src.Validate(); err != nil {
-		return wrap(ErrInvalidStage, err)
+		return crex.Wrap(ErrInvalidStage, err)
 	}
 
 	for i := range s.Steps {
 		if err := s.Steps[i].Validate(); err != nil {
-			return wrap(ErrInvalidStage, fmt.Errorf("step %d: %w", i+1, err))
+			return crex.Wrapf(ErrInvalidStage, "step %d: %w", i+1, err)
 		}
 	}
 

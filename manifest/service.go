@@ -1,5 +1,7 @@
 package manifest
 
+import "github.com/cruciblehq/crex"
+
 // Holds configuration specific to service resources.
 //
 // Service resources are backend components that provide functionality to other
@@ -17,7 +19,7 @@ type Service struct {
 // Validates the service configuration.
 func (s *Service) Validate() error {
 	if len(s.Entrypoint) == 0 {
-		return wrap(ErrInvalidService, ErrMissingEntrypoint)
+		return crex.Wrap(ErrInvalidService, ErrMissingEntrypoint)
 	}
 
 	return s.Recipe.Validate()

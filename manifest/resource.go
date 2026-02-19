@@ -1,5 +1,7 @@
 package manifest
 
+import "github.com/cruciblehq/crex"
+
 // Holds common metadata about the resource.
 //
 // Includes the resource type, qualified name, and version. The type field
@@ -31,15 +33,15 @@ type Resource struct {
 // The type must be a known [ResourceType]. Name and version are required.
 func (r *Resource) Validate() error {
 	if _, err := ParseResourceType(string(r.Type)); err != nil {
-		return wrap(ErrInvalidResource, err)
+		return crex.Wrap(ErrInvalidResource, err)
 	}
 
 	if r.Name == "" {
-		return wrap(ErrInvalidResource, ErrMissingName)
+		return crex.Wrap(ErrInvalidResource, ErrMissingName)
 	}
 
 	if r.Version == "" {
-		return wrap(ErrInvalidResource, ErrMissingVersion)
+		return crex.Wrap(ErrInvalidResource, ErrMissingVersion)
 	}
 
 	return nil

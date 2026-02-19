@@ -1,6 +1,10 @@
 package manifest
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/cruciblehq/crex"
+)
 
 // Discriminates the origin of a stage's base image.
 type SourceType string
@@ -38,11 +42,11 @@ func (s *Source) Validate() error {
 	switch s.Type {
 	case SourceFile, SourceRef:
 	default:
-		return wrap(ErrInvalidSource, ErrUnknownSourceType)
+		return crex.Wrap(ErrInvalidSource, ErrUnknownSourceType)
 	}
 
 	if s.Value == "" {
-		return wrap(ErrInvalidSource, ErrMissingValue)
+		return crex.Wrap(ErrInvalidSource, ErrMissingValue)
 	}
 
 	return nil

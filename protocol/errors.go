@@ -1,14 +1,12 @@
 package protocol
 
-import (
-	"errors"
-	"fmt"
-)
+import "errors"
 
 var (
-	ErrUnsupportedVersion = errors.New("unsupported protocol version")
-	ErrUnknownCommand     = errors.New("unknown command")
-	ErrMalformedMessage   = errors.New("malformed message")
+	ErrUnsupportedVersion  = errors.New("unsupported protocol version")
+	ErrUnknownCommand      = errors.New("unknown command")
+	ErrMalformedMessage    = errors.New("malformed message")
+	ErrInvalidBuildRequest = errors.New("invalid build request")
 
 	ErrMissingCommand   = errors.New("missing command")
 	ErrMissingRecipe    = errors.New("missing recipe")
@@ -18,9 +16,3 @@ var (
 	ErrMissingMessage   = errors.New("missing error message")
 	ErrUnresolvedSource = errors.New("unresolved source")
 )
-
-// Combines a sentinel error with a specific error to provide both broad
-// categorization and detailed context.
-func wrap(sentinel, err error) error {
-	return fmt.Errorf("%w: %w", sentinel, err)
-}

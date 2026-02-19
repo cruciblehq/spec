@@ -1,6 +1,10 @@
 package protocol
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"github.com/cruciblehq/crex"
+)
 
 // Encodes a command and payload into a JSON envelope.
 func Encode(cmd Command, payload any) ([]byte, error) {
@@ -21,7 +25,7 @@ func Decode(data []byte) (*Envelope, json.RawMessage, error) {
 	}
 
 	if err := json.Unmarshal(data, &raw); err != nil {
-		return nil, nil, wrap(ErrMalformedMessage, err)
+		return nil, nil, crex.Wrap(ErrMalformedMessage, err)
 	}
 
 	if raw.Version != Version {
@@ -43,7 +47,7 @@ func DecodePayload[T any](payload json.RawMessage) (*T, error) {
 	}
 	var t T
 	if err := json.Unmarshal(payload, &t); err != nil {
-		return nil, wrap(ErrMalformedMessage, err)
+		return nil, crex.Wrap(ErrMalformedMessage, err)
 	}
 	return &t, nil
 }

@@ -1,6 +1,10 @@
 package manifest
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/cruciblehq/crex"
+)
 
 // Describes a build pipeline as one or more stages.
 //
@@ -26,7 +30,7 @@ type Recipe struct {
 // is validated recursively.
 func (r *Recipe) Validate() error {
 	if len(r.Stages) == 0 {
-		return wrap(ErrInvalidRecipe, ErrMissingStages)
+		return crex.Wrap(ErrInvalidRecipe, ErrMissingStages)
 	}
 
 	seen := make(map[string]bool, len(r.Stages))
@@ -36,13 +40,13 @@ func (r *Recipe) Validate() error {
 		name := r.Stages[i].Name
 		if name != "" {
 			if seen[name] {
-				return wrap(ErrInvalidRecipe, fmt.Errorf("%w: %s", ErrDuplicateStageName, name))
+				return crex.Wrapf(ErrInvalidRecipe, "%w: %s", ErrDuplicateStageName, name)
 			}
 			seen[name] = true
 		}
 
 		if err := r.Stages[i].Validate(); err != nil {
-			return wrap(ErrInvalidRecipe, fmt.Errorf("stage %s: %w", stageLabel(name, i), err))
+			return crex.Wrapf(ErrInvalidRecipe, "stage %s: %w", stageLabel(name, i), err)
 		}
 
 		if !r.Stages[i].Transient {
@@ -51,10 +55,10 @@ func (r *Recipe) Validate() error {
 	}
 
 	if outputStages == 0 {
-		return wrap(ErrInvalidRecipe, ErrNoOutputStage)
+		return crex.Wrap(ErrInvalidRecipe, ErrNoOutputStage)
 	}
 	if outputStages > 1 {
-		return wrap(ErrInvalidRecipe, ErrMultipleOutputStages)
+		return crex.Wrap(ErrInvalidRecipe, ErrMultipleOutputStages)
 	}
 
 	return nil

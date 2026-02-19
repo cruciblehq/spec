@@ -1,5 +1,7 @@
 package manifest
 
+import "github.com/cruciblehq/crex"
+
 // Defines a Crucible resource.
 //
 // A manifest specifies metadata about the resource and its type-specific
@@ -33,19 +35,19 @@ type Manifest struct {
 // to its concrete type.
 func (m *Manifest) Validate() error {
 	if m.Version != 0 {
-		return wrap(ErrInvalidManifest, ErrUnsupportedVersion)
+		return crex.Wrap(ErrInvalidManifest, ErrUnsupportedVersion)
 	}
 
 	if err := m.Resource.Validate(); err != nil {
-		return wrap(ErrInvalidManifest, err)
+		return crex.Wrap(ErrInvalidManifest, err)
 	}
 
 	if m.Config == nil {
-		return wrap(ErrInvalidManifest, ErrMissingConfig)
+		return crex.Wrap(ErrInvalidManifest, ErrMissingConfig)
 	}
 
 	if err := m.validateConfig(); err != nil {
-		return wrap(ErrInvalidManifest, err)
+		return crex.Wrap(ErrInvalidManifest, err)
 	}
 
 	return nil
