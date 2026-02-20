@@ -15,4 +15,10 @@ var (
 	ErrMissingRoot      = errors.New("missing project root")
 	ErrMissingMessage   = errors.New("missing error message")
 	ErrUnresolvedSource = errors.New("unresolved source")
+
+	ErrMissingRef         = errors.New("missing resource reference")
+	ErrMissingVersion     = errors.New("missing version")
+	ErrMissingPath        = errors.New("missing path")
+	ErrMissingID          = errors.New("missing container identifier")
+	ErrMissingExecCommand = errors.New("missing exec command")
 )
