@@ -23,3 +23,8 @@ const (
 	CmdOK    Command = "ok"    // Operation completed successfully.
 	CmdError Command = "error" // Operation failed.
 )
+
+// Builds a containerd image tag from a resource reference and version.
+func ImageTag(ref, version string) string {
+	return ref + ":" + version
+}
