@@ -8,7 +8,7 @@ import "github.com/cruciblehq/crex"
 // systems by exposing an API. They build on top of a base image defined by
 // the embedded [Recipe], which specifies the source image and build steps.
 type Service struct {
-	Recipe `yaml:",squash"`
+	Recipe `yaml:",inline"`
 
 	// Command to run when the container starts.
 	//

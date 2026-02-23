@@ -7,7 +7,7 @@ package manifest
 // packages, copying configuration files, setting environment variables, etc.)
 // to produce a base that service resources build on top of.
 type Runtime struct {
-	Recipe `yaml:",squash"`
+	Recipe `yaml:",inline"`
 }
 
 // Validates the runtime configuration.
