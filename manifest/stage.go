@@ -32,6 +32,15 @@ type Stage struct {
 	Transient bool `yaml:"transient,omitempty"`
 
 	// Specifies the base image source for this stage.
+	//
+	// A "file" prefix selects a local OCI image archive on disk, such as
+	// "file ./alpine.tar". An "oci" prefix pulls a remote container image
+	// from a registry; the reference is a single colon-delimited token
+	// like "oci alpine:3.21" or "oci docker.io/library/alpine:3.21".
+	// Anything else is treated as a Crucible runtime reference where the
+	// name and version constraint are separated by a space, such as
+	// "crucible/runtime 0.1.0". An explicit "ref" prefix may be used for
+	// clarity or to disambiguate a resource named "file" or "oci".
 	From string `yaml:"from"`
 
 	// Ordered build steps for this stage.

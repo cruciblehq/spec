@@ -8,8 +8,9 @@ import (
 // Payload for the build command.
 //
 // Carries a fully-resolved recipe and metadata needed for the daemon to
-// execute a build. All stage sources must be resolved to file paths before
-// sending; the daemon does not resolve references.
+// execute a build. All stage sources must be resolved to file paths or OCI
+// image references before sending; the daemon does not resolve Crucible
+// references.
 type BuildRequest struct {
 	Recipe     *manifest.Recipe `json:"recipe"`               // Parsed recipe to execute.
 	Resource   string           `json:"resource"`             // Resource name, used as a prefix for container IDs.
@@ -20,7 +21,8 @@ type BuildRequest struct {
 }
 
 // Checks that all required build fields are present, validates the recipe,
-// and verifies that all stage sources are resolved to file paths.
+// and verifies that all stage sources are resolved to file paths or OCI
+// image references.
 func (r *BuildRequest) Validate() error {
 	if r.Recipe == nil {
 		return ErrMissingRecipe
@@ -44,7 +46,7 @@ func (r *BuildRequest) Validate() error {
 		if err != nil {
 			return crex.Wrapf(ErrInvalidBuildRequest, "stage %d: %w", i+1, err)
 		}
-		if src.Type != manifest.SourceFile {
+		if src.Type != manifest.SourceFile && src.Type != manifest.SourceOCI {
 			return crex.Wrapf(ErrInvalidBuildRequest, "stage %d: %w", i+1, ErrUnresolvedSource)
 		}
 	}
