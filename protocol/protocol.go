@@ -1,5 +1,7 @@
 package protocol
 
+import "strings"
+
 // The current protocol version.
 const Version = 0
 
@@ -27,4 +29,12 @@ const (
 // Builds a containerd image tag from a resource reference and version.
 func ImageTag(ref, version string) string {
 	return ref + ":" + version
+}
+
+// Builds a containerd container ID from a resource reference.
+//
+// Slashes in the reference (e.g., "crucible/hub") are replaced with dashes
+// so the resulting string satisfies containerd's identifier constraints.
+func ContainerID(ref string) string {
+	return strings.ReplaceAll(ref, "/", "-")
 }
