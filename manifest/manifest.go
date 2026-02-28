@@ -1,6 +1,9 @@
 package manifest
 
-import "github.com/cruciblehq/crex"
+import (
+	"github.com/cruciblehq/crex"
+	"github.com/cruciblehq/spec/reference"
+)
 
 // Defines a Crucible resource.
 //
@@ -50,6 +53,26 @@ func (m *Manifest) Validate() error {
 		return crex.Wrap(ErrInvalidManifest, err)
 	}
 
+	return nil
+}
+
+// Resolves the resource name to its fully qualified form.
+//
+// Parses [Resource.Name] as a resource identifier using the given defaults
+// so that the namespace is always explicit. The name is rewritten to
+// "namespace/name". Both defaults are required.
+func (m *Manifest) ResolveName(defaultRegistry, defaultNamespace string) error {
+	opts, err := reference.NewIdentifierOptions(defaultRegistry, defaultNamespace)
+	if err != nil {
+		return crex.Wrap(ErrResolveFailed, err)
+	}
+
+	id, err := reference.ParseIdentifier(m.Resource.Name, string(m.Resource.Type), opts)
+	if err != nil {
+		return crex.Wrap(ErrResolveFailed, err)
+	}
+
+	m.Resource.Name = id.Path()
 	return nil
 }
 

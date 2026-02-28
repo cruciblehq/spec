@@ -16,8 +16,9 @@ var (
 	ErrInvalidWidget       = errors.New("invalid widget")
 
 	// Codec
-	ErrEncodeFailed = errors.New("failed to encode manifest")
-	ErrDecodeFailed = errors.New("failed to decode manifest")
+	ErrEncodeFailed  = errors.New("failed to encode manifest")
+	ErrDecodeFailed  = errors.New("failed to decode manifest")
+	ErrResolveFailed = errors.New("failed to resolve resource name")
 
 	// Manifest
 	ErrUnsupportedVersion = errors.New("unsupported manifest version")
