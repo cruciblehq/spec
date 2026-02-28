@@ -2,6 +2,9 @@ package manifest
 
 import "github.com/cruciblehq/crex"
 
+// The JavaScript bundle produced by widget builds.
+const WidgetMainFile = "index.js"
+
 // Holds configuration specific to widget resources.
 //
 // Widget resources are frontend components that can be embedded into apps.

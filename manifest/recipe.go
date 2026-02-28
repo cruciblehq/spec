@@ -6,6 +6,10 @@ import (
 	"github.com/cruciblehq/crex"
 )
 
+// The OCI image artifact produced by recipe-based builds (runtimes, services,
+// and machines).
+const ImageFile = "image.tar"
+
 // Describes a build pipeline as one or more stages.
 //
 // A recipe is the reusable unit shared by resource types that produce OCI
