@@ -16,12 +16,15 @@ const (
 
 	// Widget resource type.
 	TypeWidget ResourceType = "widget"
+
+	// Machine resource type.
+	TypeMachine ResourceType = "machine"
 )
 
 // Converts a string to a resource type, returning an error if invalid.
 func ParseResourceType(s string) (ResourceType, error) {
 	switch ResourceType(s) {
-	case TypeRuntime, TypeService, TypeTemplate, TypeWidget:
+	case TypeRuntime, TypeService, TypeTemplate, TypeWidget, TypeMachine:
 		return ResourceType(s), nil
 	default:
 		return "", ErrInvalidResourceType

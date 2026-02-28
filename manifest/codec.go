@@ -62,6 +62,7 @@ func Decode(data []byte) (*Manifest, error) {
 		TypeService:  &Service{},
 		TypeWidget:   &Widget{},
 		TypeTemplate: &Template{},
+		TypeMachine:  &Machine{},
 	}
 
 	target, ok := configs[m.Resource.Type]

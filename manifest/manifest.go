@@ -84,6 +84,13 @@ func (m *Manifest) validateConfig() error {
 		}
 		return cfg.Validate()
 
+	case TypeMachine:
+		cfg, ok := m.Config.(*Machine)
+		if !ok {
+			return ErrConfigTypeMismatch
+		}
+		return cfg.Validate()
+
 	default:
 		return ErrInvalidResourceType
 	}
