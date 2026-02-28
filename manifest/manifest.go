@@ -5,6 +5,9 @@ import (
 	"github.com/cruciblehq/spec/reference"
 )
 
+// The canonical filename for Crucible resource manifests.
+const ManifestFile = "crucible.yaml"
+
 // Defines a Crucible resource.
 //
 // A manifest specifies metadata about the resource and its type-specific
