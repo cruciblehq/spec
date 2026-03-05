@@ -16,21 +16,16 @@ import (
 type Format int
 
 const (
+	Zstd Format = iota // Zstandard compression (.tar.zst).
+	Gzip               // Gzip compression (.tar.gz, .tgz).
+	Tar                // Plain tar, no compression (.tar).
+)
 
-	// Zstandard compression (.tar.zst).
-	Zstd Format = iota
-
-	// Gzip compression (.tar.gz, .tgz).
-	Gzip
-
-	// File extension for Zstandard-compressed tar archives.
-	extZstd = ".tar.zst"
-
-	// File extension for Gzip-compressed tar archives.
-	extGzip = ".tar.gz"
-
-	// Alternate file extension for Gzip-compressed tar archives.
-	extTgz = ".tgz"
+const (
+	extZstd = ".tar.zst" // File extension for Zstandard-compressed tar archives.
+	extGzip = ".tar.gz"  // File extension for Gzip-compressed tar archives.
+	extTgz  = ".tgz"     // Alternate file extension for Gzip-compressed tar archives.
+	extTar  = ".tar"     // File extension for plain tar archives.
 )
 
 // String returns the canonical file extension for the format.
@@ -40,6 +35,8 @@ func (f Format) String() string {
 		return extZstd
 	case Gzip:
 		return extGzip
+	case Tar:
+		return extTar
 	default:
 		return ""
 	}
@@ -57,6 +54,8 @@ func detect(name string) (Format, error) {
 		return Gzip, nil
 	case strings.HasSuffix(lower, extTgz):
 		return Gzip, nil
+	case strings.HasSuffix(lower, extTar):
+		return Tar, nil
 	default:
 		return 0, ErrUnsupportedFormat
 	}
@@ -69,6 +68,8 @@ func newCompressWriter(w io.Writer, f Format) (io.WriteCloser, error) {
 		return zstd.NewWriter(w)
 	case Gzip:
 		return gzip.NewWriter(w), nil
+	case Tar:
+		return nopWriteCloser{w}, nil
 	default:
 		return nil, ErrUnsupportedFormat
 	}
@@ -85,7 +86,14 @@ func newDecompressReader(r io.Reader, f Format) (io.ReadCloser, error) {
 		return zr.IOReadCloser(), nil
 	case Gzip:
 		return gzip.NewReader(r)
+	case Tar:
+		return io.NopCloser(r), nil
 	default:
 		return nil, ErrUnsupportedFormat
 	}
 }
+
+// Wraps a writer with a no-op Close method.
+type nopWriteCloser struct{ io.Writer }
+
+func (nopWriteCloser) Close() error { return nil }
