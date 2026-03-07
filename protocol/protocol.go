@@ -9,9 +9,8 @@ const Version = 0
 type Command string
 
 const (
-	CmdBuild    Command = "build"    // Execute a recipe-based build.
-	CmdStatus   Command = "status"   // Query daemon status.
-	CmdShutdown Command = "shutdown" // Shut down the daemon.
+	CmdBuild  Command = "build"  // Execute a recipe-based build.
+	CmdStatus Command = "status" // Query daemon status.
 
 	CmdImageImport      Command = "image-import"      // Import an OCI image tarball.
 	CmdImageStart       Command = "image-start"       // Start a container from an image.

@@ -5,6 +5,7 @@ import "errors"
 var (
 
 	// Validation errors.
+
 	ErrNameEmpty         = errors.New("name cannot be empty")
 	ErrNameTooLong       = errors.New("name cannot exceed 63 characters")
 	ErrNameInvalid       = errors.New("name must contain only lowercase letters, numbers, and hyphens, and must start and end with an alphanumeric character")
@@ -21,12 +22,14 @@ var (
 	ErrErrorMessageEmpty = errors.New("error message cannot be empty")
 
 	// Type validation errors.
+
 	ErrInvalidNamespace = errors.New("invalid namespace")
 	ErrInvalidResource  = errors.New("invalid resource")
 	ErrInvalidVersion   = errors.New("invalid version")
 	ErrInvalidChannel   = errors.New("invalid channel")
 
 	// Codec errors.
+
 	ErrEncodeFailed = errors.New("failed to encode registry type")
 	ErrDecodeFailed = errors.New("failed to decode registry type")
 )

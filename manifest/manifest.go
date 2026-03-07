@@ -63,15 +63,9 @@ func (m *Manifest) Validate() error {
 //
 // Parses [Resource.Name] as a resource identifier using the given defaults
 // so that the namespace is always explicit. The name is rewritten to
-// "namespace/name". Both defaults are required. The returned
-// [reference.Identifier] gives callers access to the parsed registry,
-// namespace, and name without a second parse.
-func (m *Manifest) ResolveName(defaultRegistry, defaultNamespace string) (*reference.Identifier, error) {
-	opts, err := reference.NewIdentifierOptions(defaultRegistry, defaultNamespace)
-	if err != nil {
-		return nil, crex.Wrap(ErrResolveFailed, err)
-	}
-
+// "namespace/name". The returned [reference.Identifier] gives callers access
+// to the parsed registry, namespace, and name without a second parse.
+func (m *Manifest) ResolveName(opts reference.IdentifierOptions) (*reference.Identifier, error) {
 	id, err := reference.ParseIdentifier(m.Resource.Name, string(m.Resource.Type), opts)
 	if err != nil {
 		return nil, crex.Wrap(ErrResolveFailed, err)

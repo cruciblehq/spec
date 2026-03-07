@@ -13,8 +13,8 @@
 // as raw JSON so the caller can route on the command before committing to a
 // concrete type. [DecodePayload] then parses the payload into a typed struct.
 //
-// The package defines request commands ([CmdBuild], [CmdStatus], [CmdShutdown])
-// and response commands ([CmdOK], [CmdError]). Each request command has a
+// The package defines request commands ([CmdBuild], [CmdStatus]) and response
+// commands ([CmdOK], [CmdError]). Each request command has a
 // corresponding payload type that carries the command's arguments. Payload
 // types expose a Validate method that checks for missing or invalid fields.
 //
