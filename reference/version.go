@@ -16,6 +16,7 @@ type Version struct {
 }
 
 var (
+
 	// Prerelease: identifier.number (e.g., "alpha.1", "beta.2", "rc.3").
 	// Identifier must start with a letter and contain only alphanumerics.
 	// Number must be zero or a positive integer without leading zeros.

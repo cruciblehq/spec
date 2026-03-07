@@ -11,11 +11,11 @@ import (
 // An identifier locates a resource without specifying a particular version.
 // Use [ParseIdentifier] to construct valid identifiers.
 type Identifier struct {
-	typ       string
-	registry  *url.URL
-	namespace string
-	name      string
-	path      string
+	typ       string   // Resource type (e.g., "widget"). Lowercase alphabetic only.
+	registry  *url.URL // Registry URL. Always set, even when using defaults.
+	namespace string   // Namespace segment of the path. Only used with the default registry.
+	name      string   // Resource name.
+	path      string   // Full path within the registry.
 }
 
 // Options for parsing identifiers.

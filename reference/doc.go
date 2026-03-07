@@ -11,7 +11,7 @@
 //
 // Scheme, registry (authority), and path together form the resource identifier
 // (or location), which specifies where to locate the resource. When omitted,
-// both default to the values configured in [IdentifierOptions].
+// both default to the values configured in [Options].
 //
 // Crucible's registry uses a hierarchical path structure to organize resources,
 // consisting of namespace and name segments expressed as namespace/name. The

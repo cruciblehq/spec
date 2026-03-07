@@ -105,6 +105,7 @@ func (c constraint) matchCaret(v *Version) bool {
 //
 // Per semver, when major is 0, the caret operator is more restrictive because
 // 0.x.y versions are considered unstable:
+//
 //   - ^0 matches any 0.x.x
 //   - ^0.0 matches any 0.0.x
 //   - ^0.0.3 matches exactly 0.0.3 (no changes allowed)
@@ -134,6 +135,7 @@ func (c constraint) matchCaretMajorZero(v *Version) bool {
 // Handles caret matching when major version is non-zero.
 //
 // Per semver, when major is non-zero, the caret allows minor and patch changes:
+//
 //   - ^1 matches any 1.x.x
 //   - ^1.2 matches any 1.x.y where x >= 2
 //   - ^1.2.3 matches 1.x.y where (x > 2) or (x == 2 and y >= 3)
@@ -166,6 +168,7 @@ func (c constraint) matchEqual(v *Version) bool {
 // Returns the relative ordering between the constraint and a version.
 //
 // Returns:
+//
 //   - -1 if the constraint version is less than v
 //   - 0 if the constraint version equals v (for set components)
 //   - 1 if the constraint version is greater than v

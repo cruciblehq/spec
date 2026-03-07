@@ -17,6 +17,22 @@ type Reference struct {
 	digest  *Digest
 }
 
+// Options for parsing references.
+type Options struct {
+	IdentifierOptions
+}
+
+// Creates a new [Options] with the given defaults.
+//
+// Both parameters are required. Returns an error if either is empty.
+func NewOptions(defaultRegistry, defaultNamespace string) (Options, error) {
+	id, err := NewIdentifierOptions(defaultRegistry, defaultNamespace)
+	if err != nil {
+		return Options{}, err
+	}
+	return Options{IdentifierOptions: id}, nil
+}
+
 // Parses a reference string.
 //
 // The context type is required, and used to set the type when the reference
@@ -45,7 +61,7 @@ type Reference struct {
 // The digest is optional and follows the format algorithm:hash (e.g.,
 // "sha256:abcd1234"). When present, it freezes the reference to a specific
 // content version.
-func Parse(s string, contextType string, options IdentifierOptions) (*Reference, error) {
+func Parse(s string, contextType string, options Options) (*Reference, error) {
 	p := &referenceParser{
 		tokens:  strings.Fields(s),
 		options: options,
@@ -54,7 +70,7 @@ func Parse(s string, contextType string, options IdentifierOptions) (*Reference,
 }
 
 // Like [Parse], but panics on error.
-func MustParse(s string, contextType string, options IdentifierOptions) *Reference {
+func MustParse(s string, contextType string, options Options) *Reference {
 	ref, err := Parse(s, contextType, options)
 	if err != nil {
 		panic(err)

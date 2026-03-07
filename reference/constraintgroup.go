@@ -7,7 +7,7 @@ import "strings"
 //
 // A constraint group must contain at least one constraint.
 type constraintGroup struct {
-	constraints []constraint
+	constraints []constraint // The individual constraints in this group.
 }
 
 // Whether a version satisfies all constraints in the group (AND logic).

@@ -7,14 +7,16 @@ import (
 
 var (
 
-	// Broad sentinel errors
+	// Broad sentinel errors.
+
 	ErrInvalidIdentifier = errors.New("invalid identifier")
 	ErrInvalidReference  = errors.New("invalid reference")
 	ErrInvalidVersion    = errors.New("invalid version")
 	ErrInvalidDigest     = errors.New("invalid digest")
 	ErrTypeMismatch      = errors.New("resource type mismatch")
 
-	// Specific identifier errors
+	// Specific identifier errors.
+
 	ErrInvalidContextType      = errors.New("invalid context type")
 	ErrEmptyIdentifier         = errors.New("empty identifier")
 	ErrInvalidScheme           = errors.New("invalid scheme")
@@ -28,11 +30,13 @@ var (
 	ErrMissingDefaultRegistry  = errors.New("default registry is required")
 	ErrMissingDefaultNamespace = errors.New("default namespace is required")
 
-	// Specific reference errors
+	// Specific reference errors.
+
 	ErrEmptyReference        = errors.New("empty reference")
 	ErrMissingVersionChannel = errors.New("missing version or channel")
 
-	// Specific version constraint errors
+	// Specific version constraint errors.
+
 	ErrEmptyConstraint           = errors.New("empty constraint string")
 	ErrEmptyConstraintGroup      = errors.New("empty constraint group")
 	ErrBareWildcard              = errors.New("bare wildcard not allowed")
@@ -54,7 +58,8 @@ var (
 	ErrIncompatibleConstraints   = errors.New("constraints have no common versions")
 	ErrUnexpectedToken           = errors.New("unexpected token")
 
-	// Specific version errors
+	// Specific version errors.
+
 	ErrInvalidBuildMetadata     = errors.New("invalid build metadata")
 	ErrInvalidPrereleaseFormat  = errors.New("invalid prerelease format")
 	ErrInvalidVersionComponents = errors.New("version must have major.minor.patch")
@@ -62,7 +67,8 @@ var (
 	ErrInvalidMinorVersion      = errors.New("invalid minor version")
 	ErrInvalidPatchVersion      = errors.New("invalid patch version")
 
-	// Specific digest errors
+	// Specific digest errors.
+
 	ErrMissingDigestColon   = errors.New("digest missing colon separator")
 	ErrEmptyDigestAlgorithm = errors.New("empty digest algorithm")
 	ErrEmptyDigestHash      = errors.New("empty digest hash")

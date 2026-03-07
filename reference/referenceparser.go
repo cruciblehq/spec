@@ -18,7 +18,7 @@ var (
 type referenceParser struct {
 	tokens  []string
 	pos     int
-	options IdentifierOptions
+	options Options
 }
 
 // Parses the tokens into a Reference.
@@ -33,7 +33,7 @@ func (p *referenceParser) parse(contextType string) (*Reference, error) {
 	// Parse the identifier portion
 	idParser := &identifierParser{
 		tokens:  p.tokens[:idEnd],
-		options: p.options,
+		options: p.options.IdentifierOptions,
 	}
 
 	id, err := idParser.parse(contextType)
