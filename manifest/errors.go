@@ -18,9 +18,8 @@ var (
 
 	// Codec.
 
-	ErrEncodeFailed  = errors.New("failed to encode manifest")
-	ErrDecodeFailed  = errors.New("failed to decode manifest")
-	ErrResolveFailed = errors.New("failed to resolve resource name")
+	ErrEncodeFailed = errors.New("failed to encode manifest")
+	ErrDecodeFailed = errors.New("failed to decode manifest")
 
 	// Manifest.
 

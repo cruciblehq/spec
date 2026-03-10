@@ -2,7 +2,6 @@ package manifest
 
 import (
 	"github.com/cruciblehq/crex"
-	"github.com/cruciblehq/spec/reference"
 )
 
 // The canonical filename for Crucible resource manifests.
@@ -57,22 +56,6 @@ func (m *Manifest) Validate() error {
 	}
 
 	return nil
-}
-
-// Resolves the resource name to its fully qualified form.
-//
-// Parses [Resource.Name] as a resource identifier. When the name includes
-// both namespace and name (e.g., "official/widget"), the name is rewritten
-// to the canonical "namespace/name" form. The returned [reference.Identifier]
-// gives callers access to the parsed components without a second parse.
-func (m *Manifest) ResolveName() (*reference.Identifier, error) {
-	id, err := reference.ParseIdentifier(m.Resource.Name, string(m.Resource.Type))
-	if err != nil {
-		return nil, crex.Wrap(ErrResolveFailed, err)
-	}
-
-	m.Resource.Name = id.Path()
-	return id, nil
 }
 
 // Validates that Config matches the resource type and is internally valid.
