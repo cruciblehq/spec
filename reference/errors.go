@@ -15,27 +15,21 @@ var (
 	ErrInvalidDigest     = errors.New("invalid digest")
 	ErrTypeMismatch      = errors.New("resource type mismatch")
 
-	// Specific identifier errors.
+	// Identifier errors.
 
-	ErrInvalidContextType      = errors.New("invalid context type")
-	ErrEmptyIdentifier         = errors.New("empty identifier")
-	ErrInvalidScheme           = errors.New("invalid scheme")
-	ErrInvalidRegistry         = errors.New("invalid registry")
-	ErrInvalidPath             = errors.New("invalid path")
-	ErrInvalidNamespace        = errors.New("invalid namespace")
-	ErrInvalidName             = errors.New("invalid name")
-	ErrMissingRegistry         = errors.New("missing registry in URI")
-	ErrMissingPath             = errors.New("missing path in URI")
-	ErrEmptyPath               = errors.New("empty path")
-	ErrMissingDefaultRegistry  = errors.New("default registry is required")
-	ErrMissingDefaultNamespace = errors.New("default namespace is required")
+	ErrInvalidContextType = errors.New("invalid context type")
+	ErrEmptyIdentifier    = errors.New("empty identifier")
+	ErrInvalidRegistry    = errors.New("invalid registry")
+	ErrInvalidPath        = errors.New("invalid path")
+	ErrInvalidNamespace   = errors.New("invalid namespace")
+	ErrInvalidName        = errors.New("invalid name")
 
-	// Specific reference errors.
+	// Reference errors.
 
 	ErrEmptyReference        = errors.New("empty reference")
 	ErrMissingVersionChannel = errors.New("missing version or channel")
 
-	// Specific version constraint errors.
+	// Version constraint errors.
 
 	ErrEmptyConstraint           = errors.New("empty constraint string")
 	ErrEmptyConstraintGroup      = errors.New("empty constraint group")
@@ -58,7 +52,7 @@ var (
 	ErrIncompatibleConstraints   = errors.New("constraints have no common versions")
 	ErrUnexpectedToken           = errors.New("unexpected token")
 
-	// Specific version errors.
+	// Version errors.
 
 	ErrInvalidBuildMetadata     = errors.New("invalid build metadata")
 	ErrInvalidPrereleaseFormat  = errors.New("invalid prerelease format")
@@ -67,7 +61,7 @@ var (
 	ErrInvalidMinorVersion      = errors.New("invalid minor version")
 	ErrInvalidPatchVersion      = errors.New("invalid patch version")
 
-	// Specific digest errors.
+	// Digest errors.
 
 	ErrMissingDigestColon   = errors.New("digest missing colon separator")
 	ErrEmptyDigestAlgorithm = errors.New("empty digest algorithm")

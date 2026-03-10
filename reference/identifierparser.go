@@ -2,7 +2,6 @@ package reference
 
 import (
 	"fmt"
-	"net/url"
 	"regexp"
 	"strings"
 )
@@ -12,25 +11,14 @@ var (
 	// Type: lowercase alphabetic only.
 	typePattern = regexp.MustCompile(`^[a-z]+$`)
 
-	// Scheme: lowercase alphabetic followed by optional digits, plus, dot, or hyphen.
-	schemePattern = regexp.MustCompile(`^[a-z][a-z0-9+.-]*$`)
-
-	// Registry: alphanumeric, starting/ending with alphanumeric, separated by
-	// dots or hyphens. May end with colon and port.
-	registryPattern = regexp.MustCompile(`^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?))+\.?(:\d+)?$`)
-
 	// Name: lowercase alphanumeric with hyphens, starting with letter.
 	namePattern = regexp.MustCompile(`^[a-z]([a-z0-9-]{0,126}[a-z0-9])?$`)
-
-	// Path: lowercase, digits, hyphens, slashes, underscores, dots.
-	pathPattern = regexp.MustCompile(`^[a-z0-9/_.-]+$`)
 )
 
 // Whitespace-tokenized identifier string parser.
 type identifierParser struct {
-	tokens  []string          // Tokenized input
-	pos     int               // Parser position in tokens
-	options IdentifierOptions // Parsing options
+	tokens []string // Tokenized input
+	pos    int      // Parser position in tokens
 }
 
 // Parses the tokens into an Identifier.
@@ -86,14 +74,14 @@ func (p *identifierParser) parseType(id *Identifier, contextType string) error {
 		return nil
 	}
 
-	// Look ahead: if next looks like a path, current is type not path
+	// Look ahead: if next token contains a slash, current is type not path.
 	if p.pos+1 < len(p.tokens) {
 		next := p.tokens[p.pos+1]
-		if !strings.Contains(next, "/") && !looksLikeRegistry(next) {
+		if !strings.Contains(next, "/") {
 			return nil
 		}
 	} else {
-		// Single token remaining; it's a path, not a type
+		// Single token remaining; it's a path, not a type.
 		return nil
 	}
 
@@ -106,110 +94,55 @@ func (p *identifierParser) parseType(id *Identifier, contextType string) error {
 	return nil
 }
 
-// Parses the resource location (scheme, registry, path).
+// Parses the resource location.
+//
+// More than 3 segments is an error. Registry and namespace may be empty in
+// the parsed result — callers are expected to apply defaults when needed.
 func (p *identifierParser) parseLocation(id *Identifier) error {
 	tok, ok := p.next()
 	if !ok {
 		return wrap(ErrInvalidIdentifier, ErrEmptyIdentifier)
 	}
 
-	// Full URI: scheme://registry/path
-	if scheme, rest, ok := strings.Cut(tok, "://"); ok {
-		return p.parseURI(id, scheme, rest)
-	}
+	parts := strings.Split(tok, "/")
 
-	// Check if first segment looks like a registry
-	if first, rest, ok := strings.Cut(tok, "/"); ok && looksLikeRegistry(first) {
-		return p.parseRegistryPath(id, first, rest)
-	}
-
-	// Default registry: namespace/name or name
-	return p.parseDefaultPath(id, tok)
-}
-
-// Parses a full URI (scheme://registry/path).
-func (p *identifierParser) parseURI(id *Identifier, scheme, rest string) error {
-	if !schemePattern.MatchString(scheme) {
-		return wrap(ErrInvalidIdentifier, ErrInvalidScheme)
-	}
-
-	registry, path, ok := strings.Cut(rest, "/")
-	if !ok || registry == "" || path == "" {
-		if !ok || registry == "" {
-			return wrap(ErrInvalidIdentifier, ErrMissingRegistry)
+	switch len(parts) {
+	case 1:
+		// name
+		if !namePattern.MatchString(parts[0]) {
+			return wrap(ErrInvalidIdentifier, ErrInvalidName)
 		}
-		return wrap(ErrInvalidIdentifier, ErrMissingPath)
-	}
+		id.name = parts[0]
 
-	if !registryPattern.MatchString(registry) {
-		return wrap(ErrInvalidIdentifier, ErrInvalidRegistry)
-	}
-
-	if !pathPattern.MatchString(path) {
-		return wrap(ErrInvalidIdentifier, ErrInvalidPath)
-	}
-
-	id.registry = &url.URL{
-		Scheme: scheme,
-		Host:   registry,
-	}
-	id.path = path
-
-	return nil
-}
-
-// Parses a registry/path combination without scheme.
-func (p *identifierParser) parseRegistryPath(id *Identifier, registry, path string) error {
-	if !registryPattern.MatchString(registry) {
-		return wrap(ErrInvalidIdentifier, ErrInvalidRegistry)
-	}
-
-	if path == "" {
-		return wrap(ErrInvalidIdentifier, ErrEmptyPath)
-	}
-
-	if !pathPattern.MatchString(path) {
-		return wrap(ErrInvalidIdentifier, ErrInvalidPath)
-	}
-
-	id.registry = &url.URL{
-		Scheme: "https",
-		Host:   registry,
-	}
-	id.path = path
-
-	return nil
-}
-
-// Parses a default registry path (namespace/name or just name).
-func (p *identifierParser) parseDefaultPath(id *Identifier, tok string) error {
-	u, err := url.Parse(p.options.DefaultRegistry)
-	if err != nil {
-		return wrap(ErrInvalidIdentifier, err)
-	}
-	id.registry = u
-
-	if namespace, name, ok := strings.Cut(tok, "/"); ok {
-		if !namePattern.MatchString(namespace) {
+	case 2:
+		// namespace/name
+		if !namePattern.MatchString(parts[0]) {
 			return wrap(ErrInvalidIdentifier, ErrInvalidNamespace)
 		}
-		if !namePattern.MatchString(name) {
+		if !namePattern.MatchString(parts[1]) {
 			return wrap(ErrInvalidIdentifier, ErrInvalidName)
 		}
-		id.namespace = namespace
-		id.name = name
-	} else {
-		if !namePattern.MatchString(tok) {
+		id.namespace = parts[0]
+		id.name = parts[1]
+
+	case 3:
+		// registry/namespace/name
+		if parts[0] == "" {
+			return wrap(ErrInvalidIdentifier, ErrInvalidRegistry)
+		}
+		if !namePattern.MatchString(parts[1]) {
+			return wrap(ErrInvalidIdentifier, ErrInvalidNamespace)
+		}
+		if !namePattern.MatchString(parts[2]) {
 			return wrap(ErrInvalidIdentifier, ErrInvalidName)
 		}
-		id.namespace = p.options.DefaultNamespace
-		id.name = tok
+		id.registry = parts[0]
+		id.namespace = parts[1]
+		id.name = parts[2]
+
+	default:
+		return wrap(ErrInvalidIdentifier, ErrInvalidPath)
 	}
 
 	return nil
-}
-
-// Returns true if the string looks like a registry hostname.
-func looksLikeRegistry(s string) bool {
-	return strings.Contains(s, ".") || strings.Contains(s, ":")
 }

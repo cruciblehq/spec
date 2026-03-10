@@ -2,14 +2,8 @@ package reference
 
 import "testing"
 
-// Returns Options with default test values.
-func testOpts() Options {
-	opts, _ := NewOptions("https://registry.test", "official")
-	return opts
-}
-
 func TestParse(t *testing.T) {
-	ref, err := Parse("namespace/name 1.0.0", "template", testOpts())
+	ref, err := Parse("namespace/name 1.0.0", "template")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -25,31 +19,46 @@ func TestParse(t *testing.T) {
 	}
 }
 
-func TestParse_WithOptions(t *testing.T) {
-	opts, err := NewOptions("https://registry.test", "myteam")
+func TestParse_BareName(t *testing.T) {
+	ref, err := Parse("widget 1.0.0", "template")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	ref, err := Parse("widget 1.0.0", "template", opts)
+	if ref.Namespace() != "" {
+		t.Errorf("expected empty namespace, got %q", ref.Namespace())
+	}
+	if ref.Name() != "widget" {
+		t.Errorf("expected name %q, got %q", "widget", ref.Name())
+	}
+}
+
+func TestParse_RegistryNamespaceName(t *testing.T) {
+	ref, err := Parse("hub.example.com/namespace/name 1.0.0", "template")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if ref.Namespace() != "myteam" {
-		t.Errorf("expected namespace %q, got %q", "myteam", ref.Namespace())
+	if ref.Registry() != "hub.example.com" {
+		t.Errorf("expected registry %q, got %q", "hub.example.com", ref.Registry())
+	}
+	if ref.Namespace() != "namespace" {
+		t.Errorf("expected namespace %q, got %q", "namespace", ref.Namespace())
+	}
+	if ref.Name() != "name" {
+		t.Errorf("expected name %q, got %q", "name", ref.Name())
 	}
 }
 
 func TestParse_Error(t *testing.T) {
-	_, err := Parse("", "template", testOpts())
+	_, err := Parse("", "template")
 	if err == nil {
 		t.Fatal("expected error")
 	}
 }
 
 func TestMustParse(t *testing.T) {
-	ref := MustParse("namespace/name 1.0.0", "template", testOpts())
+	ref := MustParse("namespace/name 1.0.0", "template")
 
 	if ref.Name() != "name" {
 		t.Errorf("expected name %q, got %q", "name", ref.Name())
@@ -63,11 +72,58 @@ func TestMustParse_Panic(t *testing.T) {
 		}
 	}()
 
-	MustParse("", "template", testOpts())
+	MustParse("", "template")
+}
+
+func TestReference_WithDefaults(t *testing.T) {
+	ref, err := Parse("widget 1.0.0", "template")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if ref.Registry() != "" {
+		t.Errorf("expected empty registry, got %q", ref.Registry())
+	}
+	if ref.Namespace() != "" {
+		t.Errorf("expected empty namespace, got %q", ref.Namespace())
+	}
+
+	resolved := ref.WithDefaults("hub.example.com", "official")
+
+	if resolved.Registry() != "hub.example.com" {
+		t.Errorf("expected registry %q, got %q", "hub.example.com", resolved.Registry())
+	}
+	if resolved.Namespace() != "official" {
+		t.Errorf("expected namespace %q, got %q", "official", resolved.Namespace())
+	}
+
+	// Original should be unchanged.
+	if ref.Registry() != "" {
+		t.Errorf("original registry should still be empty, got %q", ref.Registry())
+	}
+	if ref.Namespace() != "" {
+		t.Errorf("original namespace should still be empty, got %q", ref.Namespace())
+	}
+}
+
+func TestReference_WithDefaults_NoOverwrite(t *testing.T) {
+	ref, err := Parse("hub.example.com/myteam/widget 1.0.0", "template")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resolved := ref.WithDefaults("other.registry.com", "other-namespace")
+
+	if resolved.Registry() != "hub.example.com" {
+		t.Errorf("expected registry %q, got %q", "hub.example.com", resolved.Registry())
+	}
+	if resolved.Namespace() != "myteam" {
+		t.Errorf("expected namespace %q, got %q", "myteam", resolved.Namespace())
+	}
 }
 
 func TestReference_Version(t *testing.T) {
-	ref := MustParse("namespace/name 1.0.0", "template", testOpts())
+	ref := MustParse("namespace/name 1.0.0", "template")
 
 	if ref.Version() == nil {
 		t.Fatal("expected version, got nil")
@@ -75,7 +131,7 @@ func TestReference_Version(t *testing.T) {
 }
 
 func TestReference_Channel(t *testing.T) {
-	ref := MustParse("namespace/name :stable", "template", testOpts())
+	ref := MustParse("namespace/name :stable", "template")
 
 	if ref.Channel() == nil {
 		t.Fatal("expected channel, got nil")
@@ -86,7 +142,7 @@ func TestReference_Channel(t *testing.T) {
 }
 
 func TestReference_Digest(t *testing.T) {
-	ref := MustParse("namespace/name 1.0.0 sha256:abcd1234", "template", testOpts())
+	ref := MustParse("namespace/name 1.0.0 sha256:abcd1234", "template")
 
 	if ref.Digest() == nil {
 		t.Fatal("expected digest, got nil")
@@ -94,7 +150,7 @@ func TestReference_Digest(t *testing.T) {
 }
 
 func TestReference_IsFrozen_True(t *testing.T) {
-	ref := MustParse("namespace/name 1.0.0 sha256:abcd1234", "template", testOpts())
+	ref := MustParse("namespace/name 1.0.0 sha256:abcd1234", "template")
 
 	if !ref.IsFrozen() {
 		t.Error("expected IsFrozen to be true")
@@ -102,7 +158,7 @@ func TestReference_IsFrozen_True(t *testing.T) {
 }
 
 func TestReference_IsFrozen_False(t *testing.T) {
-	ref := MustParse("namespace/name 1.0.0", "template", testOpts())
+	ref := MustParse("namespace/name 1.0.0", "template")
 
 	if ref.IsFrozen() {
 		t.Error("expected IsFrozen to be false")
@@ -110,7 +166,7 @@ func TestReference_IsFrozen_False(t *testing.T) {
 }
 
 func TestReference_IsChannelBased_True(t *testing.T) {
-	ref := MustParse("namespace/name :stable", "template", testOpts())
+	ref := MustParse("namespace/name :stable", "template")
 
 	if !ref.IsChannelBased() {
 		t.Error("expected IsChannelBased to be true")
@@ -118,7 +174,7 @@ func TestReference_IsChannelBased_True(t *testing.T) {
 }
 
 func TestReference_IsChannelBased_False(t *testing.T) {
-	ref := MustParse("namespace/name 1.0.0", "template", testOpts())
+	ref := MustParse("namespace/name 1.0.0", "template")
 
 	if ref.IsChannelBased() {
 		t.Error("expected IsChannelBased to be false")
@@ -126,7 +182,7 @@ func TestReference_IsChannelBased_False(t *testing.T) {
 }
 
 func TestReference_IsVersionBased_True(t *testing.T) {
-	ref := MustParse("namespace/name 1.0.0", "template", testOpts())
+	ref := MustParse("namespace/name 1.0.0", "template")
 
 	if !ref.IsVersionBased() {
 		t.Error("expected IsVersionBased to be true")
@@ -134,7 +190,7 @@ func TestReference_IsVersionBased_True(t *testing.T) {
 }
 
 func TestReference_IsVersionBased_False(t *testing.T) {
-	ref := MustParse("namespace/name :stable", "template", testOpts())
+	ref := MustParse("namespace/name :stable", "template")
 
 	if ref.IsVersionBased() {
 		t.Error("expected IsVersionBased to be false")
@@ -142,7 +198,7 @@ func TestReference_IsVersionBased_False(t *testing.T) {
 }
 
 func TestReference_String_WithVersion(t *testing.T) {
-	ref := MustParse("namespace/name 1.0.0", "template", testOpts())
+	ref := MustParse("namespace/name 1.0.0", "template")
 
 	s := ref.String()
 	if s == "" {
@@ -151,7 +207,7 @@ func TestReference_String_WithVersion(t *testing.T) {
 }
 
 func TestReference_String_WithChannel(t *testing.T) {
-	ref := MustParse("namespace/name :stable", "template", testOpts())
+	ref := MustParse("namespace/name :stable", "template")
 
 	s := ref.String()
 	if s == "" {
@@ -160,7 +216,7 @@ func TestReference_String_WithChannel(t *testing.T) {
 }
 
 func TestReference_String_WithDigest(t *testing.T) {
-	ref := MustParse("namespace/name 1.0.0 sha256:abcd1234", "template", testOpts())
+	ref := MustParse("namespace/name 1.0.0 sha256:abcd1234", "template")
 
 	s := ref.String()
 	if s == "" {

@@ -17,22 +17,6 @@ type Reference struct {
 	digest  *Digest
 }
 
-// Options for parsing references.
-type Options struct {
-	IdentifierOptions
-}
-
-// Creates a new [Options] with the given defaults.
-//
-// Both parameters are required. Returns an error if either is empty.
-func NewOptions(defaultRegistry, defaultNamespace string) (Options, error) {
-	id, err := NewIdentifierOptions(defaultRegistry, defaultNamespace)
-	if err != nil {
-		return Options{}, err
-	}
-	return Options{IdentifierOptions: id}, nil
-}
-
 // Parses a reference string.
 //
 // The context type is required, and used to set the type when the reference
@@ -41,18 +25,14 @@ func NewOptions(defaultRegistry, defaultNamespace string) (Options, error) {
 //
 // The expected string format is:
 //
-//	[<type>] [[scheme://]registry/]<path> (<version-constraint> | <channel>) [<digest>]
+//	[<type>] [[[registry/]namespace/]name] (<version-constraint> | <channel>) [<digest>]
 //
 // The type is optional and must be lowercase alphabetic. When omitted, the
 // context type is used. When present, it must match the context type exactly.
 //
-// The resource location can take three forms:
-//   - Full URI with scheme: https://registry.example.com/path/to/resource
-//   - Registry without scheme: registry.example.com/path/to/resource
-//   - Default registry path: namespace/name or just name
-//
-// When using the default registry, the namespace defaults to the configured
-// default namespace.
+// The resource location is a single token with up to three slash-separated
+// segments (registry/namespace/name). When segments are omitted, the
+// corresponding fields are empty. Callers apply defaults where needed.
 //
 // Either a version constraint or a channel is required, but not both. Version
 // constraints may span multiple tokens (e.g., ">=1.0.0 <2.0.0"). Channels are
@@ -61,17 +41,16 @@ func NewOptions(defaultRegistry, defaultNamespace string) (Options, error) {
 // The digest is optional and follows the format algorithm:hash (e.g.,
 // "sha256:abcd1234"). When present, it freezes the reference to a specific
 // content version.
-func Parse(s string, contextType string, options Options) (*Reference, error) {
+func Parse(s string, contextType string) (*Reference, error) {
 	p := &referenceParser{
-		tokens:  strings.Fields(s),
-		options: options,
+		tokens: strings.Fields(s),
 	}
 	return p.parse(contextType)
 }
 
 // Like [Parse], but panics on error.
-func MustParse(s string, contextType string, options Options) *Reference {
-	ref, err := Parse(s, contextType, options)
+func MustParse(s string, contextType string) *Reference {
+	ref, err := Parse(s, contextType)
 	if err != nil {
 		panic(err)
 	}
@@ -112,6 +91,17 @@ func New(id *Identifier, versionOrChannel string, digest *Digest) (*Reference, e
 	return ref, nil
 }
 
+// Returns a copy of this reference with defaults applied for any empty fields.
+//
+// If the registry is empty and defaultRegistry is non-empty, the registry is
+// set. If the namespace is empty and defaultNamespace is non-empty, the
+// namespace is set. Fields that are already populated are never overwritten.
+func (r *Reference) WithDefaults(defaultRegistry, defaultNamespace string) *Reference {
+	clone := *r
+	clone.Identifier = *clone.Identifier.WithDefaults(defaultRegistry, defaultNamespace)
+	return &clone
+}
+
 // Semantic version constraint. Nil if channel-based.
 func (r *Reference) Version() *VersionConstraint {
 	return r.version
@@ -144,12 +134,13 @@ func (r *Reference) IsVersionBased() bool {
 	return r.version != nil
 }
 
-// Returns the canonical string representation.
+// Returns a string representation of the reference.
 //
-// The output always includes the type. The scheme and registry are always
-// included, even when using defaults. The path is always included. For default
-// registry references, the path corresponds to namespace/name. Version or
-// channel is always included, and digest is appended if present.
+// Includes only the fields that are set. Registry and namespace appear only
+// when present on the underlying identifier. Version or channel is included
+// when set, and digest is appended if present. This is not necessarily a
+// canonical or round-trippable form — a reference parsed without applying
+// defaults may omit the registry and namespace.
 func (r *Reference) String() string {
 	if r == nil {
 		return ""

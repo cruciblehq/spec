@@ -7,8 +7,7 @@ import (
 
 func TestReferenceParser_Parse_NameAndVersion(t *testing.T) {
 	p := &referenceParser{
-		tokens:  []string{"widget", "1.0.0"},
-		options: testOpts(),
+		tokens: []string{"widget", "1.0.0"},
 	}
 
 	ref, err := p.parse("template")
@@ -29,8 +28,7 @@ func TestReferenceParser_Parse_NameAndVersion(t *testing.T) {
 
 func TestReferenceParser_Parse_NamespaceNameAndVersion(t *testing.T) {
 	p := &referenceParser{
-		tokens:  []string{"namespace/name", "1.0.0"},
-		options: testOpts(),
+		tokens: []string{"namespace/name", "1.0.0"},
 	}
 
 	ref, err := p.parse("template")
@@ -48,8 +46,7 @@ func TestReferenceParser_Parse_NamespaceNameAndVersion(t *testing.T) {
 
 func TestReferenceParser_Parse_WithExplicitType(t *testing.T) {
 	p := &referenceParser{
-		tokens:  []string{"template", "namespace/name", "1.0.0"},
-		options: testOpts(),
+		tokens: []string{"template", "namespace/name", "1.0.0"},
 	}
 
 	ref, err := p.parse("template")
@@ -65,10 +62,9 @@ func TestReferenceParser_Parse_WithExplicitType(t *testing.T) {
 	}
 }
 
-func TestReferenceParser_Parse_FullURIAndVersion(t *testing.T) {
+func TestReferenceParser_Parse_RegistryNamespaceNameAndVersion(t *testing.T) {
 	p := &referenceParser{
-		tokens:  []string{"https://myregistry.com/path/to/resource", "1.0.0"},
-		options: testOpts(),
+		tokens: []string{"hub.example.com/namespace/name", "1.0.0"},
 	}
 
 	ref, err := p.parse("template")
@@ -76,19 +72,20 @@ func TestReferenceParser_Parse_FullURIAndVersion(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	reg := ref.Registry()
-	if reg.String() != "https://myregistry.com" {
-		t.Errorf("expected registry %q, got %q", "https://myregistry.com", reg.String())
+	if ref.Registry() != "hub.example.com" {
+		t.Errorf("expected registry %q, got %q", "hub.example.com", ref.Registry())
 	}
-	if ref.Path() != "path/to/resource" {
-		t.Errorf("expected path %q, got %q", "path/to/resource", ref.Path())
+	if ref.Namespace() != "namespace" {
+		t.Errorf("expected namespace %q, got %q", "namespace", ref.Namespace())
+	}
+	if ref.Name() != "name" {
+		t.Errorf("expected name %q, got %q", "name", ref.Name())
 	}
 }
 
 func TestReferenceParser_Parse_WithChannel(t *testing.T) {
 	p := &referenceParser{
-		tokens:  []string{"namespace/name", ":stable"},
-		options: testOpts(),
+		tokens: []string{"namespace/name", ":stable"},
 	}
 
 	ref, err := p.parse("template")
@@ -109,8 +106,7 @@ func TestReferenceParser_Parse_WithChannel(t *testing.T) {
 
 func TestReferenceParser_Parse_WithVersionRange(t *testing.T) {
 	p := &referenceParser{
-		tokens:  []string{"namespace/name", ">=1.0.0", "<2.0.0"},
-		options: testOpts(),
+		tokens: []string{"namespace/name", ">=1.0.0", "<2.0.0"},
 	}
 
 	ref, err := p.parse("template")
@@ -125,8 +121,7 @@ func TestReferenceParser_Parse_WithVersionRange(t *testing.T) {
 
 func TestReferenceParser_Parse_WithDigest(t *testing.T) {
 	p := &referenceParser{
-		tokens:  []string{"namespace/name", "1.0.0", "sha256:abcd1234"},
-		options: testOpts(),
+		tokens: []string{"namespace/name", "1.0.0", "sha256:abcd1234"},
 	}
 
 	ref, err := p.parse("template")
@@ -141,8 +136,7 @@ func TestReferenceParser_Parse_WithDigest(t *testing.T) {
 
 func TestReferenceParser_Parse_ChannelWithDigest(t *testing.T) {
 	p := &referenceParser{
-		tokens:  []string{"namespace/name", ":stable", "sha256:abcd1234"},
-		options: testOpts(),
+		tokens: []string{"namespace/name", ":stable", "sha256:abcd1234"},
 	}
 
 	ref, err := p.parse("template")
@@ -158,31 +152,9 @@ func TestReferenceParser_Parse_ChannelWithDigest(t *testing.T) {
 	}
 }
 
-func TestReferenceParser_Parse_WithOptions(t *testing.T) {
-	customOpts, _ := NewOptions("https://custom.registry.io", "myteam")
-	p := &referenceParser{
-		tokens:  []string{"widget", "1.0.0"},
-		options: customOpts,
-	}
-
-	ref, err := p.parse("template")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	reg := ref.Registry()
-	if reg.String() != "https://custom.registry.io" {
-		t.Errorf("expected registry %q, got %q", "https://custom.registry.io", reg.String())
-	}
-	if ref.Namespace() != "myteam" {
-		t.Errorf("expected namespace %q, got %q", "myteam", ref.Namespace())
-	}
-}
-
 func TestReferenceParser_Parse_EmptyTokens(t *testing.T) {
 	p := &referenceParser{
-		tokens:  []string{},
-		options: testOpts(),
+		tokens: []string{},
 	}
 
 	_, err := p.parse("template")
@@ -197,8 +169,7 @@ func TestReferenceParser_Parse_EmptyTokens(t *testing.T) {
 
 func TestReferenceParser_Parse_MissingVersion(t *testing.T) {
 	p := &referenceParser{
-		tokens:  []string{"namespace/name"},
-		options: testOpts(),
+		tokens: []string{"namespace/name"},
 	}
 
 	_, err := p.parse("template")
@@ -213,8 +184,7 @@ func TestReferenceParser_Parse_MissingVersion(t *testing.T) {
 
 func TestReferenceParser_Parse_TypeMismatch(t *testing.T) {
 	p := &referenceParser{
-		tokens:  []string{"plugin", "namespace/name", "1.0.0"},
-		options: testOpts(),
+		tokens: []string{"plugin", "namespace/name", "1.0.0"},
 	}
 
 	_, err := p.parse("template")
@@ -229,8 +199,7 @@ func TestReferenceParser_Parse_TypeMismatch(t *testing.T) {
 
 func TestReferenceParser_Parse_UnexpectedToken(t *testing.T) {
 	p := &referenceParser{
-		tokens:  []string{"namespace/name", "1.0.0", "extra"},
-		options: testOpts(),
+		tokens: []string{"namespace/name", "1.0.0", "extra"},
 	}
 
 	_, err := p.parse("template")

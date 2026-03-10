@@ -61,12 +61,12 @@ func (m *Manifest) Validate() error {
 
 // Resolves the resource name to its fully qualified form.
 //
-// Parses [Resource.Name] as a resource identifier using the given defaults
-// so that the namespace is always explicit. The name is rewritten to
-// "namespace/name". The returned [reference.Identifier] gives callers access
-// to the parsed registry, namespace, and name without a second parse.
-func (m *Manifest) ResolveName(opts reference.IdentifierOptions) (*reference.Identifier, error) {
-	id, err := reference.ParseIdentifier(m.Resource.Name, string(m.Resource.Type), opts)
+// Parses [Resource.Name] as a resource identifier. When the name includes
+// both namespace and name (e.g., "official/widget"), the name is rewritten
+// to the canonical "namespace/name" form. The returned [reference.Identifier]
+// gives callers access to the parsed components without a second parse.
+func (m *Manifest) ResolveName() (*reference.Identifier, error) {
+	id, err := reference.ParseIdentifier(m.Resource.Name, string(m.Resource.Type))
 	if err != nil {
 		return nil, crex.Wrap(ErrResolveFailed, err)
 	}

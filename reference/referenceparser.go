@@ -16,9 +16,8 @@ var (
 
 // Whitespace-tokenized reference string parser.
 type referenceParser struct {
-	tokens  []string
-	pos     int
-	options Options
+	tokens []string
+	pos    int
 }
 
 // Parses the tokens into a Reference.
@@ -32,8 +31,7 @@ func (p *referenceParser) parse(contextType string) (*Reference, error) {
 
 	// Parse the identifier portion
 	idParser := &identifierParser{
-		tokens:  p.tokens[:idEnd],
-		options: p.options.IdentifierOptions,
+		tokens: p.tokens[:idEnd],
 	}
 
 	id, err := idParser.parse(contextType)

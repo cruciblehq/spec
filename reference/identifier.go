@@ -2,7 +2,6 @@ package reference
 
 import (
 	"fmt"
-	"net/url"
 	"strings"
 )
 
@@ -11,33 +10,10 @@ import (
 // An identifier locates a resource without specifying a particular version.
 // Use [ParseIdentifier] to construct valid identifiers.
 type Identifier struct {
-	typ       string   // Resource type (e.g., "widget"). Lowercase alphabetic only.
-	registry  *url.URL // Registry URL. Always set, even when using defaults.
-	namespace string   // Namespace segment of the path. Only used with the default registry.
-	name      string   // Resource name.
-	path      string   // Full path within the registry.
-}
-
-// Options for parsing identifiers.
-type IdentifierOptions struct {
-	DefaultRegistry  string // Registry authority when not specified.
-	DefaultNamespace string // Namespace when not specified.
-}
-
-// Creates a new [IdentifierOptions] with the given defaults.
-//
-// Both parameters are required. Returns an error if either is empty.
-func NewIdentifierOptions(defaultRegistry, defaultNamespace string) (IdentifierOptions, error) {
-	if defaultRegistry == "" {
-		return IdentifierOptions{}, ErrMissingDefaultRegistry
-	}
-	if defaultNamespace == "" {
-		return IdentifierOptions{}, ErrMissingDefaultNamespace
-	}
-	return IdentifierOptions{
-		DefaultRegistry:  defaultRegistry,
-		DefaultNamespace: defaultNamespace,
-	}, nil
+	typ       string // Resource type (e.g., "widget"). Lowercase alphabetic only.
+	registry  string // Registry host (e.g., "hub.cruciblehq.xyz:8080"). Empty when not specified.
+	namespace string // Resource namespace. Empty when not specified.
+	name      string // Resource name.
 }
 
 // Parses an identifier string.
@@ -49,59 +25,59 @@ func NewIdentifierOptions(defaultRegistry, defaultNamespace string) (IdentifierO
 //
 // The expected string format is:
 //
-//	[<type>] [[scheme://]host/]<path>
+//	[<type>] [[[registry/]namespace/]name]
 //
 // The type is optional and must be lowercase alphabetic. When omitted, the
 // context type is used. When present, it must match the context type exactly.
 //
-// The resource location can take three forms:
-//   - Full URI with scheme: https://registry.example.com/path/to/resource
-//   - Registry without scheme: registry.example.com/path/to/resource
-//   - Default registry path: namespace/name or just name
+// The resource location is a single token with up to three slash-separated
+// segments:
+//   - name: just the resource name
+//   - namespace/name: namespace and resource name
+//   - registry/namespace/name: registry, namespace, and resource name
 //
-// When using the default registry, the namespace defaults to the configured
-// default namespace.
-func ParseIdentifier(s string, contextType string, options IdentifierOptions) (*Identifier, error) {
+// When segments are omitted, the corresponding fields are left empty in the
+// returned identifier. Callers are expected to apply defaults where needed.
+func ParseIdentifier(s string, contextType string) (*Identifier, error) {
 	p := &identifierParser{
-		tokens:  strings.Fields(s),
-		options: options,
+		tokens: strings.Fields(s),
 	}
 	return p.parse(contextType)
 }
 
 // Like [ParseIdentifier], but panics on error.
-func MustParseIdentifier(s string, contextType string, options IdentifierOptions) *Identifier {
-	id, err := ParseIdentifier(s, contextType, options)
+func MustParseIdentifier(s string, contextType string) *Identifier {
+	id, err := ParseIdentifier(s, contextType)
 	if err != nil {
 		panic(err)
 	}
 	return id
 }
 
-// Creates a new identifier.
-//
-// The registry string is parsed as a URL. Returns an error if parsing fails.
-func NewIdentifier(typ string, registry, namespace, name string) (*Identifier, error) {
-	u, err := url.Parse(registry)
-	if err != nil {
-		return nil, wrap(ErrInvalidIdentifier, err)
-	}
+// Creates a new identifier with all fields set.
+func NewIdentifier(typ string, registry, namespace, name string) *Identifier {
 	return &Identifier{
 		typ:       typ,
-		registry:  u,
+		registry:  registry,
 		namespace: namespace,
 		name:      name,
-		path:      "",
-	}, nil
+	}
 }
 
-// Like [NewIdentifier], but panics on error.
-func MustNewIdentifier(typ string, registry, namespace, name string) *Identifier {
-	id, err := NewIdentifier(typ, registry, namespace, name)
-	if err != nil {
-		panic(err)
+// Returns a copy of this identifier with defaults applied for any empty fields.
+//
+// If the registry is empty and defaultRegistry is non-empty, the registry is
+// set. If the namespace is empty and defaultNamespace is non-empty, the
+// namespace is set. Fields that are already populated are never overwritten.
+func (id *Identifier) WithDefaults(defaultRegistry, defaultNamespace string) *Identifier {
+	clone := *id
+	if clone.registry == "" && defaultRegistry != "" {
+		clone.registry = defaultRegistry
 	}
-	return id
+	if clone.namespace == "" && defaultNamespace != "" {
+		clone.namespace = defaultNamespace
+	}
+	return &clone
 }
 
 // Resource type (e.g., "widget"). Lowercase alphabetic only.
@@ -109,56 +85,41 @@ func (id *Identifier) Type() string {
 	return id.typ
 }
 
-// Registry URL.
-//
-// Returns a copy; callers cannot mutate the identifier.
-func (id *Identifier) Registry() url.URL {
-	return *id.registry
+// Registry host. Empty when not specified in the parsed string.
+func (id *Identifier) Registry() string {
+	return id.registry
 }
 
-// Registry host authority, including port if present.
-func (id *Identifier) Host() string {
-	return id.registry.Host
-}
-
-// Registry hostname, without port.
-func (id *Identifier) Hostname() string {
-	return id.registry.Hostname()
-}
-
-// Namespace segment of the path. Only used with the default registry.
+// Namespace segment. Empty when not specified in the parsed string.
 func (id *Identifier) Namespace() string {
 	return id.namespace
 }
 
-// Resource name. Only used with the default registry.
+// Resource name.
 func (id *Identifier) Name() string {
 	return id.name
 }
 
-// Returns the full path component.
+// Returns the path component.
 //
-// For default registry references, returns namespace/name. For non-default
-// registries, returns the stored path.
+// If both namespace and name are set, returns namespace/name. Otherwise
+// returns just the name.
 func (id *Identifier) Path() string {
-	if id.path != "" {
-		return id.path
-	}
 	if id.namespace == "" {
 		return id.name
 	}
 	return id.namespace + "/" + id.name
 }
 
-// Returns the full URI, including registry and path.
-func (id *Identifier) URI() string {
-	return fmt.Sprintf("%s/%s", id.registry.String(), id.Path())
-}
-
-// Returns the canonical string representation.
+// Returns a string representation of the identifier.
 //
-// The output always includes the type. The scheme and registry are always
-// included, even when using defaults.
+// The output includes only the fields that are set: type is always present,
+// registry and namespace are included only when non-empty. An identifier
+// parsed without defaults will omit the registry and namespace even though
+// they may be required for resolution.
 func (id *Identifier) String() string {
-	return fmt.Sprintf("%s %s", id.Type(), id.URI())
+	if id.registry != "" {
+		return fmt.Sprintf("%s %s/%s", id.Type(), id.registry, id.Path())
+	}
+	return fmt.Sprintf("%s %s", id.Type(), id.Path())
 }

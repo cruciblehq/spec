@@ -7,8 +7,7 @@ import (
 
 func TestIdentifierParser_Parse_NameOnly(t *testing.T) {
 	p := &identifierParser{
-		tokens:  []string{"widget"},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
+		tokens: []string{"widget"},
 	}
 
 	id, err := p.parse("template")
@@ -19,8 +18,8 @@ func TestIdentifierParser_Parse_NameOnly(t *testing.T) {
 	if id.typ != "template" {
 		t.Errorf("expected type %q, got %q", "template", id.typ)
 	}
-	if id.namespace != "official" {
-		t.Errorf("expected namespace %q, got %q", "official", id.namespace)
+	if id.namespace != "" {
+		t.Errorf("expected empty namespace, got %q", id.namespace)
 	}
 	if id.name != "widget" {
 		t.Errorf("expected name %q, got %q", "widget", id.name)
@@ -29,8 +28,7 @@ func TestIdentifierParser_Parse_NameOnly(t *testing.T) {
 
 func TestIdentifierParser_Parse_NamespaceAndName(t *testing.T) {
 	p := &identifierParser{
-		tokens:  []string{"namespace/name"},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
+		tokens: []string{"namespace/name"},
 	}
 
 	id, err := p.parse("template")
@@ -46,10 +44,30 @@ func TestIdentifierParser_Parse_NamespaceAndName(t *testing.T) {
 	}
 }
 
+func TestIdentifierParser_Parse_RegistryNamespaceAndName(t *testing.T) {
+	p := &identifierParser{
+		tokens: []string{"hub.example.com/namespace/name"},
+	}
+
+	id, err := p.parse("template")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if id.registry != "hub.example.com" {
+		t.Errorf("expected registry %q, got %q", "hub.example.com", id.registry)
+	}
+	if id.namespace != "namespace" {
+		t.Errorf("expected namespace %q, got %q", "namespace", id.namespace)
+	}
+	if id.name != "name" {
+		t.Errorf("expected name %q, got %q", "name", id.name)
+	}
+}
+
 func TestIdentifierParser_Parse_WithExplicitType(t *testing.T) {
 	p := &identifierParser{
-		tokens:  []string{"template", "namespace/name"},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
+		tokens: []string{"template", "namespace/name"},
 	}
 
 	id, err := p.parse("template")
@@ -65,70 +83,9 @@ func TestIdentifierParser_Parse_WithExplicitType(t *testing.T) {
 	}
 }
 
-func TestIdentifierParser_Parse_FullURI(t *testing.T) {
-	p := &identifierParser{
-		tokens:  []string{"https://myregistry.com/path/to/resource"},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
-	}
-
-	id, err := p.parse("template")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if id.registry.String() != "https://myregistry.com" {
-		t.Errorf("expected registry %q, got %q", "https://myregistry.com", id.registry.String())
-	}
-	if id.path != "path/to/resource" {
-		t.Errorf("expected path %q, got %q", "path/to/resource", id.path)
-	}
-}
-
-func TestIdentifierParser_Parse_RegistryAndPath(t *testing.T) {
-	p := &identifierParser{
-		tokens:  []string{"myregistry.com/path/to/resource"},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
-	}
-
-	id, err := p.parse("template")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if id.registry.String() != "https://myregistry.com" {
-		t.Errorf("expected registry %q, got %q", "https://myregistry.com", id.registry.String())
-	}
-	if id.path != "path/to/resource" {
-		t.Errorf("expected path %q, got %q", "path/to/resource", id.path)
-	}
-}
-
-func TestIdentifierParser_Parse_WithOptions(t *testing.T) {
-	p := &identifierParser{
-		tokens: []string{"widget"},
-		options: IdentifierOptions{
-			DefaultRegistry:  "https://custom.registry.io",
-			DefaultNamespace: "myteam",
-		},
-	}
-
-	id, err := p.parse("template")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if id.registry.String() != "https://custom.registry.io" {
-		t.Errorf("expected registry %q, got %q", "https://custom.registry.io", id.registry.String())
-	}
-	if id.namespace != "myteam" {
-		t.Errorf("expected namespace %q, got %q", "myteam", id.namespace)
-	}
-}
-
 func TestIdentifierParser_Parse_InvalidContextType(t *testing.T) {
 	p := &identifierParser{
-		tokens:  []string{"widget"},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
+		tokens: []string{"widget"},
 	}
 
 	_, err := p.parse("Invalid")
@@ -143,8 +100,7 @@ func TestIdentifierParser_Parse_InvalidContextType(t *testing.T) {
 
 func TestIdentifierParser_Parse_EmptyTokens(t *testing.T) {
 	p := &identifierParser{
-		tokens:  []string{},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
+		tokens: []string{},
 	}
 
 	_, err := p.parse("template")
@@ -159,8 +115,7 @@ func TestIdentifierParser_Parse_EmptyTokens(t *testing.T) {
 
 func TestIdentifierParser_Parse_TypeMismatch(t *testing.T) {
 	p := &identifierParser{
-		tokens:  []string{"plugin", "namespace/name"},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
+		tokens: []string{"plugin", "namespace/name"},
 	}
 
 	_, err := p.parse("template")
@@ -175,8 +130,22 @@ func TestIdentifierParser_Parse_TypeMismatch(t *testing.T) {
 
 func TestIdentifierParser_Parse_UnexpectedToken(t *testing.T) {
 	p := &identifierParser{
-		tokens:  []string{"namespace/name", "extra"},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
+		tokens: []string{"namespace/name", "extra"},
+	}
+
+	_, err := p.parse("template")
+	if err == nil {
+		t.Fatal("expected error")
+	}
+
+	if !errors.Is(err, ErrInvalidIdentifier) {
+		t.Errorf("expected ErrInvalidIdentifier, got %v", err)
+	}
+}
+
+func TestIdentifierParser_Parse_TooManySegments(t *testing.T) {
+	p := &identifierParser{
+		tokens: []string{"a/b/c/d"},
 	}
 
 	_, err := p.parse("template")
@@ -245,8 +214,7 @@ func TestIdentifierParser_Next(t *testing.T) {
 
 func TestIdentifierParser_ParseType_ContextOnly(t *testing.T) {
 	p := &identifierParser{
-		tokens:  []string{"namespace/name"},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
+		tokens: []string{"namespace/name"},
 	}
 
 	id := &Identifier{}
@@ -266,8 +234,7 @@ func TestIdentifierParser_ParseType_ContextOnly(t *testing.T) {
 
 func TestIdentifierParser_ParseType_Explicit(t *testing.T) {
 	p := &identifierParser{
-		tokens:  []string{"template", "namespace/name"},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
+		tokens: []string{"template", "namespace/name"},
 	}
 
 	id := &Identifier{}
@@ -287,8 +254,7 @@ func TestIdentifierParser_ParseType_Explicit(t *testing.T) {
 
 func TestIdentifierParser_ParseType_Mismatch(t *testing.T) {
 	p := &identifierParser{
-		tokens:  []string{"plugin", "namespace/name"},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
+		tokens: []string{"plugin", "namespace/name"},
 	}
 
 	id := &Identifier{}
@@ -304,8 +270,7 @@ func TestIdentifierParser_ParseType_Mismatch(t *testing.T) {
 
 func TestIdentifierParser_ParseType_NonAlphabetic(t *testing.T) {
 	p := &identifierParser{
-		tokens:  []string{"123", "namespace/name"},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
+		tokens: []string{"123", "namespace/name"},
 	}
 
 	id := &Identifier{}
@@ -321,8 +286,7 @@ func TestIdentifierParser_ParseType_NonAlphabetic(t *testing.T) {
 
 func TestIdentifierParser_ParseType_SingleToken(t *testing.T) {
 	p := &identifierParser{
-		tokens:  []string{"widget"},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
+		tokens: []string{"widget"},
 	}
 
 	id := &Identifier{}
@@ -336,10 +300,9 @@ func TestIdentifierParser_ParseType_SingleToken(t *testing.T) {
 	}
 }
 
-func TestIdentifierParser_ParseLocation_DefaultPath(t *testing.T) {
+func TestIdentifierParser_ParseLocation_NameOnly(t *testing.T) {
 	p := &identifierParser{
-		tokens:  []string{"widget"},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
+		tokens: []string{"widget"},
 	}
 
 	id := &Identifier{}
@@ -347,8 +310,11 @@ func TestIdentifierParser_ParseLocation_DefaultPath(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if id.namespace != "official" {
-		t.Errorf("expected namespace %q, got %q", "official", id.namespace)
+	if id.registry != "" {
+		t.Errorf("expected empty registry, got %q", id.registry)
+	}
+	if id.namespace != "" {
+		t.Errorf("expected empty namespace, got %q", id.namespace)
 	}
 	if id.name != "widget" {
 		t.Errorf("expected name %q, got %q", "widget", id.name)
@@ -357,8 +323,7 @@ func TestIdentifierParser_ParseLocation_DefaultPath(t *testing.T) {
 
 func TestIdentifierParser_ParseLocation_NamespaceAndName(t *testing.T) {
 	p := &identifierParser{
-		tokens:  []string{"namespace/name"},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
+		tokens: []string{"namespace/name"},
 	}
 
 	id := &Identifier{}
@@ -374,10 +339,30 @@ func TestIdentifierParser_ParseLocation_NamespaceAndName(t *testing.T) {
 	}
 }
 
+func TestIdentifierParser_ParseLocation_RegistryNamespaceAndName(t *testing.T) {
+	p := &identifierParser{
+		tokens: []string{"hub.example.com/namespace/name"},
+	}
+
+	id := &Identifier{}
+	if err := p.parseLocation(id); err != nil {
+		t.Fatal(err)
+	}
+
+	if id.registry != "hub.example.com" {
+		t.Errorf("expected registry %q, got %q", "hub.example.com", id.registry)
+	}
+	if id.namespace != "namespace" {
+		t.Errorf("expected namespace %q, got %q", "namespace", id.namespace)
+	}
+	if id.name != "name" {
+		t.Errorf("expected name %q, got %q", "name", id.name)
+	}
+}
+
 func TestIdentifierParser_ParseLocation_Empty(t *testing.T) {
 	p := &identifierParser{
-		tokens:  []string{},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
+		tokens: []string{},
 	}
 
 	id := &Identifier{}
@@ -391,33 +376,13 @@ func TestIdentifierParser_ParseLocation_Empty(t *testing.T) {
 	}
 }
 
-func TestIdentifierParser_ParseURI(t *testing.T) {
+func TestIdentifierParser_ParseLocation_InvalidName(t *testing.T) {
 	p := &identifierParser{
-		tokens:  []string{},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
+		tokens: []string{"Invalid"},
 	}
 
 	id := &Identifier{}
-	if err := p.parseURI(id, "https", "myregistry.com/path/to/resource"); err != nil {
-		t.Fatal(err)
-	}
-
-	if id.registry.String() != "https://myregistry.com" {
-		t.Errorf("expected registry %q, got %q", "https://myregistry.com", id.registry.String())
-	}
-	if id.path != "path/to/resource" {
-		t.Errorf("expected path %q, got %q", "path/to/resource", id.path)
-	}
-}
-
-func TestIdentifierParser_ParseURI_InvalidScheme(t *testing.T) {
-	p := &identifierParser{
-		tokens:  []string{},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
-	}
-
-	id := &Identifier{}
-	err := p.parseURI(id, "123", "myregistry.com/path")
+	err := p.parseLocation(id)
 	if err == nil {
 		t.Fatal("expected error")
 	}
@@ -427,14 +392,13 @@ func TestIdentifierParser_ParseURI_InvalidScheme(t *testing.T) {
 	}
 }
 
-func TestIdentifierParser_ParseURI_InvalidRegistry(t *testing.T) {
+func TestIdentifierParser_ParseLocation_InvalidNamespace(t *testing.T) {
 	p := &identifierParser{
-		tokens:  []string{},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
+		tokens: []string{"Invalid/widget"},
 	}
 
 	id := &Identifier{}
-	err := p.parseURI(id, "https", "-invalid/path")
+	err := p.parseLocation(id)
 	if err == nil {
 		t.Fatal("expected error")
 	}
@@ -444,14 +408,13 @@ func TestIdentifierParser_ParseURI_InvalidRegistry(t *testing.T) {
 	}
 }
 
-func TestIdentifierParser_ParseURI_InvalidPath(t *testing.T) {
+func TestIdentifierParser_ParseLocation_InvalidNameInNamespace(t *testing.T) {
 	p := &identifierParser{
-		tokens:  []string{},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
+		tokens: []string{"myteam/Invalid"},
 	}
 
 	id := &Identifier{}
-	err := p.parseURI(id, "https", "myregistry.com/INVALID")
+	err := p.parseLocation(id)
 	if err == nil {
 		t.Fatal("expected error")
 	}
@@ -461,14 +424,13 @@ func TestIdentifierParser_ParseURI_InvalidPath(t *testing.T) {
 	}
 }
 
-func TestIdentifierParser_ParseURI_MissingPath(t *testing.T) {
+func TestIdentifierParser_ParseLocation_TooManySegments(t *testing.T) {
 	p := &identifierParser{
-		tokens:  []string{},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
+		tokens: []string{"a/b/c/d"},
 	}
 
 	id := &Identifier{}
-	err := p.parseURI(id, "https", "myregistry.com")
+	err := p.parseLocation(id)
 	if err == nil {
 		t.Fatal("expected error")
 	}
@@ -478,236 +440,18 @@ func TestIdentifierParser_ParseURI_MissingPath(t *testing.T) {
 	}
 }
 
-func TestIdentifierParser_ParseURI_EmptyPath(t *testing.T) {
+func TestIdentifierParser_ParseLocation_EmptyRegistry(t *testing.T) {
 	p := &identifierParser{
-		tokens:  []string{},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
+		tokens: []string{"/namespace/name"},
 	}
 
 	id := &Identifier{}
-	err := p.parseURI(id, "https", "myregistry.com/")
+	err := p.parseLocation(id)
 	if err == nil {
 		t.Fatal("expected error")
 	}
 
 	if !errors.Is(err, ErrInvalidIdentifier) {
 		t.Errorf("expected ErrInvalidIdentifier, got %v", err)
-	}
-}
-
-func TestIdentifierParser_ParseRegistryPath(t *testing.T) {
-	p := &identifierParser{
-		tokens:  []string{},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
-	}
-
-	id := &Identifier{}
-	if err := p.parseRegistryPath(id, "myregistry.com", "path/to/resource"); err != nil {
-		t.Fatal(err)
-	}
-
-	if id.registry.String() != "https://myregistry.com" {
-		t.Errorf("expected registry %q, got %q", "https://myregistry.com", id.registry.String())
-	}
-	if id.path != "path/to/resource" {
-		t.Errorf("expected path %q, got %q", "path/to/resource", id.path)
-	}
-}
-
-func TestIdentifierParser_ParseRegistryPath_InvalidRegistry(t *testing.T) {
-	p := &identifierParser{
-		tokens:  []string{},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
-	}
-
-	id := &Identifier{}
-	err := p.parseRegistryPath(id, "-invalid", "path")
-	if err == nil {
-		t.Fatal("expected error")
-	}
-
-	if !errors.Is(err, ErrInvalidIdentifier) {
-		t.Errorf("expected ErrInvalidIdentifier, got %v", err)
-	}
-}
-
-func TestIdentifierParser_ParseRegistryPath_EmptyPath(t *testing.T) {
-	p := &identifierParser{
-		tokens:  []string{},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
-	}
-
-	id := &Identifier{}
-	err := p.parseRegistryPath(id, "myregistry.com", "")
-	if err == nil {
-		t.Fatal("expected error")
-	}
-
-	if !errors.Is(err, ErrInvalidIdentifier) {
-		t.Errorf("expected ErrInvalidIdentifier, got %v", err)
-	}
-}
-
-func TestIdentifierParser_ParseRegistryPath_InvalidPath(t *testing.T) {
-	p := &identifierParser{
-		tokens:  []string{},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
-	}
-
-	id := &Identifier{}
-	err := p.parseRegistryPath(id, "myregistry.com", "INVALID")
-	if err == nil {
-		t.Fatal("expected error")
-	}
-
-	if !errors.Is(err, ErrInvalidIdentifier) {
-		t.Errorf("expected ErrInvalidIdentifier, got %v", err)
-	}
-}
-
-func TestIdentifierParser_ParseDefaultPath_NameOnly(t *testing.T) {
-	p := &identifierParser{
-		tokens:  []string{},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
-	}
-
-	id := &Identifier{}
-	if err := p.parseDefaultPath(id, "widget"); err != nil {
-		t.Fatal(err)
-	}
-
-	if id.namespace != "official" {
-		t.Errorf("expected namespace %q, got %q", "official", id.namespace)
-	}
-	if id.name != "widget" {
-		t.Errorf("expected name %q, got %q", "widget", id.name)
-	}
-}
-
-func TestIdentifierParser_ParseDefaultPath_WithNamespace(t *testing.T) {
-	p := &identifierParser{
-		tokens:  []string{},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
-	}
-
-	id := &Identifier{}
-	if err := p.parseDefaultPath(id, "namespace/name"); err != nil {
-		t.Fatal(err)
-	}
-
-	if id.namespace != "namespace" {
-		t.Errorf("expected namespace %q, got %q", "namespace", id.namespace)
-	}
-	if id.name != "name" {
-		t.Errorf("expected name %q, got %q", "name", id.name)
-	}
-}
-
-func TestIdentifierParser_ParseDefaultPath_WithOptions(t *testing.T) {
-	p := &identifierParser{
-		tokens: []string{},
-		options: IdentifierOptions{
-			DefaultRegistry:  "https://custom.registry.io",
-			DefaultNamespace: "namespace",
-		},
-	}
-
-	id := &Identifier{}
-	if err := p.parseDefaultPath(id, "name"); err != nil {
-		t.Fatal(err)
-	}
-
-	if id.registry.String() != "https://custom.registry.io" {
-		t.Errorf("expected registry %q, got %q", "https://custom.registry.io", id.registry.String())
-	}
-	if id.namespace != "namespace" {
-		t.Errorf("expected namespace %q, got %q", "namespace", id.namespace)
-	}
-}
-
-func TestIdentifierParser_ParseDefaultPath_InvalidName(t *testing.T) {
-	p := &identifierParser{
-		tokens:  []string{},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
-	}
-
-	id := &Identifier{}
-	err := p.parseDefaultPath(id, "Invalid")
-	if err == nil {
-		t.Fatal("expected error")
-	}
-
-	if !errors.Is(err, ErrInvalidIdentifier) {
-		t.Errorf("expected ErrInvalidIdentifier, got %v", err)
-	}
-}
-
-func TestIdentifierParser_ParseDefaultPath_InvalidNamespace(t *testing.T) {
-	p := &identifierParser{
-		tokens:  []string{},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
-	}
-
-	id := &Identifier{}
-	err := p.parseDefaultPath(id, "Invalid/widget")
-	if err == nil {
-		t.Fatal("expected error")
-	}
-
-	if !errors.Is(err, ErrInvalidIdentifier) {
-		t.Errorf("expected ErrInvalidIdentifier, got %v", err)
-	}
-}
-
-func TestIdentifierParser_ParseDefaultPath_InvalidNameInNamespace(t *testing.T) {
-	p := &identifierParser{
-		tokens:  []string{},
-		options: IdentifierOptions{DefaultRegistry: "https://registry.test", DefaultNamespace: "official"},
-	}
-
-	id := &Identifier{}
-	err := p.parseDefaultPath(id, "myteam/Invalid")
-	if err == nil {
-		t.Fatal("expected error")
-	}
-
-	if !errors.Is(err, ErrInvalidIdentifier) {
-		t.Errorf("expected ErrInvalidIdentifier, got %v", err)
-	}
-}
-
-func TestLooksLikeRegistry_WithDot(t *testing.T) {
-	if !looksLikeRegistry("myregistry.com") {
-		t.Error("expected true for myregistry.com")
-	}
-}
-
-func TestLooksLikeRegistry_WithPort(t *testing.T) {
-	if !looksLikeRegistry("localhost:8080") {
-		t.Error("expected true for localhost:8080")
-	}
-}
-
-func TestLooksLikeRegistry_WithDotAndPort(t *testing.T) {
-	if !looksLikeRegistry("myregistry.com:443") {
-		t.Error("expected true for myregistry.com:443")
-	}
-}
-
-func TestLooksLikeRegistry_Subdomain(t *testing.T) {
-	if !looksLikeRegistry("sub.myregistry.com") {
-		t.Error("expected true for sub.myregistry.com")
-	}
-}
-
-func TestLooksLikeRegistry_SimpleName(t *testing.T) {
-	if looksLikeRegistry("myteam") {
-		t.Error("expected false for myteam")
-	}
-}
-
-func TestLooksLikeRegistry_Widget(t *testing.T) {
-	if looksLikeRegistry("widget") {
-		t.Error("expected false for widget")
 	}
 }
