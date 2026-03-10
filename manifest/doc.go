@@ -13,7 +13,9 @@
 // Artifacts produced by a named stage can be referenced from subsequent stages
 // via copy steps (e.g. "builder:/app/bin"). Exactly one stage must be
 // non-transient (the output stage), which becomes the final build artifact.
-// All other stages must be marked transient.
+// All other stages must be marked transient. When building for multiple
+// platforms, separate output stages can be declared with [Stage.Platform] set
+// to distinct "os/arch" values; each platform must have exactly one output stage.
 //
 // Build steps within a stage are classified as operations or modifiers:
 //

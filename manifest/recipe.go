@@ -38,33 +38,61 @@ func (r *Recipe) Validate() error {
 	}
 
 	seen := make(map[string]bool, len(r.Stages))
-	outputStages := 0
+	outputPlatforms := make(map[string]bool)
+	unplatformedOutputs := 0
 
 	for i := range r.Stages {
-		name := r.Stages[i].Name
-		if name != "" {
-			if seen[name] {
-				return crex.Wrapf(ErrInvalidRecipe, "%w: %s", ErrDuplicateStageName, name)
-			}
-			seen[name] = true
-		}
-
-		if err := r.Stages[i].Validate(); err != nil {
-			return crex.Wrapf(ErrInvalidRecipe, "stage %s: %w", stageLabel(name, i), err)
-		}
-
-		if !r.Stages[i].Transient {
-			outputStages++
+		if err := r.validateStage(i, seen, outputPlatforms, &unplatformedOutputs); err != nil {
+			return err
 		}
 	}
 
-	if outputStages == 0 {
+	if unplatformedOutputs == 0 && len(outputPlatforms) == 0 {
 		return crex.Wrap(ErrInvalidRecipe, ErrNoOutputStage)
 	}
-	if outputStages > 1 {
+	if unplatformedOutputs > 1 {
 		return crex.Wrap(ErrInvalidRecipe, ErrMultipleOutputStages)
 	}
 
+	return nil
+}
+
+// Validates a single stage within the recipe, checking for duplicate names
+// and tracking output stage counts.
+func (r *Recipe) validateStage(i int, seen map[string]bool, outputPlatforms map[string]bool, unplatformedOutputs *int) error {
+	stage := &r.Stages[i]
+	name := stage.Name
+
+	if name != "" {
+		if seen[name] {
+			return crex.Wrapf(ErrInvalidRecipe, "%w: %s", ErrDuplicateStageName, name)
+		}
+		seen[name] = true
+	}
+
+	if err := stage.Validate(); err != nil {
+		return crex.Wrapf(ErrInvalidRecipe, "stage %s: %w", stageLabel(name, i), err)
+	}
+
+	if !stage.Transient {
+		if err := r.trackOutputStage(stage.Platform, outputPlatforms, unplatformedOutputs); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// Tracks output stage platform uniqueness.
+func (r *Recipe) trackOutputStage(platform string, outputPlatforms map[string]bool, unplatformedOutputs *int) error {
+	if platform == "" {
+		*unplatformedOutputs++
+		return nil
+	}
+	if outputPlatforms[platform] {
+		return crex.Wrapf(ErrInvalidRecipe, "%w: %s", ErrDuplicateOutputPlatform, platform)
+	}
+	outputPlatforms[platform] = true
 	return nil
 }
 

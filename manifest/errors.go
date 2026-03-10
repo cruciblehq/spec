@@ -52,13 +52,15 @@ var (
 
 	// Step.
 
-	ErrMutuallyExclusiveOps  = errors.New("run and copy are mutually exclusive")
-	ErrEmptyStep             = errors.New("step has no fields set")
-	ErrShellWithCopy         = errors.New("shell cannot be used with copy")
-	ErrEnvWithCopy           = errors.New("env cannot be used with copy")
-	ErrStepsWithoutPlatform  = errors.New("child steps require platform")
-	ErrPlatformWithOperation = errors.New("platform group cannot have operations")
-	ErrNestedPlatformGroup   = errors.New("platform groups cannot be nested")
+	ErrMutuallyExclusiveOps    = errors.New("run and copy are mutually exclusive")
+	ErrEmptyStep               = errors.New("step has no fields set")
+	ErrShellWithCopy           = errors.New("shell cannot be used with copy")
+	ErrEnvWithCopy             = errors.New("env cannot be used with copy")
+	ErrStepsWithoutPlatform    = errors.New("child steps require platform")
+	ErrPlatformWithOperation   = errors.New("platform group cannot have operations")
+	ErrNestedPlatformGroup     = errors.New("platform groups cannot be nested")
+	ErrPlatformInPlatformStage = errors.New("steps cannot use platform inside a platform-scoped stage")
+	ErrDuplicateOutputPlatform = errors.New("duplicate output platform")
 
 	// Service.
 

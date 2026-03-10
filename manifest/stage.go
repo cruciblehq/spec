@@ -12,7 +12,10 @@ import (
 // and steps. Named stages can be referenced from subsequent stages
 // (e.g. "builder:/app/bin" in a copy step). Stages are non-transient by
 // default, meaning their image is exported as the final build artifact.
-// Set [Stage.Transient] to true for intermediate stages.
+// Set [Stage.Transient] to true for intermediate stages. When [Stage.Platform]
+// is set, the stage only runs for the matching target platform. Steps within a
+// platform-scoped stage cannot use [Step.Platform] since the platform is
+// already fixed for the entire stage.
 type Stage struct {
 
 	// Identifies the stage for cross-stage references.
@@ -30,6 +33,14 @@ type Stage struct {
 	// false). In a multi-stage recipe every stage except the output stage
 	// must be marked transient.
 	Transient bool `yaml:"transient,omitempty"`
+
+	// Restricts this stage to a specific target platform.
+	//
+	// When set, the stage is only built when the target platform matches.
+	// The format is "os/arch" (e.g. "linux/arm64"). Steps within a
+	// platform-scoped stage cannot use [Step.Platform]; the platform is
+	// fixed for the entire stage.
+	Platform string `yaml:"platform,omitempty"`
 
 	// Specifies the base image source for this stage.
 	//
@@ -68,10 +79,26 @@ func (s *Stage) Validate() error {
 	}
 
 	for i := range s.Steps {
+		if s.Platform != "" && stepUsesPlatform(&s.Steps[i]) {
+			return crex.Wrapf(ErrInvalidStage, "step %d: %w", i+1, ErrPlatformInPlatformStage)
+		}
 		if err := s.Steps[i].Validate(); err != nil {
 			return crex.Wrapf(ErrInvalidStage, "step %d: %w", i+1, err)
 		}
 	}
 
 	return nil
+}
+
+// Reports whether a step or any of its children use the platform field.
+func stepUsesPlatform(s *Step) bool {
+	if s.Platform != "" {
+		return true
+	}
+	for i := range s.Steps {
+		if stepUsesPlatform(&s.Steps[i]) {
+			return true
+		}
+	}
+	return false
 }
