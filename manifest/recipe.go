@@ -6,9 +6,11 @@ import (
 	"github.com/cruciblehq/crex"
 )
 
-// The OCI image artifact produced by recipe-based builds (runtimes, services,
-// and machines).
+// The OCI image artifact produced by recipe-based builds (runtimes and services).
 const ImageFile = "image.tar"
+
+// The disk image artifact produced by machine builds.
+const MachineImageFile = "disk.qcow2"
 
 // Describes a build pipeline as one or more stages.
 //
