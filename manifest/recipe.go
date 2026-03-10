@@ -9,9 +9,6 @@ import (
 // The OCI image artifact produced by recipe-based builds (runtimes and services).
 const ImageFile = "image.tar"
 
-// The disk image artifact produced by machine builds.
-const MachineImageFile = "disk.qcow2"
-
 // Describes a build pipeline as one or more stages.
 //
 // A recipe is the reusable unit shared by resource types that produce OCI

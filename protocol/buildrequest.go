@@ -12,13 +12,12 @@ import (
 // image references before sending; the daemon does not resolve Crucible
 // references.
 type BuildRequest struct {
-	Recipe       *manifest.Recipe      `json:"recipe"`                 // Parsed recipe to execute.
-	Resource     string                `json:"resource"`               // Resource name, used as a prefix for container IDs.
-	ResourceType manifest.ResourceType `json:"resourceType,omitempty"` // Resource type. Machine builds use virt-customize instead of containerd.
-	Output       string                `json:"output"`                 // Directory for the final build artifact.
-	Root         string                `json:"root"`                   // Project root, for resolving copy sources.
-	Entrypoint   []string              `json:"entrypoint,omitempty"`   // OCI entrypoint to set on the output image.
-	Platforms    []string              `json:"platforms,omitempty"`    // Target platforms (e.g., ["linux/amd64"]). Defaults to host.
+	Recipe     *manifest.Recipe `json:"recipe"`               // Parsed recipe to execute.
+	Resource   string           `json:"resource"`             // Resource name, used as a prefix for container IDs.
+	Output     string           `json:"output"`               // Directory for the final build artifact.
+	Root       string           `json:"root"`                 // Project root, for resolving copy sources.
+	Entrypoint []string         `json:"entrypoint,omitempty"` // OCI entrypoint to set on the output image.
+	Platforms  []string         `json:"platforms,omitempty"`  // Target platforms (e.g., ["linux/amd64"]). Defaults to host.
 }
 
 // Checks that all required build fields are present, validates the recipe,
