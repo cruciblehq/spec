@@ -7,27 +7,27 @@ import "github.com/cruciblehq/utils-go/crex"
 // Hook names the kernel LSM callback point at which the rule is evaluated.
 // Where constrains the allow to invocations matching the predicate tree; a
 // nil Where makes the rule unconditional.
-type MACAllow struct {
-	Hook  string   `codec:"hook"`  // Kernel LSM hook name.
-	Where *MACExpr `codec:"where"` // Where-clause expression tree.
+type Allow struct {
+	Hook  string `codec:"hook"`  // Kernel LSM hook name.
+	Where *Expr  `codec:"where"` // Where-clause expression tree.
 }
 
-// Deep-clones a MACAllow.
-func cloneMACAllow(a *MACAllow) *MACAllow {
-	return &MACAllow{
+// Deep-clones an Allow rule.
+func cloneAllow(a *Allow) *Allow {
+	return &Allow{
 		Hook:  a.Hook,
-		Where: cloneMACExpr(a.Where),
+		Where: cloneExpr(a.Where),
 	}
 }
 
 // Validates the allow rule.
-func (a *MACAllow) Validate() error {
+func (a *Allow) Validate() error {
 	if a.Hook == "" {
-		return crex.Newf(ErrInvalidMACAllow, "hook is empty")
+		return crex.Newf(ErrInvalidAllow, "hook is empty")
 	}
 	if a.Where != nil {
 		if err := a.Where.Validate(); err != nil {
-			return crex.Wrap(ErrInvalidMACAllow, err)
+			return crex.Wrap(ErrInvalidAllow, err)
 		}
 	}
 	return nil

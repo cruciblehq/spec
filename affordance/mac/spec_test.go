@@ -5,18 +5,18 @@ import (
 	"testing"
 )
 
-func cmpWhere(field string, intVal uint64) *MACExpr {
-	return &MACExpr{
+func cmpWhere(field string, intVal uint64) *Expr {
+	return &Expr{
 		Type: "cmp",
 		Op:   "=",
-		LHS:  &MACValue{IsField: true, Field: field},
-		RHS:  &MACValue{IntVal: intVal},
+		LHS:  &Value{IsField: true, Field: field},
+		RHS:  &Value{IntVal: intVal},
 	}
 }
 
 func TestMACApplyAddsRule(t *testing.T) {
 	m := &Spec{}
-	r := &MACAllow{Hook: "file_open"}
+	r := &Allow{Hook: "file_open"}
 	if !m.Apply(r) {
 		t.Fatal("expected true for new rule")
 	}
@@ -27,7 +27,7 @@ func TestMACApplyAddsRule(t *testing.T) {
 
 func TestMACApplyDeduplicates(t *testing.T) {
 	m := &Spec{}
-	r := &MACAllow{Hook: "file_open"}
+	r := &Allow{Hook: "file_open"}
 	m.Apply(r)
 	if m.Apply(r) {
 		t.Fatal("expected false for duplicate rule")
@@ -39,7 +39,7 @@ func TestMACApplyDeduplicates(t *testing.T) {
 
 func TestMACApplyWithWhere(t *testing.T) {
 	m := &Spec{}
-	r := &MACAllow{Hook: "file_open", Where: cmpWhere("task.uid", 1000)}
+	r := &Allow{Hook: "file_open", Where: cmpWhere("task.uid", 1000)}
 	if !m.Apply(r) {
 		t.Fatal("expected true for new rule with where clause")
 	}
@@ -50,8 +50,8 @@ func TestMACApplyWithWhere(t *testing.T) {
 
 func TestMACApplyWithWhereDeduplicate(t *testing.T) {
 	m := &Spec{}
-	r1 := &MACAllow{Hook: "file_open", Where: cmpWhere("task.uid", 1000)}
-	r2 := &MACAllow{Hook: "file_open", Where: cmpWhere("task.uid", 1000)}
+	r1 := &Allow{Hook: "file_open", Where: cmpWhere("task.uid", 1000)}
+	r2 := &Allow{Hook: "file_open", Where: cmpWhere("task.uid", 1000)}
 	m.Apply(r1)
 	if m.Apply(r2) {
 		t.Fatal("expected false for duplicate rule with same where clause")
@@ -63,8 +63,8 @@ func TestMACApplyWithWhereDeduplicate(t *testing.T) {
 
 func TestMACApplyWithDifferentWhere(t *testing.T) {
 	m := &Spec{}
-	r1 := &MACAllow{Hook: "file_open", Where: cmpWhere("task.uid", 1000)}
-	r2 := &MACAllow{Hook: "file_open", Where: cmpWhere("task.uid", 2000)}
+	r1 := &Allow{Hook: "file_open", Where: cmpWhere("task.uid", 1000)}
+	r2 := &Allow{Hook: "file_open", Where: cmpWhere("task.uid", 2000)}
 	m.Apply(r1)
 	if !m.Apply(r2) {
 		t.Fatal("expected true for rule with different where clause")
@@ -76,23 +76,23 @@ func TestMACApplyWithDifferentWhere(t *testing.T) {
 
 func TestMACApplyWithInWhere(t *testing.T) {
 	m := &Spec{}
-	r := &MACAllow{
+	r := &Allow{
 		Hook: "file_open",
-		Where: &MACExpr{
+		Where: &Expr{
 			Type:   "in",
-			Field:  &MACValue{IsField: true, Field: "task.uid"},
-			Values: []*MACValue{{IntVal: 0}, {IntVal: 1000}},
+			Field:  &Value{IsField: true, Field: "task.uid"},
+			Values: []*Value{{IntVal: 0}, {IntVal: 1000}},
 		},
 	}
 	if !m.Apply(r) {
 		t.Fatal("expected true for new rule")
 	}
-	r2 := &MACAllow{
+	r2 := &Allow{
 		Hook: "file_open",
-		Where: &MACExpr{
+		Where: &Expr{
 			Type:   "in",
-			Field:  &MACValue{IsField: true, Field: "task.uid"},
-			Values: []*MACValue{{IntVal: 0}, {IntVal: 1000}},
+			Field:  &Value{IsField: true, Field: "task.uid"},
+			Values: []*Value{{IntVal: 0}, {IntVal: 1000}},
 		},
 	}
 	if m.Apply(r2) {
@@ -101,15 +101,15 @@ func TestMACApplyWithInWhere(t *testing.T) {
 }
 
 func TestMACValidateOK(t *testing.T) {
-	m := &Spec{Rules: []*MACAllow{{Hook: "file_open"}}}
+	m := &Spec{Rules: []*Allow{{Hook: "file_open"}}}
 	if err := m.Validate(); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
 
 func TestMACValidateNilRule(t *testing.T) {
-	m := &Spec{Rules: []*MACAllow{nil}}
-	if err := m.Validate(); !errors.Is(err, ErrInvalidMAC) {
-		t.Fatalf("err = %v, want ErrInvalidMAC", err)
+	m := &Spec{Rules: []*Allow{nil}}
+	if err := m.Validate(); !errors.Is(err, ErrInvalidSpec) {
+		t.Fatalf("err = %v, want ErrInvalidSpec", err)
 	}
 }

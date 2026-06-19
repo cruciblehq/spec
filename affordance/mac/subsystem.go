@@ -52,7 +52,7 @@ func check(g *agl.Model) error {
 // well-formed and references only fields available on the hook. Does not check
 // for semantic validity of the where clause beyond field reference checks;
 // the resulting Allow may still be rejected by the ward-lsm runtime.
-func parse(g *agl.Model) (*MACAllow, error) {
+func parse(g *agl.Model) (*Allow, error) {
 	hookArg := g.Args[0]
 	if hookArg.Type != agl.ArgName {
 		return nil, crex.Newf(ErrCompile, "expected name as hook in mac expression")
@@ -61,7 +61,7 @@ func parse(g *agl.Model) (*MACAllow, error) {
 	if hook == nil {
 		return nil, crex.Newf(ErrCompile, "unknown hook %q in mac expression", hookArg.Value)
 	}
-	allow := &MACAllow{Hook: hookArg.Value}
+	allow := &Allow{Hook: hookArg.Value}
 	if g.Where != nil {
 		expr, err := translateExpr(g.Where, hook)
 		if err != nil {
@@ -74,7 +74,7 @@ func parse(g *agl.Model) (*MACAllow, error) {
 
 // Translates a grant expression tree into a MAC expression tree, validating
 // field references against the hook schema.
-func translateExpr(expr agl.Expr, hook *Hook) (*MACExpr, error) {
+func translateExpr(expr agl.Expr, hook *Hook) (*Expr, error) {
 	switch e := expr.(type) {
 	case *agl.BinaryExpr:
 		return translateBinary(e, hook)
@@ -96,7 +96,7 @@ func translateExpr(expr agl.Expr, hook *Hook) (*MACExpr, error) {
 }
 
 // Translates a binary boolean expression (and/or).
-func translateBinary(e *agl.BinaryExpr, hook *Hook) (*MACExpr, error) {
+func translateBinary(e *agl.BinaryExpr, hook *Hook) (*Expr, error) {
 	left, err := translateExpr(e.Left, hook)
 	if err != nil {
 		return nil, err
@@ -105,20 +105,20 @@ func translateBinary(e *agl.BinaryExpr, hook *Hook) (*MACExpr, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &MACExpr{Type: string(e.Op), Left: left, Right: right}, nil
+	return &Expr{Type: string(e.Op), Left: left, Right: right}, nil
 }
 
 // Translates a unary boolean expression (not).
-func translateUnary(e *agl.UnaryExpr, hook *Hook) (*MACExpr, error) {
+func translateUnary(e *agl.UnaryExpr, hook *Hook) (*Expr, error) {
 	operand, err := translateExpr(e.Operand, hook)
 	if err != nil {
 		return nil, err
 	}
-	return &MACExpr{Type: exprNot, Operand: operand}, nil
+	return &Expr{Type: exprNot, Operand: operand}, nil
 }
 
 // Translates a comparison expression and verifies operand type compatibility.
-func translateCompare(e *agl.CompareExpr, hook *Hook) (*MACExpr, error) {
+func translateCompare(e *agl.CompareExpr, hook *Hook) (*Expr, error) {
 	lhs, err := translateOperand(e.Left, hook)
 	if err != nil {
 		return nil, err
@@ -130,16 +130,16 @@ func translateCompare(e *agl.CompareExpr, hook *Hook) (*MACExpr, error) {
 	if err := checkTypeCompat(e.Left, e.Right, hook); err != nil {
 		return nil, err
 	}
-	return &MACExpr{Type: exprCmp, Op: string(e.Op), LHS: lhs, RHS: rhs}, nil
+	return &Expr{Type: exprCmp, Op: string(e.Op), LHS: lhs, RHS: rhs}, nil
 }
 
 // Translates an "in" set-membership expression.
-func translateIn(e *agl.InExpr, hook *Hook) (*MACExpr, error) {
+func translateIn(e *agl.InExpr, hook *Hook) (*Expr, error) {
 	field, err := translateOperand(e.Field, hook)
 	if err != nil {
 		return nil, err
 	}
-	vals := make([]*MACValue, 0, len(e.Values))
+	vals := make([]*Value, 0, len(e.Values))
 	for _, v := range e.Values {
 		tv, err := translateOperand(v, hook)
 		if err != nil {
@@ -150,11 +150,11 @@ func translateIn(e *agl.InExpr, hook *Hook) (*MACExpr, error) {
 		}
 		vals = append(vals, tv)
 	}
-	return &MACExpr{Type: exprIn, Field: field, Values: vals}, nil
+	return &Expr{Type: exprIn, Field: field, Values: vals}, nil
 }
 
 // Translates a "like" pattern match, requiring a string-typed field.
-func translateLike(e *agl.LikeExpr, hook *Hook) (*MACExpr, error) {
+func translateLike(e *agl.LikeExpr, hook *Hook) (*Expr, error) {
 	field, err := translateOperand(e.Field, hook)
 	if err != nil {
 		return nil, err
@@ -162,11 +162,11 @@ func translateLike(e *agl.LikeExpr, hook *Hook) (*MACExpr, error) {
 	if err := requireFieldType(e.Field, hook, TypeString, "'like'"); err != nil {
 		return nil, err
 	}
-	return &MACExpr{Type: exprLike, Field: field, Pattern: e.Pattern}, nil
+	return &Expr{Type: exprLike, Field: field, Pattern: e.Pattern}, nil
 }
 
 // Translates a "between" range expression, requiring a numeric field.
-func translateBetween(e *agl.BetweenExpr, hook *Hook) (*MACExpr, error) {
+func translateBetween(e *agl.BetweenExpr, hook *Hook) (*Expr, error) {
 	field, err := translateOperand(e.Field, hook)
 	if err != nil {
 		return nil, err
@@ -182,11 +182,11 @@ func translateBetween(e *agl.BetweenExpr, hook *Hook) (*MACExpr, error) {
 	if err := requireFieldType(e.Field, hook, TypeUint64, "'between'"); err != nil {
 		return nil, err
 	}
-	return &MACExpr{Type: exprBetween, Field: field, Low: low, High: high}, nil
+	return &Expr{Type: exprBetween, Field: field, Low: low, High: high}, nil
 }
 
 // Translates a bitwise mask test, requiring a numeric field.
-func translateBitTest(e *agl.BitTestExpr, hook *Hook) (*MACExpr, error) {
+func translateBitTest(e *agl.BitTestExpr, hook *Hook) (*Expr, error) {
 	field, err := translateOperand(e.Field, hook)
 	if err != nil {
 		return nil, err
@@ -198,7 +198,7 @@ func translateBitTest(e *agl.BitTestExpr, hook *Hook) (*MACExpr, error) {
 	if err := requireFieldType(e.Field, hook, TypeUint64, "'&'"); err != nil {
 		return nil, err
 	}
-	return &MACExpr{Type: exprBitTest, Field: field, Mask: mask}, nil
+	return &Expr{Type: exprBitTest, Field: field, Mask: mask}, nil
 }
 
 // Verifies that op, when it references a field, has the expected scalar type.
@@ -218,7 +218,7 @@ func requireFieldType(op agl.Operand, hook *Hook, want FieldType, label string) 
 }
 
 // Translates a grant operand into a MAC value, validating field references.
-func translateOperand(op agl.Operand, hook *Hook) (*MACValue, error) {
+func translateOperand(op agl.Operand, hook *Hook) (*Value, error) {
 	if op.IsField {
 		f, ok := hook.Fields[op.Field]
 		if !ok {
@@ -227,13 +227,13 @@ func translateOperand(op agl.Operand, hook *Hook) (*MACValue, error) {
 		if f.Sleepable && !hook.Sleepable {
 			return nil, crex.Newf(ErrCompile, "field %q requires a sleepable hook, but %q is not sleepable", op.Field, hook.Name)
 		}
-		return &MACValue{IsField: true, Field: op.Field}, nil
+		return &Value{IsField: true, Field: op.Field}, nil
 	}
 	switch op.Value.Type {
 	case agl.ValueInt:
-		return &MACValue{IntVal: op.Value.Int}, nil
+		return &Value{IntVal: op.Value.Int}, nil
 	case agl.ValueStr:
-		return &MACValue{StrVal: op.Value.Str}, nil
+		return &Value{StrVal: op.Value.Str}, nil
 	case agl.ValueVar:
 		return nil, crex.Newf(ErrCompile, "variable references are not supported in mac filters")
 	default:

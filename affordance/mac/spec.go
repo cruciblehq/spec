@@ -8,20 +8,20 @@ import "github.com/cruciblehq/utils-go/crex"
 // Duplicate rules are suppressed so the slice contains only the minimal set
 // of distinct hook allows required by the workload.
 type Spec struct {
-	Rules []*MACAllow `codec:"rules"` // Granted LSM hook allow rules.
+	Rules []*Allow `codec:"rules"` // Granted LSM hook allow rules.
 }
 
 // Appends r to the spec's rule list if it is not already present.
 //
 // Returns true if the rule was added (false means a rule with the same hook
 // and where clause already existed, and the call was a no-op).
-func (s *Spec) Apply(r *MACAllow) bool {
+func (s *Spec) Apply(r *Allow) bool {
 	for _, existing := range s.Rules {
-		if existing.Hook == r.Hook && macExprEqual(existing.Where, r.Where) {
+		if existing.Hook == r.Hook && exprEqual(existing.Where, r.Where) {
 			return false
 		}
 	}
-	s.Rules = append(s.Rules, cloneMACAllow(r))
+	s.Rules = append(s.Rules, cloneAllow(r))
 	return true
 }
 
@@ -29,10 +29,10 @@ func (s *Spec) Apply(r *MACAllow) bool {
 func (s *Spec) Validate() error {
 	for i, rule := range s.Rules {
 		if rule == nil {
-			return crex.At(crex.Newf(ErrInvalidMAC, "nil rule"), "rule", i+1)
+			return crex.At(crex.Newf(ErrInvalidSpec, "nil rule"), "rule", i+1)
 		}
 		if err := rule.Validate(); err != nil {
-			return crex.At(crex.Wrap(ErrInvalidMAC, err), "rule", i+1)
+			return crex.At(crex.Wrap(ErrInvalidSpec, err), "rule", i+1)
 		}
 	}
 	return nil
