@@ -1,7 +1,6 @@
 package manifest
 
 import (
-	"github.com/cruciblehq/spec/affordance/kernel"
 	"github.com/cruciblehq/utils-go/codec"
 	"github.com/cruciblehq/utils-go/crex"
 )
@@ -41,13 +40,6 @@ type Compute struct {
 	// [*ComputeLocal] for "local".
 	Config any `codec:"-"`
 
-	// Kernel requirements derived from service grants.
-	//
-	// Union of the kernel specs accumulated by all service affordance builders
-	// assigned to this compute unit. Populated by the blueprint builder after
-	// bin-packing; nil when no requirements have been derived yet. The provider
-	// must satisfy these requirements with the VM image at provisioning time.
-	Kernel *kernel.Spec `codec:"kernel,omitempty"`
 }
 
 // Validates the compute entry.
@@ -69,19 +61,13 @@ func (c *Compute) Validate() error {
 	if err := v.Validate(); err != nil {
 		return err
 	}
-	if c.Kernel != nil {
-		if err := c.Kernel.Validate(); err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
 // Decodes a raw parsed map into the compute entry.
 //
 // Reads the provider type first, then decodes the remaining fields into the
-// concrete configuration type for that provider. The optional "kernel" key is
-// decoded into a [kernel.Spec] if present.
+// concrete configuration type for that provider.
 func (c *Compute) Decode(cd *codec.Codec, raw any) error {
 	src, ok := raw.(map[string]any)
 	if !ok {
@@ -103,25 +89,13 @@ func (c *Compute) Decode(cd *codec.Codec, raw any) error {
 		return crex.Wrap(ErrDecodeFailed, err)
 	}
 	c.Config = target
-	if rawKernel, ok := src["kernel"]; ok && rawKernel != nil {
-		kernelMap, ok := rawKernel.(map[string]any)
-		if !ok {
-			return crex.Newf(ErrDecodeFailed, "unexpected kernel type %T", rawKernel)
-		}
-		k := &kernel.Spec{}
-		if err := cd.Decode(kernelMap, k); err != nil {
-			return crex.Wrap(ErrDecodeFailed, err)
-		}
-		c.Kernel = k
-	}
 	return nil
 }
 
 // Encodes the compute entry to a serializable map.
 //
 // Merges the provider configuration fields with the provider type key into a
-// single flat map. The kernel requirements, if present, are encoded as a
-// nested "kernel" key.
+// single flat map.
 func (c *Compute) Encode(cd *codec.Codec) (any, error) {
 	var cfg map[string]any
 	if c.Config == nil {
@@ -133,13 +107,6 @@ func (c *Compute) Encode(cd *codec.Codec) (any, error) {
 			return nil, err
 		}
 		cfg["type"] = c.Type
-	}
-	if c.Kernel != nil {
-		raw, err := encodeToMap(cd, c.Kernel)
-		if err != nil {
-			return nil, err
-		}
-		cfg["kernel"] = raw
 	}
 	return cfg, nil
 }

@@ -12,7 +12,7 @@ import (
 // in a blueprint). The ID persists from composition through plan into state,
 // allowing the instance to be tracked and referenced across the deployment
 // lifecycle. The reference may carry [Ref.Args] to parameterize the
-// referenced affordance.
+// referenced resource.
 type Ref struct {
 
 	// Stable identifier for this instance.
@@ -28,10 +28,10 @@ type Ref struct {
 	// resolves this string to a specific artifact. This field is required.
 	Ref string `codec:"ref"`
 
-	// Named arguments for the referenced affordance.
+	// Named arguments for the referenced resource.
 	//
 	// Maps parameter names to their string values. Each key must match a
-	// parameter declared in the affordance's [Schema.Params].
+	// parameter declared in the resource's schema.
 	Args Args `codec:"args,omitempty"`
 }
 

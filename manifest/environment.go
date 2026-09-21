@@ -2,7 +2,7 @@ package manifest
 
 // A named set of environment variables.
 //
-// Environments provide concrete values for affordances declared by services.
+// Environments provide concrete values for parameters declared by services.
 // The specific environment to use is selected at build time, impacting the
 // resulting deployment plan.
 type Environment struct {

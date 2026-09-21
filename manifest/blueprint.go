@@ -8,14 +8,14 @@ import (
 //
 // A blueprint declares which services should be deployed together and how
 // they are composed and exposed. Building a blueprint resolves service
-// references and affordances, producing a deployment plan as output.
+// references and configuration, producing a deployment plan as output.
 type Blueprint struct {
 
 	// Services to deploy.
 	//
 	// Each entry names a service from the registry. Services carry only
-	// an ID and a reference; affordances and configuration come from the
-	// service manifest fetched during the build.
+	// an ID and a reference; the service manifest fetched during the build
+	// provides the remaining configuration.
 	Services []Ref `codec:"services"`
 
 	// Gateway routing configuration.
@@ -26,9 +26,8 @@ type Blueprint struct {
 
 	// Named environment variable sets.
 	//
-	// Each environment provides concrete values for the config/env and
-	// config/secret affordances declared by services. Which environment
-	// to use is selected at build time.
+	// Each environment provides concrete values for parameters declared by
+	// services. Which environment to use is selected at build time.
 	Environments []Environment `codec:"environments,omitempty"`
 }
 
@@ -97,9 +96,9 @@ func (b *Blueprint) Environment(id string) *Environment {
 // Appends an environment to the blueprint.
 //
 // Environment IDs are selected at build time to provide concrete values for
-// config/env and config/secret affordances. The ID must be unique within
-// the blueprint. Returns [ErrEnvironmentExists] if an environment with the
-// same ID is already declared.
+// the parameter set declared by the service. The ID must be unique within the
+// blueprint. Returns [ErrEnvironmentExists] if an environment with the same ID
+// is already declared.
 func (b *Blueprint) AddEnvironment(env Environment) error {
 	if b.Environment(env.ID) != nil {
 		return crex.Newf(ErrEnvironmentExists, "id %q", env.ID)

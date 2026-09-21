@@ -1,21 +1,15 @@
 package manifest
 
 import (
-	"github.com/cruciblehq/spec/affordance/fcap"
-	"github.com/cruciblehq/spec/affordance/mac"
-	"github.com/cruciblehq/spec/affordance/net"
-	"github.com/cruciblehq/spec/affordance/volume"
 	"github.com/cruciblehq/utils-go/crex"
 	"github.com/opencontainers/runtime-spec/specs-go"
 )
 
 // Compiled enforcement model for containers.
 //
-// This model is produced by the affordance builder during blueprint build and
-// stored in the plan's Containers map. It covers the enforcement surface that
-// runc applies at container creation time (OCI runtime spec, file capabilities,
-// MAC hook allow rules, and container-level network spec. An empty value for
-// any field is the explicit zero-grant baseline for that subsystem.
+// This model is stored in the plan's Containers map and covers the enforcement
+// surface that runc applies at container creation time (OCI runtime spec,
+// container-level network spec, and related runtime settings).
 type Container struct {
 
 	// Full OCI runtime spec passed to runc at container creation.
@@ -25,55 +19,18 @@ type Container struct {
 	// and narrowed by the OCI subsystems (cap, seccomp, cgroup, rlimit, etc).
 	OCI specs.Spec `codec:"oci"`
 
-	// File capabilities.
+	// Container-level network rules.
 	//
-	// Compiled from .fcap grants and applied by the executor as xattrs on the
-	// container filesystem before runc starts; runc then reads them during
-	// execve to set the process capability sets. An empty Entries map means
-	// no file capabilities are granted.
-	Fcap fcap.Spec `codec:"fcap"`
-
-	// MAC (LSM) hook allow rules.
-	//
-	// Compiled from .mac grants and loaded as BPF-LSM hook rules into the
-	// container's security module context. Each rule names a kernel hook
-	// and an optional predicate that must match for the allow to apply. An
-	// empty Rules slice means no LSM allows are granted.
-	MAC mac.Spec `codec:"mac"`
-
-	// Container-level network spec.
-	//
-	// Compiled from .net grants and applied as nftables rules injected into the
-	// container's network namespace by the VM init process before the container
-	// starts. Rules enforce ingress ports and egress destinations within the
-	// netns. Empty Ingress and Egress slices mean a deny-all baseline (no ports
-	// are reachable inbound and no outbound destinations are reachable).
-	Network net.Spec `codec:"network"`
-
-	// Persistent storage volumes declared for this container.
-	//
-	// Compiled from .volume grants and provisioned by the executor before the
-	// container starts. Each entry maps to a directory or managed disk mounted
-	// at Mount.Destination inside the container. An empty slice means no
-	// persistent volumes are declared for this container.
-	Volumes []volume.Mount `codec:"volumes,omitempty"`
+	// These entries are derived from the deployment topology and describe the
+	// allowed inbound and outbound traffic for the service. The rules are
+	// validated as part of plan validation.
+	Network Network `codec:"network"`
 }
 
 // Validates the compiled container enforcement spec.
 func (c *Container) Validate() error {
-	if err := c.Fcap.Validate(); err != nil {
-		return crex.Wrap(ErrInvalidContainer, err)
-	}
-	if err := c.MAC.Validate(); err != nil {
-		return crex.Wrap(ErrInvalidContainer, err)
-	}
 	if err := c.Network.Validate(); err != nil {
 		return crex.Wrap(ErrInvalidContainer, err)
-	}
-	for i := range c.Volumes {
-		if err := c.Volumes[i].Validate(); err != nil {
-			return crex.Wrap(ErrInvalidContainer, err)
-		}
 	}
 	return nil
 }

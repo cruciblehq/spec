@@ -29,8 +29,8 @@ type Service struct {
 
 // Encodes the service configuration to a format-independent map.
 //
-// The schema, entrypoint, and recipe stages are encoded in the flat grant
-// format so that grants serialize correctly.
+// The schema, entrypoint, and recipe stages are encoded in the canonical
+// serialized format.
 func (s *Service) Encode(c *codec.Codec) (any, error) {
 	m := make(map[string]any)
 	stages, err := s.Recipe.encodeStages(c)

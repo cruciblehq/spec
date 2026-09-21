@@ -13,7 +13,7 @@ type Deployment struct {
 	//
 	// The service must be declared in the blueprint and resolved during the
 	// build, otherwise the plan is invalid. The service's manifest provides
-	// the configuration and affordances for the deployment.
+	// the configuration for the deployment.
 	Service string `codec:"service"`
 
 	// ID of the container runtime spec.

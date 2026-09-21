@@ -8,8 +8,8 @@ const PlanVersion = 0
 // Represents a deployment plan.
 //
 // Specifies what resources will be deployed and the infrastructure required to
-// run them. Generated during the planning phase by resolving references,
-// compiling affordances, and determining routing.
+// run them. Generated during the planning phase by resolving references and
+// determining routing.
 //
 // Infrastructure holds separate compute and network pools, each keyed by ID.
 // Containers and Environments are lookup maps keyed by ID. Deployments is an

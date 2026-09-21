@@ -40,18 +40,9 @@ type Stage struct {
 
 	// Arguments for the base image reference.
 	//
-	// Maps parameter names to string values for the base image affordance. Must
+	// Maps parameter names to string values for the base image resource. Must
 	// not be set when [Stage.From] is empty. Each key must be a valid name.
 	Args Args `codec:"args,omitempty"`
-
-	// Grants for this stage.
-	//
-	// Domain grants (starting with ".") target a specific subsystem directly.
-	// Reference grants (bare name, no ".") name an affordance resource whose
-	// grants are inlined at build time. Grant scopes allow platform-specific
-	// grants within a universal stage. Platform-scoped stages cannot contain
-	// grant scopes with a platform selector.
-	Grants []GrantScope `codec:"grants,omitempty"`
 
 	// Ordered build steps for this stage.
 	//
@@ -67,8 +58,7 @@ type Stage struct {
 // When [Stage.From] is set, arg keys must be valid names. Args must not be set
 // when From is empty. An empty From indicates a scratch stage. Each step is
 // validated recursively with positional context. When [Stage.Platform] is set,
-// steps cannot use [Step.Platform] and grant scopes cannot carry a platform
-// selector. Grants are also validated recursively.
+// steps cannot use [Step.Platform].
 func (s *Stage) Validate() error {
 	if s.Name != "" && !isValidName(s.Name) {
 		return crex.Wrap(ErrInvalidStage, ErrInvalidStageName)
@@ -87,12 +77,6 @@ func (s *Stage) Validate() error {
 
 	for i := range s.Steps {
 		if err := s.validateStep(i); err != nil {
-			return err
-		}
-	}
-
-	for i := range s.Grants {
-		if err := s.validateGrantScope(i); err != nil {
 			return err
 		}
 	}
@@ -127,26 +111,7 @@ func stepUsesPlatform(s *Step) bool {
 	return false
 }
 
-// Validates a single grant scope by index.
-//
-// When the stage has a platform selector, grant scopes cannot carry a
-// platform selector. Validation errors are wrapped with the grant scope
-// index for context.
-func (s *Stage) validateGrantScope(i int) error {
-	if s.Platform != "" && s.Grants[i].Platform != "" {
-		return crex.At(crex.Tag(crex.Newf(ErrInvalidStage, "platform not allowed inside a platform-scoped stage"), ErrGrantScopePlatformInPlatformStage), "grant scope", i+1)
-	}
-	if err := s.Grants[i].Validate(); err != nil {
-		return crex.At(crex.Wrap(ErrInvalidStage, err), "grant scope", i+1)
-	}
-	return nil
-}
-
 // Encodes the stage to a format-independent value.
-//
-// Grants are serialized in the same flat format used by [Affordance.Scopes]:
-// universal grants as plain strings, platform-scoped groups as objects with
-// a platform key and a nested grants list.
 func (s *Stage) Encode(c *codec.Codec) (any, error) {
 	m := make(map[string]any)
 	if s.Name != "" {
@@ -160,13 +125,6 @@ func (s *Stage) Encode(c *codec.Codec) (any, error) {
 	}
 	if len(s.Args) > 0 {
 		m["args"] = s.Args
-	}
-	if len(s.Grants) > 0 {
-		list, err := encodeScopes(s.Grants)
-		if err != nil {
-			return nil, err
-		}
-		m["grants"] = list
 	}
 	if len(s.Steps) > 0 {
 		steps := make([]any, len(s.Steps))
@@ -183,9 +141,6 @@ func (s *Stage) Encode(c *codec.Codec) (any, error) {
 }
 
 // Decodes the stage from a raw parsed map.
-//
-// Grants are decoded from the flat format: plain strings for universal grants
-// and objects with a platform key for platform-scoped groups.
 func (s *Stage) Decode(c *codec.Codec, raw any) error {
 	src, ok := raw.(map[string]any)
 	if !ok {
@@ -205,14 +160,6 @@ func (s *Stage) Decode(c *codec.Codec, raw any) error {
 	}
 	if err := c.Field(src, s, "Steps"); err != nil {
 		return crex.Wrap(ErrInvalidStage, err)
-	}
-	list, _ := src["grants"].([]any)
-	if len(list) > 0 {
-		scopes, err := decodeScopes(list)
-		if err != nil {
-			return crex.Wrap(ErrInvalidStage, err)
-		}
-		s.Grants = scopes
 	}
 	return nil
 }

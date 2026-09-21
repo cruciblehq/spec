@@ -24,8 +24,7 @@ type Runtime struct {
 
 // Encodes the runtime configuration to a format-independent map.
 //
-// The schema and recipe stages are encoded in the flat grant format so that
-// grants serialize correctly.
+// The schema and recipe stages are encoded in the canonical serialized format.
 func (r *Runtime) Encode(c *codec.Codec) (any, error) {
 	m := make(map[string]any)
 	stages, err := r.Recipe.encodeStages(c)

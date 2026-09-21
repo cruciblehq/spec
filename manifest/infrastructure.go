@@ -3,11 +3,9 @@ package manifest
 // Pool of compute and network resources allocated by the blueprint builder.
 //
 // The blueprint builder populates the pool based on the compute and network
-// grants declared by services in the blueprint. Each grant contributes to the
-// total resource requirements, which the builder uses to select and configure
-// the compute and network resources needed to run the services. The pool is
-// included in the plan so that the executor can provision the resources and
-// apply the configurations when deploying the services.
+// requirements declared by services in the blueprint. The pool is included in
+// the plan so that the executor can provision the resources and apply the
+// configurations when deploying the services.
 type Infrastructure struct {
 
 	// Allocated compute units.

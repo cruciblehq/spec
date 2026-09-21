@@ -43,15 +43,6 @@
 // resource to use as the starting point for the build. When no base image is
 // specified, the stage starts from an empty filesystem (scratch).
 //
-// Stages also carry affordance refs that describe requirements from the
-// runtime. Each affordance ref identifies an affordance resource. Affordances
-// are either composed (referencing child affordances) or primitive-backed
-// (mapping to a primitive). Arguments are either absent (bare ref), a
-// scalar (assigned to the affordance's default parameter), or a mapping of
-// parameter names to values. The primitive resolver translates each ref's
-// arguments into concrete effects without the developer needing to know the
-// implementation details.
-//
 // Every type in the package exposes a Validate method that checks structural
 // correctness. Validation cascades from [Manifest.Validate] down through
 // [Resource], the config type, [Recipe], [Stage], [Step], and [Ref].

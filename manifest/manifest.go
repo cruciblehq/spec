@@ -73,8 +73,6 @@ func (m *Manifest) validateConfig() error {
 		_, match = m.Config.(*Widget)
 	case TypeTemplate:
 		_, match = m.Config.(*Template)
-	case TypeAffordance:
-		_, match = m.Config.(*Affordance)
 	case TypeBlueprint:
 		_, match = m.Config.(*Blueprint)
 	default:
@@ -137,8 +135,6 @@ func (m *Manifest) Decode(c *codec.Codec, raw any) error {
 		target = &Widget{}
 	case TypeTemplate:
 		target = &Template{}
-	case TypeAffordance:
-		target = &Affordance{}
 	case TypeBlueprint:
 		target = &Blueprint{}
 	default:

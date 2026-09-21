@@ -1,7 +1,9 @@
 package manifest
 
 import (
-	"github.com/cruciblehq/spec/affordance/net"
+	"strconv"
+	"strings"
+
 	"github.com/cruciblehq/utils-go/crex"
 )
 
@@ -92,7 +94,11 @@ func (r *EgressRule) Validate() error {
 // Accepts the protocol keywords, the "ip" wildcard for any protocol, and a
 // decimal IP protocol number in the range 0–255.
 func validateProtocol(p string) error {
-	if net.IsValidProtocol(p) {
+	switch strings.ToLower(strings.TrimSpace(p)) {
+	case "", "ip", "tcp", "udp", "icmp", "icmpv6", "sctp", "raw":
+		return nil
+	}
+	if n, err := strconv.Atoi(p); err == nil && n >= 0 && n <= 255 {
 		return nil
 	}
 	return crex.Newf(ErrInvalidProtocol, "unknown protocol %q", p)

@@ -58,7 +58,7 @@ func (r *Recipe) Validate() error {
 // Helper for encoding the stages of a recipe.
 //
 // Each stage is encoded using [Stage.Encode], which produces a map with the
-// stage fields and grants in the flat grant format. The resulting list of maps
+// stage fields in the canonical serialized format. The resulting list of maps
 // is returned for inclusion in the parent resource's encoded configuration.
 func (r *Recipe) encodeStages(c *codec.Codec) ([]any, error) {
 	if len(r.Stages) == 0 {

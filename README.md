@@ -6,7 +6,7 @@ Normative data models and wire contracts for Crucible.
 
 This project defines the data models that multiple projects must agree on,
 including schema, validation behavior, reference parsing, manifest and plan
-semantics, and affordance modeling.
+semantics.
 
 ## Package Layout
 
