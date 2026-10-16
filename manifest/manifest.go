@@ -69,6 +69,8 @@ func (m *Manifest) validateConfig() error {
 		_, match = m.Config.(*Runtime)
 	case TypeService:
 		_, match = m.Config.(*Service)
+	case TypeInterface:
+		_, match = m.Config.(*Interface)
 	case TypeWidget:
 		_, match = m.Config.(*Widget)
 	case TypeTemplate:
@@ -131,6 +133,8 @@ func (m *Manifest) Decode(c *codec.Codec, raw any) error {
 		target = &Runtime{}
 	case TypeService:
 		target = &Service{}
+	case TypeInterface:
+		target = &Interface{}
 	case TypeWidget:
 		target = &Widget{}
 	case TypeTemplate:

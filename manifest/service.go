@@ -1,6 +1,7 @@
 package manifest
 
 import (
+	"github.com/cruciblehq/spec/reference"
 	"github.com/cruciblehq/utils-go/codec"
 	"github.com/cruciblehq/utils-go/crex"
 )
@@ -18,6 +19,27 @@ type Service struct {
 	// Lists configuration values the service accepts at runtime. Values are
 	// bound through environment declarations.
 	Schema *Schema `codec:"schema,omitempty"`
+
+	// Interfaces asserted by this service.
+	//
+	// Each item names an interface the service claims to satisfy. The platform
+	// treats these as symbolic assertions and does not attempt to validate
+	// actual conformance.
+	Implements []string `codec:"implements,omitempty"`
+
+	// Interface contracts required by this service.
+	//
+	// Each item names an interface the service expects to bind. Resolution
+	// identifies one or more implementations of the matching interface
+	// identity and version.
+	Requires []string `codec:"requires,omitempty"`
+
+	// Interface contracts attached to an existing binding.
+	//
+	// Each item names an interface the service expects to bind to a logical
+	// dependency established elsewhere through a [Service.Requires] entry.
+	// The reference syntax matches [Service.Requires] exactly.
+	Attaches []string `codec:"attaches,omitempty"`
 
 	// Command to run when the container starts.
 	//
@@ -52,6 +74,15 @@ func (s *Service) Encode(c *codec.Codec) (any, error) {
 	if len(s.Entrypoint) > 0 {
 		m["entrypoint"] = s.Entrypoint
 	}
+	if len(s.Implements) > 0 {
+		m["implements"] = s.Implements
+	}
+	if len(s.Requires) > 0 {
+		m["requires"] = s.Requires
+	}
+	if len(s.Attaches) > 0 {
+		m["attaches"] = s.Attaches
+	}
 	return m, nil
 }
 
@@ -61,6 +92,16 @@ func (s *Service) Validate() error {
 		return crex.Wrap(ErrInvalidService, ErrMissingEntrypoint)
 	}
 
+	if err := validateInterfaceReferences(s.Implements, true); err != nil {
+		return crex.Wrap(ErrInvalidService, err)
+	}
+	if err := validateInterfaceReferences(s.Requires, false); err != nil {
+		return crex.Wrap(ErrInvalidService, err)
+	}
+	if err := validateInterfaceReferences(s.Attaches, false); err != nil {
+		return crex.Wrap(ErrInvalidService, err)
+	}
+
 	if s.Schema != nil {
 		if err := s.Schema.Validate(); err != nil {
 			return crex.Wrap(ErrInvalidService, err)
@@ -68,4 +109,21 @@ func (s *Service) Validate() error {
 	}
 
 	return s.Recipe.Validate()
+}
+
+// Validates each interface reference used by the service.
+func validateInterfaceReferences(items []string, exact bool) error {
+	for _, item := range items {
+		ref, err := reference.Parse(item, string(TypeInterface))
+		if err != nil {
+			return crex.Wrap(ErrInvalidRef, err)
+		}
+		if ref.Version() == nil {
+			return crex.Wrap(ErrInvalidRef, ErrMissingRefTarget)
+		}
+		if exact && !ref.Version().IsExact() {
+			return crex.Wrap(ErrInvalidRef, ErrMissingRefTarget)
+		}
+	}
+	return nil
 }

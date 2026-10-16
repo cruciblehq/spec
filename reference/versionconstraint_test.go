@@ -38,6 +38,36 @@ func TestParseVersionConstraint_ExactVersionWithEquals(t *testing.T) {
 	}
 }
 
+func TestVersionConstraint_IsExact(t *testing.T) {
+	if !mustParseConstraint(t, "1.2.3").IsExact() {
+		t.Fatal("exact version constraint should report true")
+	}
+	if mustParseConstraint(t, "=1.2.3").IsExact() == false {
+		t.Fatal("explicit exact version constraint should report true")
+	}
+	if mustParseConstraint(t, ">=1.0.0 <2.0.0").IsExact() {
+		t.Fatal("range constraint should report false")
+	}
+}
+
+func TestVersionConstraint_ExactVersion(t *testing.T) {
+	vc := mustParseConstraint(t, "1.2.3")
+	v, ok := vc.ExactVersion()
+	if !ok {
+		t.Fatal("exact version constraint should be convertible to a version")
+	}
+	if v.String() != "1.2.3" {
+		t.Fatalf("ExactVersion() = %q, want %q", v.String(), "1.2.3")
+	}
+}
+
+func TestVersionConstraint_ExactVersion_RejectsRangeConstraint(t *testing.T) {
+	vc := mustParseConstraint(t, ">=1.0.0 <2.0.0")
+	if _, ok := vc.ExactVersion(); ok {
+		t.Fatal("range constraint should not be treated as an exact version")
+	}
+}
+
 func TestParseVersionConstraint_PartialVersion(t *testing.T) {
 	vc := mustParseConstraint(t, "1.2")
 	if vc.String() != "=1.2" {

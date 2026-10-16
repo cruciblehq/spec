@@ -44,6 +44,43 @@ func (vc *VersionConstraint) String() string {
 	return strings.Join(parts, " || ")
 }
 
+// Whether this constraint represents a single exact version.
+func (vc *VersionConstraint) IsExact() bool {
+	_, ok := vc.ExactVersion()
+	return ok
+}
+
+// Extracts the exact semantic version from an equality constraint.
+//
+// Returns false when the constraint is not a single exact version. Range
+// expressions like ">=1.0.0 <2.0.0" or wildcards are not exact versions.
+func (vc *VersionConstraint) ExactVersion() (*Version, bool) {
+	if vc == nil || len(vc.constraints) == 0 {
+		return nil, false
+	}
+	if len(vc.constraints) != 1 {
+		return nil, false
+	}
+	group := vc.constraints[0]
+	if len(group.constraints) != 1 {
+		return nil, false
+	}
+
+	c := group.constraints[0]
+	if c.operator != "=" {
+		return nil, false
+	}
+	if !c.minorSet || !c.patchSet {
+		return nil, false
+	}
+
+	return &Version{
+		Major: c.major,
+		Minor: c.minor,
+		Patch: c.patch,
+	}, true
+}
+
 // Whether a specific version satisfies this constraint.
 //
 // Parses the version string and checks it against all constraint groups.
