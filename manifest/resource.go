@@ -1,6 +1,9 @@
 package manifest
 
-import "github.com/cruciblehq/utils-go/crex"
+import (
+	"github.com/cruciblehq/spec/reference"
+	"github.com/cruciblehq/utils-go/crex"
+)
 
 // Common identity envelope shared by every resource manifest.
 //
@@ -45,6 +48,13 @@ func (r *Resource) Validate() error {
 	}
 	if r.Name == "" {
 		return crex.Wrap(ErrInvalidResource, ErrMissingName)
+	}
+	id, err := reference.ParseIdentifier(r.Name, string(r.Type))
+	if err != nil {
+		return crex.Wrap(ErrInvalidResource, err)
+	}
+	if id.Namespace() == "" {
+		return crex.Wrap(ErrInvalidResource, ErrMissingNamespace)
 	}
 	if r.Version == "" {
 		return crex.Wrap(ErrInvalidResource, ErrMissingVersion)

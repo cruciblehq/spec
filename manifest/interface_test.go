@@ -82,6 +82,23 @@ func TestServiceValidate_AttachesDeclaration(t *testing.T) {
 	}
 }
 
+func TestResourceValidate_RequiresExplicitNamespace(t *testing.T) {
+	res := &Resource{
+		Type:    TypeService,
+		Name:    "postgres",
+		Version: "18.6",
+	}
+
+	if err := res.Validate(); err == nil {
+		t.Fatal("resource name without namespace should fail validation")
+	}
+
+	res.Name = "crucible/postgres"
+	if err := res.Validate(); err != nil {
+		t.Fatalf("explicit namespace resource should validate: %v", err)
+	}
+}
+
 func TestServiceValidate_RejectsInvalidInterfaceDeclaration(t *testing.T) {
 	svc := &Service{
 		Recipe:     Recipe{Stages: []Stage{{}}},

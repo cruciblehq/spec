@@ -17,6 +17,7 @@ var (
 	ErrEncodeFailed               = crex.New("failed to encode manifest")
 	ErrDecodeFailed               = crex.New("failed to decode manifest")
 	ErrMissingName                = crex.New("missing resource name")
+	ErrMissingNamespace           = crex.New("missing resource namespace")
 	ErrMissingVersion             = crex.New("missing resource version")
 	ErrMissingOutputStage         = crex.New("recipe has no output stage")
 	ErrDuplicateStageName         = crex.New("duplicate stage name")
