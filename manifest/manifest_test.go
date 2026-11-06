@@ -62,29 +62,34 @@ func TestManifestRoundTripByType(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			m := Manifest{
-				Version:  0,
-				Resource: Resource{Type: c.typ, Name: "cruciblehq/thing", Version: "1.0.0"},
-				Config:   c.config,
-			}
-			if err := m.Validate(); err != nil {
-				t.Fatalf("validate %s: %v", c.name, err)
-			}
-			path := filepath.Join(t.TempDir(), "crucible.yaml")
-			if err := Write(&m, path); err != nil {
-				t.Fatalf("write %s: %v", c.name, err)
-			}
-			got, err := Read(path)
-			if err != nil {
-				t.Fatalf("read %s: %v", c.name, err)
-			}
-			if got.Resource.Type != c.typ {
-				t.Fatalf("round-tripped type = %q, want %q", got.Resource.Type, c.typ)
-			}
-			if err := got.Validate(); err != nil {
-				t.Fatalf("round-tripped %s invalid: %v", c.name, err)
-			}
+			checkManifestRoundTrip(t, c.typ, c.config)
 		})
+	}
+}
+
+func checkManifestRoundTrip(t *testing.T, typ ResourceType, config any) {
+	t.Helper()
+	m := Manifest{
+		Version:  0,
+		Resource: Resource{Type: typ, Name: "cruciblehq/thing", Version: "1.0.0"},
+		Config:   config,
+	}
+	if err := m.Validate(); err != nil {
+		t.Fatalf("validate: %v", err)
+	}
+	path := filepath.Join(t.TempDir(), "crucible.yaml")
+	if err := Write(&m, path); err != nil {
+		t.Fatalf("write: %v", err)
+	}
+	got, err := Read(path)
+	if err != nil {
+		t.Fatalf("read: %v", err)
+	}
+	if got.Resource.Type != typ {
+		t.Fatalf("round-tripped type = %q, want %q", got.Resource.Type, typ)
+	}
+	if err := got.Validate(); err != nil {
+		t.Fatalf("round-tripped invalid: %v", err)
 	}
 }
 
