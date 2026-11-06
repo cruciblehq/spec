@@ -162,3 +162,12 @@ func TestServiceEncode_IncludesInterfaceLists(t *testing.T) {
 		t.Fatal("encoded service missing attaches")
 	}
 }
+
+func TestInterfaceReferenceMatches_ErrorBranches(t *testing.T) {
+	if _, err := InterfaceReferenceMatches("::bad::", "ns/iface 1.0.0"); err == nil {
+		t.Fatal("invalid requirement should error")
+	}
+	if _, err := InterfaceReferenceMatches("ns/iface 1.0.0", "::bad::"); err == nil {
+		t.Fatal("invalid implementation should error")
+	}
+}

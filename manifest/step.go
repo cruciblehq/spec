@@ -5,13 +5,13 @@ import "github.com/cruciblehq/utils-go/crex"
 // A build step in a recipe stage.
 //
 // Fields are either operations or modifiers. Operations are the actions:
-// [Step.Run], [Step.Copy]; they are mutually exclusive. Modifiers are
-// [Step.Shell], [Step.Env], [Step.Workdir], [Step.User], [Step.Platform];
-// paired with an operation they apply to that single step, standalone they
-// persist in the image for subsequent steps. Modifiers combine freely with
-// each other. [Step.Platform] with [Step.Steps] creates a group whose children
-// inherit any modifiers set at the group level. Invalid combinations are
-// rejected during validation.
+// [Step.Run], [Step.Copy], [Step.Unpack]; they are mutually exclusive.
+// Modifiers are [Step.Shell], [Step.Env], [Step.Workdir], [Step.User],
+// [Step.Platform]; paired with an operation they apply to that single step,
+// standalone they persist in the image for subsequent steps. Modifiers combine
+// freely with each other. [Step.Platform] with [Step.Steps] creates a group
+// whose children inherit any modifiers set at the group level. Invalid
+// combinations are rejected during validation.
 type Step struct {
 
 	// Executes a command through a shell inside the build container.
@@ -27,6 +27,17 @@ type Step struct {
 	// resolves against the current working directory. Directories are
 	// copied recursively.
 	Copy string `codec:"copy,omitempty"`
+
+	// Unpacks a tar archive from the host into the image.
+	//
+	// Specified as "src dest" where src is a host path, relative to the
+	// manifest file, to a tar archive (optionally gzip-compressed), and dest
+	// is a path inside the image where the archive contents are extracted. A
+	// relative dest resolves against the current working directory. Unlike
+	// [Step.Copy], which stores files as-is, Unpack extracts the archive's
+	// contents, preserving permissions, ownership, symlinks, and device nodes.
+	// It is the primitive used to seed a base filesystem into a scratch image.
+	Unpack string `codec:"unpack,omitempty"`
 
 	// Selects the shell used to execute [Step.Run] commands.
 	//
@@ -108,19 +119,31 @@ func (s *Step) Validate() error {
 func (s *Step) validateStructure() error {
 	hasRun := s.Run != ""
 	hasCopy := s.Copy != ""
+	hasUnpack := s.Unpack != ""
 	hasMod := s.Shell != "" || len(s.Env) > 0 || s.Workdir != "" || s.User != "" || s.Platform != ""
 	hasSteps := len(s.Steps) > 0
 
-	if !hasRun && !hasCopy && !hasMod && !hasSteps {
+	ops := 0
+	if hasRun {
+		ops++
+	}
+	if hasCopy {
+		ops++
+	}
+	if hasUnpack {
+		ops++
+	}
+
+	if ops == 0 && !hasMod && !hasSteps {
 		return ErrEmptyStep
 	}
-	if hasRun && hasCopy {
+	if ops > 1 {
 		return ErrMutuallyExclusiveOps
 	}
 	if hasSteps && s.Platform == "" {
 		return ErrStepsWithoutPlatform
 	}
-	if (hasRun || hasCopy) && hasSteps {
+	if ops > 0 && hasSteps {
 		return ErrPlatformWithOperation
 	}
 	return nil
@@ -128,9 +151,10 @@ func (s *Step) validateStructure() error {
 
 // Validates modifier compatibility with the current operation.
 //
-// Rejects shell and env when paired with a copy operation.
+// Rejects shell and env when paired with a copy or unpack operation, since
+// neither executes a command.
 func (s *Step) validateModifiers() error {
-	if s.Copy == "" {
+	if s.Copy == "" && s.Unpack == "" {
 		return nil
 	}
 
