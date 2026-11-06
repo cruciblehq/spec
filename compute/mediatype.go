@@ -1,9 +1,10 @@
 package compute
 
-// Identifier for HTTP Content-Type and Accept headers.
+// String identifier for HTTP Content-Type and Accept headers.
 //
-// Defines vendor-specific media types for the cruxd API. JSON message bodies
-// use the [MediaType.JSON] form.
+// Defines vendor-specific media types for the cruxd compute API following the
+// pattern application/vnd.crucible.compute.{name}.v0. JSON message bodies use
+// the [MediaType.JSON] form. Binary and streaming bodies use the type as-is.
 type MediaType string
 
 // Media types for JSON message bodies.
@@ -31,7 +32,7 @@ const (
 	MediaTypeError                    MediaType = "application/vnd.crucible.compute.error.v0"                      // [Error] returned on a non-2xx status.
 )
 
-// Media types for binary and streaming bodies.
+// Media types for binary and streaming bodies, carried as-is.
 const (
 	MediaTypeImageArchive MediaType = "application/vnd.crucible.compute.image-archive.v0" // OCI image tar archive (import, export).
 	MediaTypeLayer        MediaType = "application/vnd.crucible.compute.layer.v0"         // Uncompressed tar applied to a container (copy).

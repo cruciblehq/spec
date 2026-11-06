@@ -8,12 +8,12 @@ import (
 // A container runtime on a single machine.
 //
 // A Runtime is a handle to the container runtime on one machine, providing
-// image operations and the creation of containers. The implementation inside
-// cruxd talks to containerd; the client implementation inside crux forwards
-// each call to cruxd over HTTP/2. The runtime owns its underlying connection,
-// so calling any method after [Runtime.Close] results in undefined behaviour.
-// Containers are created with [Runtime.Load] and own all operations on their
-// writable snapshot.
+// image operations and the creation of containers. The direct implementation
+// inside cruxd talks to containerd; the client implementation inside crux
+// forwards each call to cruxd over HTTP/2. The runtime owns its underlying
+// connection, so calling any method after [Runtime.Close] results in undefined
+// behaviour. Containers are created with [Runtime.Load] and own all operations
+// on their writable snapshot.
 type Runtime interface {
 
 	// Imports an OCI image archive into the machine's image store.
@@ -40,8 +40,11 @@ type Runtime interface {
 
 	// Returns the OCI image config for the named image.
 	//
-	// ref must be a reference returned by [Runtime.Import] or [Container.Commit].
-	ImageConfig(ctx context.Context, ref ImageRef) (ImageConfig, error)
+	// The returned [ImageConfig] holds the runtime defaults baked into the
+	// image, which are the values in effect before [Options] overrides them
+	// at container start. ref must be a reference returned by [Runtime.Import]
+	// or [Container.Commit].
+	Inspect(ctx context.Context, ref ImageRef) (ImageConfig, error)
 
 	// Removes the named image from the store.
 	//

@@ -19,5 +19,5 @@ const (
 // Reserved names are enclosed in angle brackets. The protocol owns that
 // namespace, so application-defined channels must use something else.
 func (c Channel) Reserved() bool {
-	return len(c) >= 2 && c[0] == '<' && c[len(c)-1] == '>'
+	return len(c) >= 3 && c[0] == '<' && c[len(c)-1] == '>'
 }

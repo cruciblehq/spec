@@ -1,8 +1,6 @@
 package compute
 
-import (
-	"github.com/cruciblehq/utils-go/crex"
-)
+import "github.com/cruciblehq/utils-go/crex"
 
 var (
 	ErrUnauthenticated   = crex.New("unauthenticated")

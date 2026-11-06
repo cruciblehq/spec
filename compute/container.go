@@ -71,7 +71,7 @@ type Container interface {
 	//
 	// Captures the snapshot diff and any pending configuration, recording a
 	// history entry with by as the creator. Returns a reference that can be
-	// passed to [ContainerRuntime.Load], Export, Extract, or Remove. The live
+	// passed to [Runtime.Load], Export, Extract, or Remove. The live
 	// container is not affected.
 	Commit(ctx context.Context, by string) (ImageRef, error)
 
