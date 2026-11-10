@@ -57,8 +57,9 @@ type Container interface {
 	//
 	// Does not create an image or affect the writable snapshot. Typically
 	// called after [Container.Inspect] to modify specific fields while
-	// preserving the rest.
-	Configure(cfg ImageConfig)
+	// preserving the rest. Returns an error when the configuration cannot be
+	// stored.
+	Configure(ctx context.Context, cfg ImageConfig) error
 
 	// Returns the container's current OCI image config.
 	//
