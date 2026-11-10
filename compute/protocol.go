@@ -6,6 +6,9 @@ package compute
 // during handshake. cruxd rejects clients with incompatible protocol versions.
 const Version = "0"
 
+// Port cruxd listens on for the control API.
+const DefaultPort = 2789
+
 // Endpoint paths exposed by cruxd.
 const (
 	EndpointHealth           = "/health"             // Liveness probe.
