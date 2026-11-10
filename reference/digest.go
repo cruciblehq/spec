@@ -1,6 +1,7 @@
 package reference
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/cruciblehq/utils-go/crex"
@@ -50,7 +51,7 @@ func ParseDigest(s string) (*Digest, error) {
 
 // Returns the canonical string representation (algorithm:hash).
 func (d *Digest) String() string {
-	return d.Algorithm + ":" + d.Hash
+	return fmt.Sprintf("%s:%s", d.Algorithm, d.Hash)
 }
 
 // Whether two digests are identical.

@@ -108,7 +108,7 @@ func (id *Identifier) Path() string {
 	if id.namespace == "" {
 		return id.name
 	}
-	return id.namespace + "/" + id.name
+	return fmt.Sprintf("%s/%s", id.namespace, id.name)
 }
 
 // Returns a string representation of the identifier.
