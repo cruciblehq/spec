@@ -36,13 +36,14 @@ type Container interface {
 	// already-stopped container.
 	Stop(ctx context.Context) error
 
-	// Runs a command in the container.
+	// Runs a command in the container and returns its exit code.
 	//
 	// The command is invoked via opts.Shell (or the default shell) as a single
 	// argument. Changes to the filesystem accumulate in the writable snapshot
-	// and persist for subsequent calls. A non-zero exit code is returned as an
-	// error. Process output is written to stdout and stderr.
-	Exec(ctx context.Context, stdout, stderr io.Writer, command string, opts Options) error
+	// and persist for subsequent calls. Process output is written to stdout and
+	// stderr. A non-zero exit code is a normal result, not an error. The error
+	// is reserved for a command that could not be run or waited on.
+	Exec(ctx context.Context, stdout, stderr io.Writer, command string, opts Options) (int, error)
 
 	// Applies an uncompressed tar archive to the container's writable snapshot.
 	//
