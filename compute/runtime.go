@@ -61,6 +61,12 @@ type Runtime interface {
 	// released with [Container.Destroy] when no longer needed.
 	Load(ctx context.Context, ref ImageRef, opts Options) (Container, error)
 
+	// Checks that the runtime can serve requests.
+	//
+	// Returns nil when the runtime and the services it depends on are
+	// reachable, and an error describing the failure otherwise.
+	Health(ctx context.Context) error
+
 	// Closes the runtime and releases its underlying connection.
 	//
 	// Does not affect images or running containers. After Close, the runtime

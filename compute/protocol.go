@@ -11,7 +11,7 @@ const DefaultPort = 2789
 
 // Endpoint paths exposed by cruxd.
 const (
-	EndpointHealth           = "/health"             // Liveness probe.
+	EndpointHealth           = "/health"             // Health of cruxd and the runtime.
 	EndpointHandshake        = "/handshake"          // Compatibility check and cruxd identity.
 	EndpointImport           = "/images/import"      // Import an OCI archive.
 	EndpointExport           = "/images/export"      // Export an image as an OCI archive.
