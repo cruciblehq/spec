@@ -1,6 +1,9 @@
 package compute
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestMediaTypeString(t *testing.T) {
 	mt := MediaTypeLoadRequest
@@ -11,7 +14,7 @@ func TestMediaTypeString(t *testing.T) {
 
 func TestMediaTypeJSON(t *testing.T) {
 	mt := MediaTypeLoadRequest
-	want := string(mt) + "+json"
+	want := fmt.Sprintf("%s+json", mt)
 	if got := mt.JSON(); got != want {
 		t.Errorf("JSON() = %q, want %q", got, want)
 	}

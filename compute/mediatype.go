@@ -1,5 +1,7 @@
 package compute
 
+import "fmt"
+
 // String identifier for HTTP Content-Type and Accept headers.
 //
 // Defines vendor-specific media types for the cruxd compute API following the
@@ -47,5 +49,5 @@ func (m MediaType) String() string {
 
 // Returns the media type with the JSON syntax suffix (+json).
 func (m MediaType) JSON() string {
-	return string(m) + "+json"
+	return fmt.Sprintf("%s+json", m)
 }
