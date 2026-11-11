@@ -35,7 +35,7 @@ func Read(path string) (*Manifest, error) {
 
 // Reads and decodes the manifest from dir/crucible.yaml.
 func ReadAt(dir string) (*Manifest, error) {
-	return Read(file.Manifest(dir))
+	return Read(Path(dir))
 }
 
 // Reads the manifest at path and asserts its config to T.
@@ -53,7 +53,7 @@ func ReadAs[T any](path string) (T, error) {
 
 // Reads the manifest from dir/crucible.yaml and asserts its config to T.
 func ReadAsAt[T any](dir string) (T, error) {
-	return ReadAs[T](file.Manifest(dir))
+	return ReadAs[T](Path(dir))
 }
 
 // Encodes a manifest and writes it to the given path.
@@ -72,7 +72,7 @@ func Write(m *Manifest, path string) error {
 
 // Encodes a manifest and writes it to dir/crucible.yaml.
 func WriteAt(m *Manifest, dir string) error {
-	return Write(m, file.Manifest(dir))
+	return Write(m, Path(dir))
 }
 
 // Reads and decodes the plan at the given path.
@@ -92,7 +92,7 @@ func ReadPlan(path string) (*Plan, error) {
 
 // Reads and decodes the plan from dir/plan.yaml.
 func ReadPlanAt(dir string) (*Plan, error) {
-	return ReadPlan(file.Plan(dir))
+	return ReadPlan(PlanPath(dir))
 }
 
 // Encodes a plan and writes it to the given path.
@@ -111,5 +111,5 @@ func WritePlan(p *Plan, path string) error {
 
 // Encodes a plan and writes it to dir/plan.yaml.
 func WritePlanAt(p *Plan, dir string) error {
-	return WritePlan(p, file.Plan(dir))
+	return WritePlan(p, PlanPath(dir))
 }
