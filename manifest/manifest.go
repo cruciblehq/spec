@@ -145,7 +145,7 @@ func (m *Manifest) Decode(c *codec.Codec, raw any) error {
 		return crex.Wrap(ErrDecodeFailed, ErrInvalidResourceType)
 	}
 
-	if err := c.Decode(src, target); err != nil {
+	if err := c.FromMap(src, target); err != nil {
 		return crex.Wrap(ErrDecodeFailed, err)
 	}
 

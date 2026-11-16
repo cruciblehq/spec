@@ -39,7 +39,6 @@ type Compute struct {
 	// The concrete type depends on [Compute.Type]: [*ComputeAWS] for "aws",
 	// [*ComputeLocal] for "local".
 	Config any `codec:"-"`
-
 }
 
 // Validates the compute entry.
@@ -85,7 +84,7 @@ func (c *Compute) Decode(cd *codec.Codec, raw any) error {
 	default:
 		return crex.Newf(ErrInvalidComputeType, "unknown provider %q", c.Type)
 	}
-	if err := cd.Decode(src, target); err != nil {
+	if err := cd.FromMap(src, target); err != nil {
 		return crex.Wrap(ErrDecodeFailed, err)
 	}
 	c.Config = target

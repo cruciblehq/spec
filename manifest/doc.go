@@ -62,7 +62,7 @@
 // Decoding a manifest:
 //
 //	var m manifest.Manifest
-//	if err := codec.Unmarshal(data, &m, codec.YAML); err != nil {
+//	if err := codec.Decode(data, &m, codec.YAML); err != nil {
 //		log.Fatal(err) // malformed YAML or unknown resource type
 //	}
 //	if err := m.Validate(); err != nil {

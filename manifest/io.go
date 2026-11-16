@@ -26,7 +26,7 @@ func Read(path string) (*Manifest, error) {
 			Reclassify(err)
 	}
 	var m Manifest
-	if err := codec.Unmarshal(data, &m, codec.YAML); err != nil {
+	if err := codec.Decode(data, &m, codec.YAML); err != nil {
 		return nil, crex.SystemError("cannot read manifest", "the manifest file is invalid or malformed").
 			Reclassify(crex.Wrap(ErrDecodeFailed, err))
 	}
@@ -83,7 +83,7 @@ func ReadPlan(path string) (*Plan, error) {
 			Reclassify(err)
 	}
 	var p Plan
-	if err := codec.Unmarshal(data, &p, codec.YAML); err != nil {
+	if err := codec.Decode(data, &p, codec.YAML); err != nil {
 		return nil, crex.SystemError("cannot read plan", "the plan file is invalid or malformed").
 			Reclassify(crex.Wrap(ErrDecodeFailed, err))
 	}

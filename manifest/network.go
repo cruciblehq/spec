@@ -7,6 +7,20 @@ import (
 	"github.com/cruciblehq/utils-go/crex"
 )
 
+// Protocol keywords accepted in network rules.
+const (
+	ProtocolAny    = "ip"     // Any protocol.
+	ProtocolTCP    = "tcp"    // Transmission Control Protocol.
+	ProtocolUDP    = "udp"    // User Datagram Protocol.
+	ProtocolICMP   = "icmp"   // Internet Control Message Protocol.
+	ProtocolICMPv6 = "icmpv6" // ICMP for IPv6.
+	ProtocolSCTP   = "sctp"   // Stream Control Transmission Protocol.
+	ProtocolRaw    = "raw"    // Raw IP packets.
+)
+
+// Largest IP protocol number.
+const maxProtocolNumber = 255
+
 // Cloud network perimeter configuration.
 //
 // Expresses what flows are permitted at the cloud boundary. No flows are
@@ -95,10 +109,10 @@ func (r *EgressRule) Validate() error {
 // decimal IP protocol number in the range 0–255.
 func validateProtocol(p string) error {
 	switch strings.ToLower(strings.TrimSpace(p)) {
-	case "", "ip", "tcp", "udp", "icmp", "icmpv6", "sctp", "raw":
+	case "", ProtocolAny, ProtocolTCP, ProtocolUDP, ProtocolICMP, ProtocolICMPv6, ProtocolSCTP, ProtocolRaw:
 		return nil
 	}
-	if n, err := strconv.Atoi(p); err == nil && n >= 0 && n <= 255 {
+	if n, err := strconv.Atoi(p); err == nil && n >= 0 && n <= maxProtocolNumber {
 		return nil
 	}
 	return crex.Newf(ErrInvalidProtocol, "unknown protocol %q", p)
