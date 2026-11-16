@@ -5,6 +5,18 @@ import (
 	"strings"
 )
 
+// Comparison operators of a version constraint.
+const (
+	opEqual        = "="  // Exact match.
+	opNotEqual     = "!=" // Negated exact match.
+	opGreater      = ">"  // Greater than.
+	opGreaterEqual = ">=" // Greater than or equal.
+	opLess         = "<"  // Less than.
+	opLessEqual    = "<=" // Less than or equal.
+	opTilde        = "~"  // Allows patch changes.
+	opCaret        = "^"  // Allows minor changes within the major version.
+)
+
 // Represents a single version comparison rule.
 //
 // A constraint consists of an operator and a version specification. The version
@@ -41,21 +53,21 @@ func (c constraint) matches(v *Version) bool {
 	}
 
 	switch c.operator {
-	case "=":
+	case opEqual:
 		return c.matchEqual(v)
-	case "!=":
+	case opNotEqual:
 		return !c.matchEqual(v)
-	case ">":
+	case opGreater:
 		return c.compare(v) < 0
-	case ">=":
+	case opGreaterEqual:
 		return c.compare(v) <= 0
-	case "<":
+	case opLess:
 		return c.compare(v) > 0
-	case "<=":
+	case opLessEqual:
 		return c.compare(v) >= 0
-	case "~":
+	case opTilde:
 		return c.matchTilde(v)
-	case "^":
+	case opCaret:
 		return c.matchCaret(v)
 	}
 	return false

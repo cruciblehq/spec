@@ -28,6 +28,9 @@ var (
 	buildPattern = regexp.MustCompile(`^[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*$`)
 )
 
+// Number of dot-separated numbers in a version: major, minor, and patch.
+const versionComponents = 3
+
 // Parses a semantic version string.
 //
 // Versions must include major, minor, and patch components with optional "v"
@@ -62,7 +65,7 @@ func ParseVersion(version string) (*Version, error) {
 
 	// Parse version numbers
 	parts := strings.Split(s, ".")
-	if len(parts) != 3 {
+	if len(parts) != versionComponents {
 		return nil, crex.Wrap(ErrInvalidVersion, ErrInvalidVersionComponents)
 	}
 

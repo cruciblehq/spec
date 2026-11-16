@@ -1,6 +1,7 @@
 package reference
 
 import (
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -67,7 +68,7 @@ func (vc *VersionConstraint) ExactVersion() (*Version, bool) {
 	}
 
 	c := group.constraints[0]
-	if c.operator != "=" {
+	if c.operator != opEqual {
 		return nil, false
 	}
 	if !c.minorSet || !c.patchSet {
@@ -239,12 +240,12 @@ func parseTokens(tokens []string) ([]constraint, error) {
 
 	for i < len(tokens) {
 		if i+2 < len(tokens) && isHyphenOperator(tokens[i+1]) {
-			lower, err := parseRangeBound(">=", tokens[i])
+			lower, err := parseRangeBound(opGreaterEqual, tokens[i])
 			if err != nil {
 				return nil, crex.Wrap(ErrInvalidReference, ErrInvalidRangeBound)
 			}
 
-			upper, err := parseRangeBound("<=", tokens[i+2])
+			upper, err := parseRangeBound(opLessEqual, tokens[i+2])
 			if err != nil {
 				return nil, crex.Wrap(ErrInvalidReference, ErrInvalidRangeBound)
 			}
@@ -351,7 +352,7 @@ func parseConstraint(s string) (constraint, error) {
 	version := match[2]
 
 	if op == "" {
-		op = "="
+		op = opEqual
 	}
 
 	return parseSingleConstraint(op, version)
@@ -365,7 +366,7 @@ func parseSingleConstraint(op, version string) (constraint, error) {
 	c := constraint{operator: op}
 
 	if strings.Contains(version, "x") || strings.Contains(version, "X") {
-		return parseWildcard(op + version)
+		return parseWildcard(fmt.Sprintf("%s%s", op, version))
 	}
 
 	match := versionPattern.FindStringSubmatch(version)
@@ -433,7 +434,7 @@ func validateWildcardFormat(s string) error {
 // matches any version with major 1 and minor 2. Operators are not allowed
 // with wildcards.
 func parseWildcard(s string) (constraint, error) {
-	op := "="
+	op := opEqual
 	if len(s) > 0 {
 		switch s[0] {
 		case '>', '<', '!', '~', '^':
@@ -482,7 +483,7 @@ func parseWildcard(s string) (constraint, error) {
 // version without limit. Crucible requires these to be paired with an upper
 // bound to prevent unintended compatibility with breaking changes.
 func requiresUpperBound(op string) bool {
-	return op == ">" || op == ">="
+	return op == opGreater || op == opGreaterEqual
 }
 
 // Whether the operator provides an implicit upper bound.
@@ -492,7 +493,7 @@ func requiresUpperBound(op string) bool {
 // Hyphen ranges are expanded before validation, so <= appears directly.
 func hasUpperBound(op string) bool {
 	switch op {
-	case "=", "!=", "<", "<=", "~", "^":
+	case opEqual, opNotEqual, opLess, opLessEqual, opTilde, opCaret:
 		return true
 	}
 	return false
