@@ -13,6 +13,8 @@ const DefaultPort = 2789
 const (
 	EndpointHealth           = "/health"             // Health of cruxd and the runtime.
 	EndpointHandshake        = "/handshake"          // Compatibility check and cruxd identity.
+	EndpointEnroll           = "/enroll"             // Machine key and proof of identity.
+	EndpointCertify          = "/certify"            // Install a machine certificate.
 	EndpointImport           = "/images/import"      // Import an OCI archive.
 	EndpointExport           = "/images/export"      // Export an image as an OCI archive.
 	EndpointExtract          = "/images/extract"     // Extract a path from an image.
@@ -27,11 +29,6 @@ const (
 	EndpointInspectContainer = "/containers/inspect" // Read a container's config.
 	EndpointCommit           = "/containers/commit"  // Commit a container to an image.
 	EndpointDestroy          = "/containers/destroy" // Release a container.
-)
-
-// HTTP headers.
-const (
-	HeaderContentType = "Content-Type" // HTTP header carrying the message media type.
 )
 
 // Query parameters.

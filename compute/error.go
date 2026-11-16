@@ -4,8 +4,8 @@ import "fmt"
 
 // Error response for a failed operation.
 //
-// Returned with a non-2xx status and [MediaTypeError] when a unary operation
-// cannot complete. Code classifies the failure for programmatic handling and
+// Returned with [MediaTypeError] and the status given by [ErrorCode.HTTPStatus]
+// when a unary operation cannot complete. Code classifies the failure and
 // Message describes it. A mid-stream failure of a streaming operation is
 // reported instead by a terminal [ExecError] message, because the response
 // status is already committed once streaming has begun.

@@ -1,5 +1,7 @@
 package compute
 
+import "net/http"
+
 // Machine-readable classification of a failed operation.
 //
 // Carried in the Code field of an [Error] so crux can branch on the kind of
@@ -8,7 +10,6 @@ type ErrorCode string
 
 const (
 	ErrorCodeBadRequest         ErrorCode = "bad_request"         // Malformed or invalid request.
-	ErrorCodeUnauthenticated    ErrorCode = "unauthenticated"     // Missing or rejected credential.
 	ErrorCodeNotFound           ErrorCode = "not_found"           // Image or container does not exist.
 	ErrorCodeConflict           ErrorCode = "conflict"            // Operation conflicts with current state (e.g. container already started).
 	ErrorCodePreconditionFailed ErrorCode = "precondition_failed" // Operation invalid in the current state (e.g. container not started).
@@ -18,7 +19,6 @@ const (
 // Set of known error codes for validation.
 var validErrorCodes = map[ErrorCode]bool{
 	ErrorCodeBadRequest:         true,
-	ErrorCodeUnauthenticated:    true,
 	ErrorCodeNotFound:           true,
 	ErrorCodeConflict:           true,
 	ErrorCodePreconditionFailed: true,
@@ -28,4 +28,22 @@ var validErrorCodes = map[ErrorCode]bool{
 // Whether the error code is a known value.
 func isValidErrorCode(code ErrorCode) bool {
 	return validErrorCodes[code]
+}
+
+// Returns the HTTP status of a response that carries an [Error] with the code.
+//
+// Unknown codes map to 500.
+func (c ErrorCode) HTTPStatus() int {
+	switch c {
+	case ErrorCodeBadRequest:
+		return http.StatusBadRequest
+	case ErrorCodeNotFound:
+		return http.StatusNotFound
+	case ErrorCodeConflict:
+		return http.StatusConflict
+	case ErrorCodePreconditionFailed:
+		return http.StatusPreconditionFailed
+	default:
+		return http.StatusInternalServerError
+	}
 }
