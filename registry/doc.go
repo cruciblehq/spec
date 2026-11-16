@@ -18,54 +18,15 @@
 // [Error] type carries machine-readable [ErrorCode] values alongside
 // human-readable messages for API error responses.
 //
-// Every wire type has a corresponding [MediaType] constant following the
-// pattern application/vnd.crucible.{name}.v0, used in HTTP Content-Type and
-// Accept headers for format negotiation.
+// Every wire type has a corresponding media type constant following the
+// pattern application/vnd.crucible.{name}.v0, used in HTTP Content-Type
+// and Accept headers for format negotiation.
 //
 // The [Registry] interface defines the full set of CRUD operations across all
 // entity types, including archive upload and download. Both the HTTP client in
 // crux and the SQL store in hub implement this interface.
 //
-// A [Source] pulls and pushes resources between a registry and the local cache.
-// It holds the default registry URL and namespace applied to reference strings
-// that omit those components. [Source.Parse] resolves a reference string into a
-// [reference.Reference], filling in the defaults. [Source.Pull] downloads and
-// extracts a resource, consulting the local cache first and verifying the
-// artifact digest before use. [Source.Push] uploads a package, creating the
-// resource and version in the registry when they do not yet exist. A [PullResult]
-// reports the local extraction directory along with the digest
-// and version metadata of the pulled artifact.
-//
 // All types implement a Validate method that checks field constraints: name
 // format, version string format, timestamp ordering, resource type, archive
-// field consistency, digest format, and count bounds. The [Encode] and [Decode]
-// codec functions call Validate automatically before encoding and after
-// decoding, ensuring only valid data crosses serialization boundaries.
-//
-// Creating a namespace through the registry interface:
-//
-//	ns, err := reg.CreateNamespace(ctx, registry.NamespaceInfo{
-//	    Name:        "my-namespace",
-//	    Description: "Example namespace",
-//	})
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
-//
-// Encoding a type to JSON with automatic validation:
-//
-//	data, err := registry.Encode(&registry.NamespaceInfo{
-//	    Name:        "my-namespace",
-//	    Description: "Example namespace",
-//	})
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
-//
-// Decoding JSON back into a typed value:
-//
-//	info, err := registry.Decode[registry.NamespaceInfo](data)
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
+// field consistency, digest format, and count bounds.
 package registry

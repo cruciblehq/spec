@@ -7,6 +7,9 @@ import (
 	"github.com/cruciblehq/spec/reference"
 )
 
+// Maximum length of a name, in bytes.
+const maxNameLength = 63
+
 var (
 
 	// Valid name pattern.
@@ -24,7 +27,7 @@ func ValidateName(name string) error {
 	if name == "" {
 		return ErrNameEmpty
 	}
-	if len(name) > 63 {
+	if len(name) > maxNameLength {
 		return ErrNameTooLong
 	}
 	if !namePattern.MatchString(name) {

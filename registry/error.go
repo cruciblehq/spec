@@ -7,12 +7,8 @@ import "fmt"
 // Provides both machine-readable error classification through the Code field
 // and context through the Message field. The media type is [MediaTypeError].
 type Error struct {
-
-	// Error code (see [ErrorCode]).
-	Code ErrorCode `json:"code"`
-
-	// Error description.
-	Message string `json:"message"`
+	Code    ErrorCode `codec:"code"`    // Error code (see [ErrorCode]).
+	Message string    `codec:"message"` // Error description.
 }
 
 // Implements the error interface.

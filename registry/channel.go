@@ -6,13 +6,13 @@ import "github.com/cruciblehq/utils-go/crex"
 //
 // Used as the request body for channel creation and update operations. For
 // update requests, the name field must match the URL path parameter or update
-// context. The version field is a simple string reference to an existing version;
-// changing this pointer updates where the channel points. Contains only user-
+// context. The version field is a simple string reference to an existing
+// version; changing it updates where the channel points. Contains only user-
 // modifiable fields. The media type is [MediaTypeChannelInfo].
 type ChannelInfo struct {
-	Name        string `json:"name"`        // Channel name.
-	Version     string `json:"version"`     // Version this channel points to.
-	Description string `json:"description"` // Description.
+	Name        string `codec:"name"`        // Channel name.
+	Version     string `codec:"version"`     // Version this channel points to.
+	Description string `codec:"description"` // Description.
 }
 
 // Validates the channel info.
@@ -35,11 +35,11 @@ func (info *ChannelInfo) Validate() error {
 // listings and channel lists to keep payloads compact. Includes read-only
 // fields like timestamps.
 type ChannelSummary struct {
-	Name        string `json:"name"`        // Channel name.
-	Version     string `json:"version"`     // Version this channel points to.
-	Description string `json:"description"` // Description.
-	CreatedAt   int64  `json:"createdAt"`   // When the channel was created.
-	UpdatedAt   int64  `json:"updatedAt"`   // When the channel was last updated.
+	Name        string `codec:"name"`        // Channel name.
+	Version     string `codec:"version"`     // Version this channel points to.
+	Description string `codec:"description"` // Description.
+	CreatedAt   int64  `codec:"createdAt"`   // When the channel was created.
+	UpdatedAt   int64  `codec:"updatedAt"`   // When the channel was last updated.
 }
 
 // Validates the channel summary.
@@ -56,7 +56,7 @@ func (s *ChannelSummary) Validate() error {
 	return nil
 }
 
-// Mutable pointer to a version with complete version details.
+// Named reference to a version with complete version details.
 //
 // Provides a named reference that can be updated to point to different versions
 // over time, primarily supporting QA/testing workflows. The embedded Version
@@ -67,13 +67,13 @@ func (s *ChannelSummary) Validate() error {
 // information to identify the channel's location. The media type is
 // [MediaTypeChannel].
 type Channel struct {
-	Namespace   string  `json:"namespace"`   // Namespace this channel belongs to.
-	Resource    string  `json:"resource"`    // Resource this channel belongs to.
-	Name        string  `json:"name"`        // Channel name.
-	Version     Version `json:"version"`     // Full version object this channel points to.
-	Description string  `json:"description"` // Description.
-	CreatedAt   int64   `json:"createdAt"`   // When the channel was created.
-	UpdatedAt   int64   `json:"updatedAt"`   // When the channel was last updated.
+	Namespace   string  `codec:"namespace"`   // Namespace this channel belongs to.
+	Resource    string  `codec:"resource"`    // Resource this channel belongs to.
+	Name        string  `codec:"name"`        // Channel name.
+	Version     Version `codec:"version"`     // Full version object this channel points to.
+	Description string  `codec:"description"` // Description.
+	CreatedAt   int64   `codec:"createdAt"`   // When the channel was created.
+	UpdatedAt   int64   `codec:"updatedAt"`   // When the channel was last updated.
 }
 
 // Validates the channel.
@@ -102,7 +102,7 @@ func (ch *Channel) Validate() error {
 type ChannelList struct {
 
 	// List of channels.
-	Channels []ChannelSummary `json:"channels"`
+	Channels []ChannelSummary `codec:"channels"`
 }
 
 // Validates the channel list.

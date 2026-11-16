@@ -1,37 +1,34 @@
 package registry
 
-import "fmt"
-
-// String identifier for HTTP Content-Type and Accept headers.
-//
-// Defines vendor-specific media types for the Crucible registry API following
-// the pattern application/vnd.crucible.{name}.v0. Used in Content-Type headers
-// for request bodies and Accept headers for response format negotiation.
-type MediaType string
-
-const (
-	MediaTypeError         MediaType = "application/vnd.crucible.error.v0"          // Error responses with codes and messages.
-	MediaTypeNamespaceInfo MediaType = "application/vnd.crucible.namespace-info.v0" // Namespace create/update requests.
-	MediaTypeNamespace     MediaType = "application/vnd.crucible.namespace.v0"      // Complete namespace with resource summaries.
-	MediaTypeNamespaceList MediaType = "application/vnd.crucible.namespace-list.v0" // Collection of namespace summaries.
-	MediaTypeResourceInfo  MediaType = "application/vnd.crucible.resource-info.v0"  // Resource create/update requests.
-	MediaTypeResource      MediaType = "application/vnd.crucible.resource.v0"       // Complete resource with version/channel summaries.
-	MediaTypeResourceList  MediaType = "application/vnd.crucible.resource-list.v0"  // Collection of resource summaries.
-	MediaTypeVersionInfo   MediaType = "application/vnd.crucible.version-info.v0"   // Version create/update requests.
-	MediaTypeVersion       MediaType = "application/vnd.crucible.version.v0"        // Complete version with archive details.
-	MediaTypeVersionList   MediaType = "application/vnd.crucible.version-list.v0"   // Collection of version summaries.
-	MediaTypeChannelInfo   MediaType = "application/vnd.crucible.channel-info.v0"   // Channel create/update requests.
-	MediaTypeChannel       MediaType = "application/vnd.crucible.channel.v0"        // Complete channel with full version object.
-	MediaTypeChannelList   MediaType = "application/vnd.crucible.channel-list.v0"   // Collection of channel summaries.
-	MediaTypeArchive       MediaType = "application/vnd.crucible.archive.v0"        // Binary archive data (tar.zst format).
+import (
+	"github.com/cruciblehq/utils-go/codec"
+	"github.com/cruciblehq/utils-go/mediatype"
 )
 
-// Returns the media type as a string.
-func (m MediaType) String() string {
-	return string(m)
-}
+// Encoding of message bodies in the registry API.
+//
+// Bodies carry their media type with this format's suffix (see
+// [mediatype.MediaType.With]), except [MediaTypeArchive], which is binary.
+const BodyFormat = codec.JSON
 
-// Returns the media type with the JSON syntax suffix (+json).
-func (m MediaType) JSON() string {
-	return fmt.Sprintf("%s+json", m)
-}
+// Media types of the Crucible registry API.
+//
+// Each follows the pattern application/vnd.crucible.{name}.v0. They are used
+// in Content-Type headers for request bodies and Accept headers for response
+// format negotiation.
+const (
+	MediaTypeError         mediatype.MediaType = "application/vnd.crucible.error.v0"          // Error responses with codes and messages.
+	MediaTypeNamespaceInfo mediatype.MediaType = "application/vnd.crucible.namespace-info.v0" // Namespace create/update requests.
+	MediaTypeNamespace     mediatype.MediaType = "application/vnd.crucible.namespace.v0"      // Complete namespace with resource summaries.
+	MediaTypeNamespaceList mediatype.MediaType = "application/vnd.crucible.namespace-list.v0" // Collection of namespace summaries.
+	MediaTypeResourceInfo  mediatype.MediaType = "application/vnd.crucible.resource-info.v0"  // Resource create/update requests.
+	MediaTypeResource      mediatype.MediaType = "application/vnd.crucible.resource.v0"       // Complete resource with version/channel summaries.
+	MediaTypeResourceList  mediatype.MediaType = "application/vnd.crucible.resource-list.v0"  // Collection of resource summaries.
+	MediaTypeVersionInfo   mediatype.MediaType = "application/vnd.crucible.version-info.v0"   // Version create/update requests.
+	MediaTypeVersion       mediatype.MediaType = "application/vnd.crucible.version.v0"        // Complete version with archive details.
+	MediaTypeVersionList   mediatype.MediaType = "application/vnd.crucible.version-list.v0"   // Collection of version summaries.
+	MediaTypeChannelInfo   mediatype.MediaType = "application/vnd.crucible.channel-info.v0"   // Channel create/update requests.
+	MediaTypeChannel       mediatype.MediaType = "application/vnd.crucible.channel.v0"        // Complete channel with full version object.
+	MediaTypeChannelList   mediatype.MediaType = "application/vnd.crucible.channel-list.v0"   // Collection of channel summaries.
+	MediaTypeArchive       mediatype.MediaType = "application/vnd.crucible.archive.v0"        // Binary archive data (tar.zst format).
+)
