@@ -2,6 +2,10 @@ package compute
 
 import "github.com/cruciblehq/spec/trust"
 
+// Requests the machine's key and proof of identity.
+type EnrollRequest struct {
+}
+
 // Machine's key and proof of identity.
 //
 // cruxd returns this from [EndpointEnroll] on a machine that has not enrolled
@@ -11,14 +15,4 @@ import "github.com/cruciblehq/spec/trust"
 type EnrollResponse struct {
 	Request []byte      `codec:"request"` // DER encoded certificate request.
 	Proof   trust.Proof `codec:"proof"`   // Evidence that this is the machine crux created.
-}
-
-// Installs a machine certificate.
-//
-// crux sends this to [EndpointCertify] to finish enrollment. The root signs the
-// certificate for the life of the machine, so it is never renewed. cruxd checks
-// that the certificate is signed by the root, names its machine, and holds its
-// key. Installing it consumes the enrollment token.
-type CertifyRequest struct {
-	Certificate []byte `codec:"certificate"` // DER encoded machine certificate.
 }

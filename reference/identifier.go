@@ -38,7 +38,7 @@ type Identifier struct {
 //
 // When segments are omitted, the corresponding fields are left empty in the
 // returned identifier. Callers are expected to apply defaults where needed.
-func ParseIdentifier(s string, contextType string) (*Identifier, error) {
+func ParseIdentifier(s, contextType string) (*Identifier, error) {
 	p := &identifierParser{
 		tokens: strings.Fields(s),
 	}
@@ -46,7 +46,7 @@ func ParseIdentifier(s string, contextType string) (*Identifier, error) {
 }
 
 // Like [ParseIdentifier], but panics on error.
-func MustParseIdentifier(s string, contextType string) *Identifier {
+func MustParseIdentifier(s, contextType string) *Identifier {
 	id, err := ParseIdentifier(s, contextType)
 	if err != nil {
 		panic(err)
@@ -55,7 +55,7 @@ func MustParseIdentifier(s string, contextType string) *Identifier {
 }
 
 // Creates a new identifier with all fields set.
-func NewIdentifier(typ string, registry, namespace, name string) *Identifier {
+func NewIdentifier(typ, registry, namespace, name string) *Identifier {
 	return &Identifier{
 		typ:       typ,
 		registry:  registry,

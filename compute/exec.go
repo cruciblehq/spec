@@ -1,5 +1,8 @@
 package compute
 
+// Largest encoded exec message in bytes, newline included.
+const MaxExecMessageSize = 16 << 20
+
 // Requests execution of a command in a running container.
 type ExecRequest struct {
 	ID      ContainerID `codec:"id"`      // Target container handle.

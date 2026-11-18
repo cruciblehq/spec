@@ -30,8 +30,3 @@ const (
 	EndpointCommit           = "/containers/commit"  // Commit a container to an image.
 	EndpointDestroy          = "/containers/destroy" // Release a container.
 )
-
-// Query parameters.
-const (
-	QueryParamID = "id" // Container handle on [EndpointCopy].
-)
