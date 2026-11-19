@@ -8,7 +8,9 @@ import (
 	"github.com/cruciblehq/utils-go/file"
 )
 
-// Asserts the manifest config to T.
+// Returns the manifest config as T.
+//
+// Returns [ErrConfigTypeMismatch] when the config is not a T.
 func As[T any](m *Manifest) (T, error) {
 	cfg, ok := m.Config.(T)
 	if !ok {

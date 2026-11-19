@@ -98,7 +98,7 @@ func (p *identifierParser) parseType(id *Identifier, contextType string) error {
 // Parses the resource location.
 //
 // More than 3 segments is an error. Registry and namespace may be empty in
-// the parsed result — callers are expected to apply defaults when needed.
+// the parsed result; callers are expected to apply defaults when needed.
 func (p *identifierParser) parseLocation(id *Identifier) error {
 	tok, ok := p.next()
 	if !ok {

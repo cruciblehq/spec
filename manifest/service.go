@@ -16,7 +16,7 @@ type Service struct {
 
 	// Declared parameters for this service.
 	//
-	// Lists configuration values the service accepts at runtime. Values are
+	// Lists configuration values the service accepts when it runs. Values are
 	// bound through environment declarations.
 	Schema *Schema `codec:"schema,omitempty"`
 
@@ -51,8 +51,8 @@ type Service struct {
 
 // Encodes the service configuration to a format-independent map.
 //
-// The schema, entrypoint, and recipe stages are encoded in the canonical
-// serialized format.
+// The recipe stages, schema, entrypoint, and interface references are encoded
+// in the canonical serialized format.
 func (s *Service) Encode(c *codec.Codec) (any, error) {
 	m := make(map[string]any)
 	stages, err := s.Recipe.encodeStages(c)
@@ -87,6 +87,9 @@ func (s *Service) Encode(c *codec.Codec) (any, error) {
 }
 
 // Validates the service configuration.
+//
+// The entrypoint must be set, the interface references must be valid, the
+// schema must be valid when present, and the recipe must be valid.
 func (s *Service) Validate() error {
 	if len(s.Entrypoint) == 0 {
 		return crex.Wrap(ErrInvalidService, ErrMissingEntrypoint)
@@ -112,6 +115,9 @@ func (s *Service) Validate() error {
 }
 
 // Validates each interface reference used by the service.
+//
+// Each item must parse as an interface reference with a version. When exact
+// is true, the version must be a single exact version.
 func validateInterfaceReferences(items []string, exact bool) error {
 	for _, item := range items {
 		ref, err := reference.Parse(item, string(TypeInterface))

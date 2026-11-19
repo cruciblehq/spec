@@ -57,10 +57,10 @@ const (
 	MediaTypeError                    mediatype.MediaType = "application/vnd.crucible.agent.error.v0"                      // [Error] returned on a non-2xx status.
 )
 
-// Media types for binary and streaming bodies, carried as-is.
+// Media types for data parts and the exec stream, used as is.
 const (
 	MediaTypeImageArchive mediatype.MediaType = "application/vnd.crucible.agent.image-archive.v0" // OCI image tar archive (import, export).
 	MediaTypeLayer        mediatype.MediaType = "application/vnd.crucible.agent.layer.v0"         // Uncompressed tar applied to a container (copy).
 	MediaTypeFileTree     mediatype.MediaType = "application/vnd.crucible.agent.file-tree.v0"     // Tar stream extracted from an image (extract).
-	MediaTypeExecResponse mediatype.MediaType = "application/vnd.crucible.agent.exec-response.v0" // Newline-delimited JSON stream of [ExecResponse] messages (exec).
+	MediaTypeExecResponse mediatype.MediaType = "application/vnd.crucible.agent.exec-response.v0" // Stream of [ExecResponse] messages, one JSON object per line (exec).
 )

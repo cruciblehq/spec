@@ -7,8 +7,8 @@ import "github.com/cruciblehq/utils-go/crex"
 // Used as the request body for namespace creation and update operations. The
 // name is the unique identifier for the namespace and cannot be changed once
 // created. For update requests, Name must match the URL path parameter or
-// update context. Contains only user-modifiable fields; system-managed fields
-// are set by the server and appear only in response types. The media type is
+// update context. Contains only fields the user can change; fields the server
+// manages appear only in response types. The media type is
 // [MediaTypeNamespaceInfo].
 type NamespaceInfo struct {
 	Name        string `codec:"name"`        // Namespace name.
@@ -54,7 +54,7 @@ func (s *NamespaceSummary) Validate() error {
 
 // Complete namespace with its resource listings.
 //
-// Serves as the organizational unit for grouping resources. The resources list
+// Groups resources under one name. The resources list
 // contains lightweight [ResourceSummary] entries without full version and channel
 // details. For complete resource information, fetch individual resources. The
 // media type is [MediaTypeNamespace].

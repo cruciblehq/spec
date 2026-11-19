@@ -7,19 +7,18 @@ import (
 
 // Compiled enforcement model for containers.
 //
-// This model is stored in the plan's Containers map and covers the enforcement
-// surface that runc applies at container creation time (OCI runtime spec,
-// container-level network spec, and related runtime settings).
+// This model is stored in the plan's Containers map and covers what the OCI
+// runtime applies when it creates the container: the OCI runtime spec, the
+// network rules of the container, and related settings.
 type Container struct {
 
-	// Full OCI runtime spec passed to runc at container creation.
+	// Full OCI runtime spec passed to the OCI runtime at container creation.
 	//
 	// Contains namespaces, capabilities, seccomp filter, cgroup device rules,
-	// mounts, environment, and every other runc-level knob. This is Populated
-	// and narrowed by the OCI subsystems (cap, seccomp, cgroup, rlimit, etc).
+	// mounts, environment, and every other setting the OCI runtime applies.
 	OCI specs.Spec `codec:"oci"`
 
-	// Container-level network rules.
+	// Network rules of the container.
 	//
 	// These entries are derived from the deployment topology and describe the
 	// allowed inbound and outbound traffic for the service. The rules are

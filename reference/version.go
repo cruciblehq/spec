@@ -10,11 +10,11 @@ import (
 
 // Represents a parsed semantic version.
 type Version struct {
-	Major      int
-	Minor      int
-	Patch      int
-	Prerelease string
-	Build      string
+	Major      int    // Major version number.
+	Minor      int    // Minor version number.
+	Patch      int    // Patch version number.
+	Prerelease string // Prerelease in the form "identifier.number", or empty.
+	Build      string // Build metadata, or empty.
 }
 
 var (

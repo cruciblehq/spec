@@ -26,12 +26,8 @@ const maxProtocolNumber = 255
 // Expresses what flows are permitted at the cloud boundary. No flows are
 // implied; every allowed path must be declared explicitly.
 type Network struct {
-
-	// Inbound flows allowed at the cloud perimeter.
-	Ingress []IngressRule `codec:"ingress,omitempty"`
-
-	// Outbound flows allowed at the cloud perimeter.
-	Egress []EgressRule `codec:"egress,omitempty"`
+	Ingress []IngressRule `codec:"ingress,omitempty"` // Inbound flows allowed at the cloud perimeter.
+	Egress  []EgressRule  `codec:"egress,omitempty"`  // Outbound flows allowed at the cloud perimeter.
 }
 
 // Validates all network rules.
@@ -67,7 +63,8 @@ type IngressRule struct {
 
 	// Traffic source.
 	//
-	// A CIDR (e.g. "0.0.0.0/0"), a Crucible service name, or "*" for any source.
+	// A CIDR (e.g. "0.0.0.0/0"), a Crucible service name, or "*" for any
+	// source.
 	Source string `codec:"source,omitempty"`
 }
 
@@ -94,7 +91,8 @@ type EgressRule struct {
 
 	// Traffic destination.
 	//
-	// A CIDR (e.g. "0.0.0.0/0"), a Crucible service name, or "*" for any destination.
+	// A CIDR (e.g. "0.0.0.0/0"), a Crucible service name, or "*" for any
+	// destination.
 	Destination string `codec:"destination,omitempty"`
 }
 

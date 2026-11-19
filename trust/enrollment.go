@@ -8,22 +8,16 @@ import (
 	"github.com/cruciblehq/utils-go/crex"
 )
 
-// Path on the machine where the client places the enrollment data.
-//
-// The client writes it when it provisions the machine, through the provider's
-// boot configuration. The agent reads it on first boot.
-const EnrollmentPath = "/etc/cruxd/enrollment.json"
-
 // Data the client gives a new machine so its agent can enroll.
 //
-// The token is used once. After enrollment, the agent keeps the root and CRL and
-// discards the token, and later trust changes arrive only as newer revocation
-// lists over mutual TLS.
+// The token is used once. After enrollment, the agent keeps the root and CRL
+// and discards the token, and later trust changes arrive only as newer
+// revocation lists over mutual TLS.
 type Enrollment struct {
 	Machine     MachineID `codec:"machine"`     // Identifier the client assigned to the machine.
 	Root        []byte    `codec:"root"`        // DER encoded root certificate.
 	Revocations []byte    `codec:"revocations"` // DER encoded CRL signed by the root.
-	Token       []byte    `codec:"token"`       // One-time enrollment token.
+	Token       []byte    `codec:"token"`       // Enrollment token, used once.
 }
 
 // Validates the enrollment and returns the parsed root and revocation list.
@@ -54,13 +48,13 @@ func (e Enrollment) Verify() (*x509.Certificate, *x509.RevocationList, error) {
 
 // Checks an agent's enrollment response on the TLS session it arrived on.
 //
-// request is the agent's DER encoded certificate request and proof its token
-// proof. The request must be signed by the Ed25519 key the agent presented in
-// TLS, and the proof must match token on this session. Returns the parsed
-// request for the client to sign.
+// request is the agent's DER encoded certificate request, and proof is its
+// token proof. The request must be signed by the Ed25519 key the agent
+// presented in TLS, and the proof must match token on this session. Returns
+// the parsed request for the client to sign.
 func VerifyEnrollment(state tls.ConnectionState, request []byte, proof Proof, token []byte) (*x509.CertificateRequest, error) {
 	if len(state.PeerCertificates) == 0 {
-		return nil, crex.Newf(ErrInvalidEnrollment, "machine presented no certificate")
+		return nil, crex.Newf(ErrInvalidEnrollment, "agent presented no certificate")
 	}
 	csr, err := x509.ParseCertificateRequest(request)
 	if err != nil {

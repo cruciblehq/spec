@@ -5,7 +5,8 @@ import (
 	"crypto/x509"
 )
 
-// Returns the TLS settings shared by every connection between a client and an agent.
+// Returns the TLS settings shared by every connection between a client and an
+// agent.
 //
 // Only TLS 1.3 is allowed, and the key exchange is restricted to the hybrid of
 // X25519 and ML-KEM-768, so recorded traffic stays protected against a future

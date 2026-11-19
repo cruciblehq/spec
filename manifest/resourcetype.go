@@ -3,6 +3,7 @@ package manifest
 // Represents the type of a Crucible resource.
 type ResourceType string
 
+// Known resource types.
 const (
 	TypeMachine   ResourceType = "machine"   // Machine resource type.
 	TypeRuntime   ResourceType = "runtime"   // Runtime resource type.

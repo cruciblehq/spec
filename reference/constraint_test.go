@@ -2,8 +2,6 @@ package reference
 
 import "testing"
 
-// Equal operator tests
-
 func TestConstraint_Equal_ExactMatch(t *testing.T) {
 	c := constraint{operator: "=", major: 1, minor: 2, patch: 3, minorSet: true, patchSet: true}
 	if !c.matches(mustParseVersion(t, "1.2.3")) {
@@ -81,8 +79,6 @@ func TestConstraint_Equal_MajorMinor_Mismatch(t *testing.T) {
 	}
 }
 
-// NotEqual operator tests
-
 func TestConstraint_NotEqual_Matches(t *testing.T) {
 	c := constraint{operator: "!=", major: 1, minor: 2, patch: 3, minorSet: true, patchSet: true}
 	if !c.matches(mustParseVersion(t, "1.2.4")) {
@@ -103,8 +99,6 @@ func TestConstraint_NotEqual_DifferentMajor(t *testing.T) {
 		t.Error("!=1.2.3 should match 2.0.0")
 	}
 }
-
-// GreaterThan operator tests
 
 func TestConstraint_GreaterThan_GreaterMajor(t *testing.T) {
 	c := constraint{operator: ">", major: 1, minor: 0, patch: 0, minorSet: true, patchSet: true}
@@ -141,8 +135,6 @@ func TestConstraint_GreaterThan_Less(t *testing.T) {
 	}
 }
 
-// GreaterThanOrEqual operator tests (standard semver behavior)
-
 func TestConstraint_GreaterThanOrEqual_Equal(t *testing.T) {
 	c := constraint{operator: ">=", major: 1, minor: 2, patch: 0, minorSet: true, patchSet: true}
 	if !c.matches(mustParseVersion(t, "1.2.0")) {
@@ -170,8 +162,6 @@ func TestConstraint_GreaterThanOrEqual_Less(t *testing.T) {
 		t.Error(">=1.2.0 should not match 1.1.0")
 	}
 }
-
-// LessThan operator tests
 
 func TestConstraint_LessThan_LessMajor(t *testing.T) {
 	c := constraint{operator: "<", major: 2, minor: 0, patch: 0, minorSet: true, patchSet: true}
@@ -208,8 +198,6 @@ func TestConstraint_LessThan_Greater(t *testing.T) {
 	}
 }
 
-// LessThanOrEqual operator tests
-
 func TestConstraint_LessThanOrEqual_Equal(t *testing.T) {
 	c := constraint{operator: "<=", major: 1, minor: 2, patch: 0, minorSet: true, patchSet: true}
 	if !c.matches(mustParseVersion(t, "1.2.0")) {
@@ -237,8 +225,6 @@ func TestConstraint_LessThanOrEqual_Greater(t *testing.T) {
 		t.Error("<=1.0.0 should not match 1.0.1")
 	}
 }
-
-// Tilde operator tests
 
 func TestConstraint_Tilde_MajorOnly_Matches(t *testing.T) {
 	c := constraint{operator: "~", major: 1}
@@ -324,8 +310,6 @@ func TestConstraint_Tilde_Full_RejectsHigherMinor(t *testing.T) {
 	}
 }
 
-// Tilde operator through matches()
-
 func TestConstraint_Matches_Tilde_MajorOnly(t *testing.T) {
 	c := constraint{operator: "~", major: 1}
 	if !c.matches(mustParseVersion(t, "1.5.9")) {
@@ -353,8 +337,6 @@ func TestConstraint_Matches_Tilde_Full_Rejects(t *testing.T) {
 		t.Error("~1.2.3 should not match 1.3.0")
 	}
 }
-
-// Caret operator tests - major non-zero
 
 func TestConstraint_Caret_MajorOnly_Matches(t *testing.T) {
 	c := constraint{operator: "^", major: 1}
@@ -460,8 +442,6 @@ func TestConstraint_Caret_Full_RejectsHigherMajor(t *testing.T) {
 		t.Error("^1.2.3 should not match 2.0.0")
 	}
 }
-
-// Caret operator tests - major zero
 
 func TestConstraint_Caret_Zero_MajorOnly_Matches(t *testing.T) {
 	c := constraint{operator: "^", major: 0}
@@ -596,8 +576,6 @@ func TestConstraint_Caret_ZeroTwoThree_RejectsLowerMinor(t *testing.T) {
 	}
 }
 
-// Caret operator through matches()
-
 func TestConstraint_Matches_Caret_MajorNonZero(t *testing.T) {
 	c := constraint{operator: "^", major: 1, minor: 2, patch: 3, minorSet: true, patchSet: true}
 	if !c.matches(mustParseVersion(t, "1.3.0")) {
@@ -639,8 +617,6 @@ func TestConstraint_Matches_Caret_ZeroZero_RejectsHigher(t *testing.T) {
 		t.Error("^0.0.3 should not match 0.0.4")
 	}
 }
-
-// Compare tests
 
 func TestConstraint_Compare_EqualFull(t *testing.T) {
 	c := constraint{major: 1, minor: 2, patch: 3, minorSet: true, patchSet: true}
@@ -705,16 +681,12 @@ func TestConstraint_Compare_GreaterPatch(t *testing.T) {
 	}
 }
 
-// Unknown operator test
-
 func TestConstraint_Matches_UnknownOperator(t *testing.T) {
 	c := constraint{operator: "??", major: 1}
 	if c.matches(mustParseVersion(t, "1.0.0")) {
 		t.Error("unknown operator should not match")
 	}
 }
-
-// String tests
 
 func TestConstraint_String_EqualMajorOnly(t *testing.T) {
 	c := constraint{operator: "=", major: 1}
@@ -806,8 +778,6 @@ func TestConstraint_String_CaretPartial(t *testing.T) {
 		t.Errorf("String() = %q, want %q", got, "^1")
 	}
 }
-
-// Prerelease versions never match constraints
 
 func TestConstraint_Matches_PrereleaseNeverMatches(t *testing.T) {
 	c := constraint{operator: "=", major: 1, minor: 2, patch: 3, minorSet: true, patchSet: true}

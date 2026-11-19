@@ -24,7 +24,7 @@ const (
 )
 
 // A single message in the streamed response to an [ExecRequest], encoded as one
-// newline-delimited JSON object (see [ExecWriter] and [ExecReader]).
+// JSON object on its own line (see [ExecWriter] and [ExecReader]).
 //
 // Output messages carry a chunk of a named [Channel]; the stream ends with
 // exactly one terminal message: [ExecExit] with the process exit code, or

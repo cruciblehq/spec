@@ -26,7 +26,7 @@ type Manifest struct {
 
 	// Type-specific configuration.
 	//
-	// The concrete type depends on [Resource.Type]: [Runtime] from runtimes,
+	// The concrete type depends on [Resource.Type]: [Runtime] for runtimes,
 	// [Service] for services, [Widget] for widgets, etc.
 	Config any `codec:"-"`
 }

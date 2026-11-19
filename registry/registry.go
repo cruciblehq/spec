@@ -10,7 +10,7 @@ import (
 // Provides hierarchical storage and retrieval of versioned artifacts organized
 // into namespaces and resources. Supports published (immutable) and unpublished
 // (mutable) versions, version channels, and compressed archive distribution.
-// All operations are context-aware for cancellation and timeout control.
+// Every operation takes a context for cancellation and timeouts.
 type Registry interface {
 
 	// Creates a new namespace.
@@ -47,15 +47,15 @@ type Registry interface {
 	// Lists all namespaces.
 	//
 	// Returns a list of all existing namespaces and an empty list if none
-	// exist. The list order is implementation-dependent.
+	// exist. The list order is up to the implementation.
 	ListNamespaces(ctx context.Context) (*NamespaceList, error)
 
 	// Creates a new resource.
 	//
-	// Resource names follow the same constraints as namespace names. If a resource
-	// with the given name already exists in the namespace, an error is returned.
-	// The response includes the created resource's metadata with empty version and
-	// channel lists.
+	// Resource names follow the same constraints as namespace names. If a
+	// resource with the given name already exists in the namespace, an error
+	// is returned. The response includes the created resource's metadata with
+	// empty version and channel lists.
 	CreateResource(ctx context.Context, namespace string, info ResourceInfo) (*Resource, error)
 
 	// Retrieves resource metadata with version and channel summaries.
@@ -80,7 +80,7 @@ type Registry interface {
 	// Lists all resources in a namespace.
 	//
 	// Returns a list of resource summaries including statistics and latest
-	// versions. The order is implementation-dependent and the list is empty
+	// versions. The order is up to the implementation, and the list is empty
 	// if the namespace contains no resources. If the namespace does not exist,
 	// an error is returned.
 	ListResources(ctx context.Context, namespace string) (*ResourceList, error)
@@ -95,9 +95,9 @@ type Registry interface {
 
 	// Retrieves version metadata with archive details.
 	//
-	// Returns complete version information including archive URL, size, digest,
-	// and publication status. If the namespace, resource, or version does not
-	// exist, an error is returned.
+	// Returns complete version information including archive URL, size, and
+	// digest. If the namespace, resource, or version does not exist, an error
+	// is returned.
 	ReadVersion(ctx context.Context, namespace, resource, version string) (*Version, error)
 
 	// Updates mutable version metadata.
@@ -115,9 +115,9 @@ type Registry interface {
 
 	// Lists all versions for a resource.
 	//
-	// Returns a list of version summaries including publication status and
-	// timestamps. The list is empty if the resource has no versions. If the
-	// namespace or resource does not exist, an error is returned.
+	// Returns a list of version summaries including timestamps. The list is
+	// empty if the resource has no versions. If the namespace or resource does
+	// not exist, an error is returned.
 	ListVersions(ctx context.Context, namespace, resource string) (*VersionList, error)
 
 	// Uploads a version archive.
@@ -160,7 +160,8 @@ type Registry interface {
 
 	// Permanently deletes a channel.
 	//
-	// The operation is idempotent, returning success if the channel does not exist.
+	// The operation is idempotent, returning success if the channel does not
+	// exist.
 	DeleteChannel(ctx context.Context, namespace, resource, channel string) error
 
 	// Lists all channels for a resource.

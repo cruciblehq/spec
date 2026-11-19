@@ -43,7 +43,8 @@ func Parse(s string, contextType string) (*Reference, error) {
 	return p.parse(contextType)
 }
 
-// Creates a reference from an identifier, version or channel, and optional digest.
+// Creates a reference from an identifier, version or channel, and optional
+// digest.
 //
 // Useful for programmatically building references when you already have the
 // parsed components, avoiding the overhead of formatting and re-parsing a
@@ -125,8 +126,8 @@ func (r *Reference) IsVersionBased() bool {
 // Includes only the fields that are set. Registry and namespace appear only
 // when present on the underlying identifier. Version or channel is included
 // when set, and digest is appended if present. This is not necessarily a
-// canonical or round-trippable form — a reference parsed without applying
-// defaults may omit the registry and namespace.
+// canonical form that parses back to the same reference. A reference parsed
+// without applying defaults may omit the registry and namespace.
 func (r *Reference) String() string {
 	if r == nil {
 		return ""

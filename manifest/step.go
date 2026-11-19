@@ -20,10 +20,11 @@ type Step struct {
 	// specified by [Step.Shell]. It runs in the current working directory.
 	Run string `codec:"run,omitempty"`
 
-	// Copies a file or directory from the host into the image.
+	// Copies a file or directory into the image.
 	//
 	// Specified as "src dest" where src is a host path relative to the
-	// manifest file and dest is a path inside the image. A relative dest
+	// manifest file, or a path in an earlier stage written as
+	// "stage:/path", and dest is a path inside the image. A relative dest
 	// resolves against the current working directory. Directories are
 	// copied recursively.
 	Copy string `codec:"copy,omitempty"`
@@ -31,10 +32,10 @@ type Step struct {
 	// Unpacks a tar archive from the host into the image.
 	//
 	// Specified as "src dest" where src is a host path, relative to the
-	// manifest file, to a tar archive (optionally gzip-compressed), and dest
-	// is a path inside the image where the archive contents are extracted. A
-	// relative dest resolves against the current working directory. Unlike
-	// [Step.Copy], which stores files as-is, Unpack extracts the archive's
+	// manifest file, to a tar archive (optionally compressed with gzip), and
+	// dest is a path inside the image where the archive contents are extracted.
+	// A relative dest resolves against the current working directory. Unlike
+	// [Step.Copy], which stores files as they are, Unpack extracts the archive's
 	// contents, preserving permissions, ownership, symlinks, and device nodes.
 	// It is the primitive used to seed a base filesystem into a scratch image.
 	Unpack string `codec:"unpack,omitempty"`
@@ -50,8 +51,8 @@ type Step struct {
 	//
 	// When paired with an operation, the variables are scoped to that single
 	// command and not persisted. When set alone, the variables persist in the
-	// image and are inherited by subsequent steps and any service that uses
-	// this runtime as its base.
+	// image and are inherited by subsequent steps and any resource that uses
+	// this image as its base.
 	Env map[string]string `codec:"env,omitempty"`
 
 	// Sets the working directory inside the build container.
@@ -74,9 +75,9 @@ type Step struct {
 	// Restricts this step or group to a specific platform.
 	//
 	// When set with an operation or modifier, restricts it to the given
-	// platform. When set with [Step.Steps], creates a platform-scoped
-	// group; other modifiers on the same step apply to all children in
-	// the group. The format is "os/arch" (e.g. "linux/amd64").
+	// platform. When set with [Step.Steps], creates a platform group; other
+	// modifiers on the same step apply to all children in the group. The
+	// format is "os/arch" (e.g. "linux/amd64").
 	Platform string `codec:"platform,omitempty"`
 
 	// Child steps scoped to the platform specified by [Step.Platform].
@@ -159,10 +160,10 @@ func (s *Step) validateModifiers() error {
 	}
 
 	if s.Shell != "" {
-		return ErrShellWithCopy
+		return ErrShellWithCopyOrUnpack
 	}
 	if len(s.Env) > 0 {
-		return ErrEnvWithCopy
+		return ErrEnvWithCopyOrUnpack
 	}
 	return nil
 }

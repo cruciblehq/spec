@@ -2,7 +2,6 @@ package reference
 
 import "testing"
 
-// Parses a version constraint string and fatally fails the test if it returns an error.
 func mustParseConstraint(t *testing.T, s string) *VersionConstraint {
 	t.Helper()
 	vc, err := ParseVersionConstraint(s)
@@ -12,7 +11,6 @@ func mustParseConstraint(t *testing.T, s string) *VersionConstraint {
 	return vc
 }
 
-// Checks whether a version string matches a constraint and fatally fails the test on error.
 func mustMatch(t *testing.T, vc *VersionConstraint, version string) bool {
 	t.Helper()
 	match, err := vc.Matches(version)
@@ -21,8 +19,6 @@ func mustMatch(t *testing.T, vc *VersionConstraint, version string) bool {
 	}
 	return match
 }
-
-// ParseVersionConstraint tests
 
 func TestParseVersionConstraint_ExactVersion(t *testing.T) {
 	vc := mustParseConstraint(t, "1.2.3")
@@ -96,8 +92,6 @@ func TestParseVersionConstraint_Whitespace(t *testing.T) {
 	}
 }
 
-// Comparison operator tests
-
 func TestParseVersionConstraint_GreaterThanWithUpperBound(t *testing.T) {
 	vc := mustParseConstraint(t, ">1.0.0 <2.0.0")
 	if vc.String() != ">1.0.0 <2.0.0" {
@@ -133,8 +127,6 @@ func TestParseVersionConstraint_NotEqual(t *testing.T) {
 	}
 }
 
-// Unbounded range rejection tests
-
 func TestParseVersionConstraint_UnboundedGreaterThan(t *testing.T) {
 	_, err := ParseVersionConstraint(">1.0.0")
 	if err == nil {
@@ -149,7 +141,12 @@ func TestParseVersionConstraint_UnboundedGreaterThanOrEqual(t *testing.T) {
 	}
 }
 
-// Tilde and caret tests
+func TestParseVersionConstraint_NotEqualIsNotUpperBound(t *testing.T) {
+	_, err := ParseVersionConstraint(">=1.0.0 !=1.5.0")
+	if err == nil {
+		t.Error("expected error for >=1.0.0 !=1.5.0")
+	}
+}
 
 func TestParseVersionConstraint_Tilde(t *testing.T) {
 	vc := mustParseConstraint(t, "~1.2.3")
@@ -178,8 +175,6 @@ func TestParseVersionConstraint_CaretZeroMajor(t *testing.T) {
 		t.Error("^0.2.3 should not match 0.3.0")
 	}
 }
-
-// Hyphen range tests
 
 func TestParseVersionConstraint_HyphenRange(t *testing.T) {
 	vc := mustParseConstraint(t, "1.0.0 - 2.0.0")
@@ -258,8 +253,6 @@ func TestParseVersionConstraint_HyphenRangeWithWildcardUpper(t *testing.T) {
 	}
 }
 
-// Wildcard tests
-
 func TestParseVersionConstraint_WildcardMajorX(t *testing.T) {
 	vc := mustParseConstraint(t, "1.x")
 	if vc.String() != "=1" {
@@ -309,8 +302,6 @@ func TestParseVersionConstraint_WildcardWithOperator(t *testing.T) {
 	}
 }
 
-// OR operator tests
-
 func TestParseVersionConstraint_OrOperator(t *testing.T) {
 	vc := mustParseConstraint(t, "1.2.3 || 2.0.0")
 	if vc.String() != "=1.2.3 || =2.0.0" {
@@ -353,16 +344,12 @@ func TestParseVersionConstraint_OrOperatorEmptyMiddle(t *testing.T) {
 	}
 }
 
-// AND operator tests
-
 func TestParseVersionConstraint_AndOperator(t *testing.T) {
 	vc := mustParseConstraint(t, ">=1.0.0 <2.0.0 !=1.5.0")
 	if vc.String() != ">=1.0.0 <2.0.0 !=1.5.0" {
 		t.Errorf("String() = %q, want %q", vc.String(), ">=1.0.0 <2.0.0 !=1.5.0")
 	}
 }
-
-// String method tests
 
 func TestVersionConstraint_String_Nil(t *testing.T) {
 	var vc *VersionConstraint
@@ -377,8 +364,6 @@ func TestVersionConstraint_String_Empty(t *testing.T) {
 		t.Errorf("String() = %q, want %q", vc.String(), "")
 	}
 }
-
-// Matches method tests
 
 func TestVersionConstraint_Matches_Exact(t *testing.T) {
 	vc := mustParseConstraint(t, "1.2.3")
@@ -520,8 +505,6 @@ func TestParseVersionConstraint_HyphenRangeWithExclusion(t *testing.T) {
 	}
 }
 
-// Whitespace normalization tests
-
 func TestParseVersionConstraint_ExtraWhitespace(t *testing.T) {
 	vc := mustParseConstraint(t, "  >=1.0.0   <2.0.0  ")
 	if vc.String() != ">=1.0.0 <2.0.0" {
@@ -550,8 +533,6 @@ func TestParseVersionConstraint_VPrefixWithOperator(t *testing.T) {
 	}
 }
 
-// Replace the prerelease tests with rejection tests:
-
 func TestParseVersionConstraint_PrereleaseRejected(t *testing.T) {
 	_, err := ParseVersionConstraint("1.0.0-alpha")
 	if err == nil {
@@ -572,8 +553,6 @@ func TestParseVersionConstraint_PrereleaseInHyphenRangeRejected(t *testing.T) {
 		t.Error("expected error for prerelease in hyphen range")
 	}
 }
-
-// Intersect tests
 
 func TestVersionConstraint_Intersect_SimpleRanges(t *testing.T) {
 	vc1 := mustParseConstraint(t, ">=1.0.0 <3.0.0")
@@ -637,7 +616,6 @@ func TestVersionConstraint_Intersect_NoOverlap(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	// Result constraint should not match any versions in either range
 	if mustMatch(t, result, "1.5.0") {
 		t.Error("non-overlapping intersection should not match 1.5.0")
 	}

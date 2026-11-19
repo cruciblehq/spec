@@ -13,36 +13,23 @@ const PlanVersion = 0
 //
 // Infrastructure holds separate compute and network pools, each keyed by ID.
 // Containers and Environments are lookup maps keyed by ID. Deployments is an
-// ordered slice that binds them into deployable units.
+// ordered slice that binds them into deployments.
 type Plan struct {
-
-	// Version of the plan format.
-	Version int `codec:"version"`
-
-	// Service lookup table. Key is the service ID, value is the reference target.
-	Services map[string]string `codec:"services,omitempty"`
-
-	// Infrastructure resource pools for compute and network allocations.
-	Infrastructure Infrastructure `codec:"infrastructure"`
-
-	// Container runtime spec lookup table. Key is the container ID.
-	Containers map[string]Container `codec:"containers,omitempty"`
-
-	// Environment variable set lookup table. Key is the environment ID.
-	Environments map[string]Environment `codec:"environments,omitempty"`
-
-	// Ordered deployment arrangement.
-	Deployments []Deployment `codec:"deployments,omitempty"`
-
-	// Gateway routing configuration.
-	Gateway Gateway `codec:"gateway"`
+	Version        int                    `codec:"version"`                // Version of the plan format.
+	Services       map[string]string      `codec:"services,omitempty"`     // Service lookup table. Key is the service ID, value is the reference target.
+	Infrastructure Infrastructure         `codec:"infrastructure"`         // Infrastructure resource pools for compute and network allocations.
+	Containers     map[string]Container   `codec:"containers,omitempty"`   // Container spec lookup table. Key is the container ID.
+	Environments   map[string]Environment `codec:"environments,omitempty"` // Environment variable set lookup table. Key is the environment ID.
+	Deployments    []Deployment           `codec:"deployments,omitempty"`  // Ordered deployment arrangement.
+	Gateway        Gateway                `codec:"gateway"`                // Gateway routing configuration.
 }
 
 // Validates the plan.
 //
-// The version must match [PlanVersion]. Infrastructure entries and environments
-// are validated individually. Each deployment's field values are validated,
-// then its service, container, compute, network, and environment references are
+// The version must match [PlanVersion]. Every service target must be set.
+// Infrastructure entries, environments, and containers are validated
+// individually. Each deployment's field values are validated, then its
+// service container, compute, network, and environment references are
 // checked against the plan's lookup tables. The gateway is validated last.
 func (p *Plan) Validate() error {
 	if p.Version != PlanVersion {

@@ -6,7 +6,7 @@ import "github.com/cruciblehq/utils-go/crex"
 //
 // Used as the request body for resource creation and update operations. For
 // update requests, the name field must match the URL path parameter or update
-// context. Contains only user-modifiable fields. The media type is
+// context. Contains only fields the user can change. The media type is
 // [MediaTypeResourceInfo].
 type ResourceInfo struct {
 	Name        string `codec:"name"`        // Resource name.
@@ -119,9 +119,7 @@ func (r *Resource) Validate() error {
 //
 // The media type is [MediaTypeResourceList].
 type ResourceList struct {
-
-	// List of resources.
-	Resources []ResourceSummary `codec:"resources"`
+	Resources []ResourceSummary `codec:"resources"` // List of resources.
 }
 
 // Validates the resource list.

@@ -28,10 +28,10 @@ const (
 //	!=	negated exact match
 //	>	greater than
 //	<	less than
-//	>=	greater-or-equal
-//	<=	less-or-equal
-//	~	tilde range, allows patch-level changes
-//	^	caret range, allows minor-level changes within major
+//	>=	greater than or equal
+//	<=	less than or equal
+//	~	tilde range, allows patch changes
+//	^	caret range, allows minor changes within major
 //
 // Pre-release and build metadata are not supported in constraints.
 type constraint struct {

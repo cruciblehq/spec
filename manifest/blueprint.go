@@ -96,7 +96,7 @@ func (b *Blueprint) Environment(id string) *Environment {
 // Appends an environment to the blueprint.
 //
 // Environment IDs are selected at build time to provide concrete values for
-// the parameter set declared by the service. The ID must be unique within the
+// the parameters declared by services. The ID must be unique within the
 // blueprint. Returns [ErrEnvironmentExists] if an environment with the same ID
 // is already declared.
 func (b *Blueprint) AddEnvironment(env Environment) error {
@@ -177,7 +177,8 @@ func (b *Blueprint) validateRoutes(ids map[string]struct{}) error {
 
 // Validates all environment entries.
 //
-// Each environment must be individually valid and environment IDs must be unique.
+// Each environment must be valid on its own, and environment IDs must be
+// unique.
 func (b *Blueprint) validateEnvironments() error {
 	envIDs := make(map[string]struct{}, len(b.Environments))
 	for i := range b.Environments {

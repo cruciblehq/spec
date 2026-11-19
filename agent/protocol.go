@@ -2,11 +2,12 @@ package agent
 
 // Version of the wire contract.
 //
-// Used for compatibility between a client and the agent. The client sends it
-// during handshake, and the agent rejects clients with incompatible versions.
+// Used for compatibility between a client and the agent. Both sides exchange it
+// during the handshake, and the client refuses an agent with an incompatible
+// version.
 const Version = "0"
 
-// Port the agent listens on.
+// Default port the agent listens on.
 const DefaultPort = 2789
 
 // Endpoint paths the agent serves.

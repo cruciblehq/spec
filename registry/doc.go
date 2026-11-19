@@ -15,18 +15,18 @@
 // creating or updating a namespace, [NamespaceSummary] is the compact form
 // returned inside lists, [Namespace] is the full representation with embedded
 // resource summaries, and [NamespaceList] wraps a slice of summaries. The
-// [Error] type carries machine-readable [ErrorCode] values alongside
-// human-readable messages for API error responses.
+// [Error] type carries an [ErrorCode] that programs can branch on and a
+// message for people, for API error responses.
 //
 // Every wire type has a corresponding media type constant following the
 // pattern application/vnd.crucible.{name}.v0, used in HTTP Content-Type
 // and Accept headers for format negotiation.
 //
 // The [Registry] interface defines the full set of CRUD operations across all
-// entity types, including archive upload and download. Both the HTTP client in
-// crux and the SQL store in hub implement this interface.
+// entity types, including archive upload and download. A client implements it
+// by calling a registry over HTTP, and a server implements it over its store.
 //
-// All types implement a Validate method that checks field constraints: name
-// format, version string format, timestamp ordering, resource type, archive
-// field consistency, digest format, and count bounds.
+// All wire types implement a Validate method that checks field constraints:
+// name format, version string format, timestamp ordering, resource type,
+// archive field consistency, digest format, and count bounds.
 package registry

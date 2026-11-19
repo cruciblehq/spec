@@ -79,7 +79,6 @@ func TestReference_WithDefaults(t *testing.T) {
 		t.Errorf("expected namespace %q, got %q", "official", resolved.Namespace())
 	}
 
-	// Original should be unchanged.
 	if ref.Registry() != "" {
 		t.Errorf("original registry should still be empty, got %q", ref.Registry())
 	}

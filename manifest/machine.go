@@ -6,7 +6,8 @@ package manifest
 // they can be distributed through the registry. Build support is intentionally
 // separate from the manifest type so images can be packed and published before
 // a dedicated builder exists.
-type Machine struct{}
+type Machine struct {
+}
 
 // Validates the machine configuration.
 func (m *Machine) Validate() error {

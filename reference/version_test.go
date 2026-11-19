@@ -2,7 +2,6 @@ package reference
 
 import "testing"
 
-// Parses a version string and fatally fails the test if it returns an error.
 func mustParseVersion(t *testing.T, s string) *Version {
 	t.Helper()
 	v, err := ParseVersion(s)
@@ -11,8 +10,6 @@ func mustParseVersion(t *testing.T, s string) *Version {
 	}
 	return v
 }
-
-// ParseVersion tests
 
 func TestParseVersion_Basic(t *testing.T) {
 	v := mustParseVersion(t, "1.2.3")
@@ -126,8 +123,6 @@ func TestParseVersion_TrimsWhitespace(t *testing.T) {
 		t.Errorf("got %d.%d.%d, want 1.2.3", v.Major, v.Minor, v.Patch)
 	}
 }
-
-// ParseVersion error tests
 
 func TestParseVersion_Empty(t *testing.T) {
 	_, err := ParseVersion("")
@@ -290,8 +285,6 @@ func TestParseVersion_InvalidBuildCharacter(t *testing.T) {
 	}
 }
 
-// Additional edge case tests
-
 func TestParseVersion_LeadingZeroInMajor(t *testing.T) {
 	// Leading zeros in numeric identifiers are valid in Go's Atoi
 	// but semver spec says they should not have leading zeros
@@ -339,8 +332,6 @@ func TestParseVersion_PrereleaseAndBuildWithHyphen(t *testing.T) {
 	}
 }
 
-// String tests
-
 func TestVersion_String_Basic(t *testing.T) {
 	v := &Version{Major: 1, Minor: 2, Patch: 3}
 	if v.String() != "1.2.3" {
@@ -376,8 +367,6 @@ func TestVersion_String_Zero(t *testing.T) {
 	}
 }
 
-// IsPrerelease tests
-
 func TestVersion_IsPrerelease_Stable(t *testing.T) {
 	v := mustParseVersion(t, "1.2.3")
 	if v.IsPrerelease() {
@@ -398,8 +387,6 @@ func TestVersion_IsPrerelease_WithBuildOnly(t *testing.T) {
 		t.Error("expected version with only build metadata to not be prerelease")
 	}
 }
-
-// Compare tests
 
 func TestVersion_Compare_MajorLess(t *testing.T) {
 	a := mustParseVersion(t, "1.0.0")
@@ -622,8 +609,6 @@ func TestVersion_Compare_PrereleaseWithBuildMetadataIgnored(t *testing.T) {
 		t.Errorf("Compare() = %d, want 0", cmp)
 	}
 }
-
-// IsPrerelease additional tests
 
 func TestVersion_IsPrerelease_Beta(t *testing.T) {
 	v := mustParseVersion(t, "1.2.3-beta.1")

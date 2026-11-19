@@ -51,7 +51,8 @@ func (e *ExecWriter) Send(msg ExecResponse) error {
 
 // Sends p as [ExecOutput] messages on channel ch.
 //
-// p is split into chunks of at most [MaxExecChunkSize] bytes, one message each.
+// p is split into chunks of at most [MaxExecChunkSize] bytes, one message
+// each.
 func (e *ExecWriter) Output(ch Channel, p []byte) error {
 	for len(p) > 0 {
 		n := min(len(p), MaxExecChunkSize)

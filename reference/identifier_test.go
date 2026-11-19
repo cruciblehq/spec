@@ -100,7 +100,6 @@ func TestIdentifier_WithDefaults(t *testing.T) {
 		t.Errorf("expected namespace %q, got %q", "official", resolved.Namespace())
 	}
 
-	// Original should be unchanged.
 	if id.Registry() != "" {
 		t.Errorf("original registry should still be empty, got %q", id.Registry())
 	}

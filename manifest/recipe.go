@@ -7,7 +7,7 @@ import (
 
 // Describes a build pipeline as one or more stages.
 //
-// A recipe is the reusable unit shared by resource types that produce OCI
+// A recipe is the build description shared by resource types that produce OCI
 // images. It contains a list of stages, each with its own source image and
 // build steps. The last stage in the list is the output stage, whose image
 // is exported as the final build artifact. All preceding stages are transient.
@@ -55,7 +55,7 @@ func (r *Recipe) Validate() error {
 	return nil
 }
 
-// Helper for encoding the stages of a recipe.
+// Encodes the stages of a recipe.
 //
 // Each stage is encoded using [Stage.Encode], which produces a map with the
 // stage fields in the canonical serialized format. The resulting list of maps

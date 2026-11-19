@@ -1,20 +1,18 @@
-// Package reference defines the structure and parsing logic for Crucible resource references.
+// Package reference defines the structure and parsing of Crucible resource
+// references.
 //
 // A resource reference is a symbolic string that encapsulates the information
 // needed to fetch and verify a resource. Its general shape is an optional
-// resource type, an optional [scheme://]registry, a hierarchical path, a
-// version constraint or a channel, and an optional digest, written for
-// example as "widget official/my-widget ^1.2.0 sha256:3a7bd3e2360a3d80c1...".
-// Scheme, registry, and path together form the resource location, and when
-// scheme or registry are omitted they default to the values configured in
-// [Options]. The path itself uses Crucible's namespace/name convention, where
-// the namespace groups related resources and the name identifies one within
-// that namespace; the namespace may be omitted only when the registry is also
-// omitted, in which case the configured default namespace applies. As a
-// result, the references "my-widget", "official/my-widget",
-// "registry.crucible.net/official/my-widget", and
-// "http://registry.crucible.net/official/my-widget" all denote the same
-// resource when the defaults match.
+// resource type, a location, a version constraint or a channel, and an
+// optional digest, written for example as "widget official/my-widget
+// ^1.2.0 sha256:3a7bd3e2360a3d80c1...". The location is one token of up to
+// three segments, registry/namespace/name. The namespace groups related
+// resources and the name identifies one within that namespace. The registry
+// may be omitted, and the namespace may be omitted only when the registry is
+// also omitted. Omitted segments stay empty after parsing, and callers fill
+// them with [Reference.WithDefaults]. As a result, the references "my-widget",
+// "official/my-widget", and "registry.crucible.net/official/my-widget" all
+// denote the same resource when the defaults match.
 //
 // Versioning follows semantic versioning with a small number of deliberate
 // deviations. The version segment accepts the operators that semver libraries
@@ -51,22 +49,23 @@
 // preserved alongside the digest for auditing, but the digest is what
 // downstream tooling uses to fetch and verify content. A digest is a
 // cryptographic hash of the resource content, written for example as
-// "sha256:3a7bd3e2360a3d80c1...", and turns the reference into a content-
-// addressed pointer that always denotes the same bytes regardless of any
-// changes to the symbolic components.
+// "sha256:3a7bd3e2360a3d80c1...", and turns the reference into a pointer by
+// content that always denotes the same bytes regardless of any changes to the
+// symbolic components.
 //
-// References also carry a resource type. The type is not represented in the
-// reference string itself; it is supplied contextually when a reference is
+// References also carry a resource type. The type is usually not written in
+// the reference string; it is supplied by the context when a reference is
 // parsed in a position where a particular type is expected. When the expected
-// type is ambiguous, callers may supply it explicitly as the leading token,
-// for example "widget my-widget :stable sha256:3a7bd3e2360a3d80c1...".
+// type is ambiguous, callers may write it explicitly as the leading token,
+// for example "widget my-widget :stable sha256:3a7bd3e2360a3d80c1...". It must
+// then match the type the context expects.
 //
 // Parsing a reference and inspecting its components:
 //
-//	ref, err := reference.Parse("official/my-widget ^1.2.0", opts)
+//	ref, err := reference.Parse("official/my-widget ^1.2.0", "widget")
 //	if err != nil {
 //		log.Fatal(err)
 //	}
-//	fmt.Println(ref.Path, ref.Version)
+//	fmt.Println(ref.Path(), ref.Version())
 //	fmt.Println(ref.String())
 package reference

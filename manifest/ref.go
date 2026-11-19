@@ -24,8 +24,9 @@ type Ref struct {
 	// Crucible reference string identifying the resource.
 	//
 	// The format is "namespace/name version", where namespace/name is the
-	// qualified resource name and version is a semver string. The registry
-	// resolves this string to a specific artifact. This field is required.
+	// qualified resource name and version is a version constraint or a channel.
+	// The registry resolves this string to a specific artifact. This field is
+	// required.
 	Ref string `codec:"ref"`
 
 	// Named arguments for the referenced resource.

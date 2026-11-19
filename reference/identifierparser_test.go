@@ -168,7 +168,6 @@ func TestIdentifierParser_Peek(t *testing.T) {
 		t.Errorf("expected %q, got %q", "a", tok)
 	}
 
-	// Peek should not advance
 	tok, ok = p.peek()
 	if !ok || tok != "a" {
 		t.Errorf("expected %q, got %q", "a", tok)
@@ -226,7 +225,6 @@ func TestIdentifierParser_ParseType_ContextOnly(t *testing.T) {
 		t.Errorf("expected type %q, got %q", "template", id.typ)
 	}
 
-	// Position should not advance
 	if p.pos != 0 {
 		t.Errorf("expected pos 0, got %d", p.pos)
 	}
@@ -246,7 +244,6 @@ func TestIdentifierParser_ParseType_Explicit(t *testing.T) {
 		t.Errorf("expected type %q, got %q", "template", id.typ)
 	}
 
-	// Position should advance past type
 	if p.pos != 1 {
 		t.Errorf("expected pos 1, got %d", p.pos)
 	}

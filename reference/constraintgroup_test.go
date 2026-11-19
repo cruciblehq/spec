@@ -2,8 +2,6 @@ package reference
 
 import "testing"
 
-// matches tests
-
 func TestConstraintGroup_Matches_Empty(t *testing.T) {
 	g := constraintGroup{}
 	if !g.matches(mustParseVersion(t, "1.0.0")) {
@@ -118,8 +116,6 @@ func TestConstraintGroup_Matches_UpperBoundary(t *testing.T) {
 		t.Error("group >=1.0.0 <2.0.0 should match 1.9.9 (just below upper boundary)")
 	}
 }
-
-// String tests
 
 func TestConstraintGroup_String_SingleConstraint(t *testing.T) {
 	g := constraintGroup{

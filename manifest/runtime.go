@@ -5,19 +5,19 @@ import (
 	"github.com/cruciblehq/utils-go/crex"
 )
 
-// Runtime resources define reusable base images.
+// Reusable base image built from a recipe.
 //
-// They wrap external OCI images and apply additional setup (installing
-// packages, copying configuration files, setting environment variables,
-// etc.) to produce a base that service resources build on top of. The
-// main difference between runtimes and services is that runtimes do not
-// have an entrypoint since they are not expected to run as containers.
+// A runtime wraps external OCI images and applies additional setup (installing
+// packages, copying configuration files, setting environment variables, etc.)
+// to produce a base that service resources build on top of. The main difference
+// between runtimes and services is that runtimes do not have an entrypoint
+// since they are not expected to run as containers.
 type Runtime struct {
 	Recipe
 
 	// Declared parameters for this runtime.
 	//
-	// Lists build-time configuration values the runtime accepts. Values are
+	// Lists configuration values the runtime accepts at build time. Values are
 	// bound through environment declarations.
 	Schema *Schema `codec:"schema,omitempty"`
 }

@@ -7,17 +7,16 @@ import (
 
 // Common identity envelope shared by every resource manifest.
 //
-// Crux reads Type first when decoding a manifest, using it to determine which
-// concrete struct the rest of the document maps to. Keeping these fields in a
-// shared type means the toolstack can inspect any manifest for its type and
-// metadata without needing to know about the specific resource types in advance.
+// Decoding reads Type first and uses it to determine which concrete struct the
+// rest of the document maps to. Keeping these fields in a shared type means
+// any program can inspect a manifest for its type and metadata without knowing
+// the specific resource types in advance.
 type Resource struct {
 
 	// Discriminator that controls how the rest of the manifest is decoded.
 	//
-	// Must be set before any other field is read. The namespace portion of the
-	// type string determines which registry is consulted; the name portion
-	// selects the resource type within that registry.
+	// Must be one of the [ResourceType] values. It is read before any other
+	// field and selects the config type the rest of the manifest decodes into.
 	Type ResourceType `codec:"type"`
 
 	// Identifier for the resource.
@@ -27,10 +26,10 @@ type Resource struct {
 	// published to multiple registries without modification.
 	Name string `codec:"name"`
 
-	// Human-readable summary of the resource's purpose.
+	// Summary of the resource's purpose, for people.
 	//
-	// Not interpreted by crux itself. Present for documentation and registry
-	// engines that surface resource metadata.
+	// Not interpreted by Crucible programs. Present for documentation and
+	// registry engines that surface resource metadata.
 	Description string `codec:"description,omitempty"`
 
 	// Semantic version declared by this resource.
@@ -42,6 +41,9 @@ type Resource struct {
 }
 
 // Validates the resource metadata.
+//
+// The type must be known, the name must parse as "namespace/name" with a
+// namespace, and the version must be set.
 func (r *Resource) Validate() error {
 	if _, err := ParseResourceType(string(r.Type)); err != nil {
 		return crex.Wrap(ErrInvalidResource, err)

@@ -17,9 +17,8 @@ const machineDomain = "machine.crucible"
 
 // Identifier the client assigns to a machine when it creates it.
 //
-// The identifier is 16 random bytes in lowercase hexadecimal. It
-// never changes for the life of the machine and does not depend on the
-// machine's address.
+// The identifier is 16 random bytes in lowercase hexadecimal. It never changes
+// for the life of the machine and does not depend on the machine's address.
 type MachineID string
 
 // Returns a new random machine identifier.

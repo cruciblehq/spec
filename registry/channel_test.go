@@ -79,7 +79,6 @@ func TestChannelSummary_Validate_Invalid_Timestamps(t *testing.T) {
 	}
 }
 
-// validChannelVersion returns a valid Version for use in channel tests.
 func validChannelVersion() Version {
 	return Version{
 		Namespace: "my-namespace",

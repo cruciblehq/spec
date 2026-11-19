@@ -8,14 +8,14 @@ import (
 // A build stage in a recipe.
 //
 // Each stage is an independent build pipeline with its own source image and
-// steps. Named stages can be referenced from subsequent stages (e.g., a step
-// name "builder" can be referenced as a source in later stages with a path
+// steps. Named stages can be referenced from subsequent stages (e.g., a stage
+// named "builder" can be referenced as a source in later stages with a path
 // like "builder:/app/bin"). The last stage in a recipe is the output stage;
 // its image is exported as the final build artifact. All preceding stages are
 // transient and exist only to produce intermediary artifacts. When Platform
 // is set, the stage only runs for the matching target platform. Steps within
-// a platform-scoped stage cannot use [Step.Platform] since the platform is
-// already fixed for the entire stage.
+// such a stage cannot use [Step.Platform] since the platform is already fixed
+// for the entire stage.
 type Stage struct {
 
 	// Identifies the stage for cross-stage references.
@@ -28,8 +28,8 @@ type Stage struct {
 	// Restricts this stage to a specific target platform.
 	//
 	// When set, the stage is only built when the target platform matches. The
-	// format is "os/arch" (e.g. "linux/arm64"). Steps within a platform-scoped
-	// stage cannot use [Step.Platform].
+	// format is "os/arch" (e.g. "linux/arm64"). Steps within such a stage
+	// cannot use [Step.Platform].
 	Platform string `codec:"platform,omitempty"`
 
 	// Base image for this stage.
@@ -55,10 +55,11 @@ type Stage struct {
 
 // Validates the stage.
 //
-// When [Stage.From] is set, arg keys must be valid names. Args must not be set
-// when From is empty. An empty From indicates a scratch stage. Each step is
-// validated recursively with positional context. When [Stage.Platform] is set,
-// steps cannot use [Step.Platform].
+// The name, when set, must be a valid name, and the platform, when set, must
+// be a valid os/arch selector. Args must not be set when [Stage.From] is empty;
+// an empty From indicates a scratch stage. Arg keys must be valid names. Each
+// step is validated recursively with positional context. When
+// [Stage.Platform] is set, steps cannot use [Step.Platform].
 func (s *Stage) Validate() error {
 	if s.Name != "" && !isValidName(s.Name) {
 		return crex.Wrap(ErrInvalidStage, ErrInvalidStageName)
@@ -90,7 +91,7 @@ func (s *Stage) Validate() error {
 // Validation errors are wrapped with the step index for context.
 func (s *Stage) validateStep(i int) error {
 	if s.Platform != "" && stepUsesPlatform(&s.Steps[i]) {
-		return crex.At(crex.Tag(crex.Newf(ErrInvalidStage, "platform not allowed inside a platform-scoped stage"), ErrPlatformInPlatformStage), "step", i+1)
+		return crex.At(crex.Tag(crex.Newf(ErrInvalidStage, "step sets a platform inside a stage that already has one"), ErrPlatformInPlatformStage), "step", i+1)
 	}
 	if err := s.Steps[i].Validate(); err != nil {
 		return crex.At(crex.Wrap(ErrInvalidStage, err), "step", i+1)

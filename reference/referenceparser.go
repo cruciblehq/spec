@@ -18,8 +18,8 @@ var (
 
 // Whitespace-tokenized reference string parser.
 type referenceParser struct {
-	tokens []string
-	pos    int
+	tokens []string // Tokenized input.
+	pos    int      // Parser position in tokens.
 }
 
 // Parses the tokens into a Reference.

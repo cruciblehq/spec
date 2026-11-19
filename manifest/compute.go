@@ -7,8 +7,8 @@ import (
 
 // Identifies a compute provider.
 //
-// Each value names a provider whose backend the compute package resolves to
-// provision and connect to a compute unit.
+// Each value names a provider that the client uses to provision and connect
+// to a machine.
 type ComputeType string
 
 // Supported compute provider types.
@@ -17,24 +17,23 @@ const (
 	ComputeTypeLocal ComputeType = "local" // Local machine provider.
 )
 
-// Represents one compute unit in the infrastructure plan.
+// Describes one machine in the infrastructure plan.
 //
-// A compute unit is an allocation of capacity for hosting services and can be
-// backed by a variety of providers (AWS EC2, local machine, etc). The provider
-// type determines the configuration fields required to provision and connect
-// to the compute unit. The executor provisions the compute units and schedules
-// services onto them based on the deployment specifications in the plan.
+// A machine hosts services and can be backed by a variety of providers (AWS
+// EC2, local machine, etc). The provider type determines the configuration
+// fields required to provision and connect to the machine. The executor
+// provisions the machines and schedules services onto them based on the
+// deployments in the plan.
 type Compute struct {
 
 	// Provider type.
 	//
 	// Determines the type of [Compute.Config], which holds the configuration
-	// fields specific to that provider. Supported providers are determined by
-	// the compute package. Currently supported providers are [ComputeTypeAWS]
-	// for AWS EC2 instances and [ComputeTypeLocal].
+	// fields specific to that provider. Currently supported providers are
+	// [ComputeTypeAWS] for AWS EC2 instances and [ComputeTypeLocal].
 	Type ComputeType `codec:"type"`
 
-	// Provider-specific configuration.
+	// Configuration specific to the provider.
 	//
 	// The concrete type depends on [Compute.Type]: [*ComputeAWS] for "aws",
 	// [*ComputeLocal] for "local".
@@ -43,12 +42,10 @@ type Compute struct {
 
 // Validates the compute entry.
 //
-// The provider type is not validated here since other packages determined the
-// supported types. The provider-specific configuration (Compute.Config) must
-// implement the Validatable interface and is validated by calling its Validate
-// method. The configuration must also be present (non-nil), since the provider
-// type implies required configuration fields. If kernel requirements are
-// present they are also validated.
+// The provider type is not checked here; [Compute.Decode] rejects unknown
+// types. The configuration in [Compute.Config] must be present, since the
+// provider type implies required fields. It must implement
+// [codec.Validatable] and is checked by its own Validate method.
 func (c *Compute) Validate() error {
 	if c.Config == nil {
 		return ErrMissingComputeProvider

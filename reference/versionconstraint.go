@@ -12,7 +12,7 @@ import (
 var (
 
 	// Matches version numbers with optional prefix and prerelease. Prerelease
-	// version identifiers are allowed syntactically, but maybe not semantically.
+	// identifiers are accepted by the pattern and rejected afterward.
 	versionPattern = regexp.MustCompile(`^v?(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:-([a-zA-Z0-9.-]+))?$`)
 
 	// Matches version operators.
@@ -26,7 +26,7 @@ var (
 // with OR logic (|| operator), while constraints within a group use AND logic
 // (space-separated).
 type VersionConstraint struct {
-	constraints []constraintGroup
+	constraints []constraintGroup // Groups joined by OR.
 }
 
 // Returns the canonical string representation.
@@ -114,14 +114,16 @@ func (vc *VersionConstraint) MatchesVersion(v *Version) (bool, error) {
 //
 // The intersection is computed by combining each constraint group from this
 // constraint with each group from the other using AND logic, then joining
-// all combinations with OR logic.
+// all combinations with OR logic. Groups are not simplified.
 //
 // For example, if this = "(>=1.0.0 <2.0.0) || (>=3.0.0 <4.0.0)" and
-// other = "(>=1.5.0 <3.5.0)", the result would be:
-// "(>=1.5.0 <2.0.0) || (>=3.0.0 <3.5.0)"
+// other = "(>=1.5.0 <3.5.0)", the result matches the same versions as
+// "(>=1.5.0 <2.0.0) || (>=3.0.0 <3.5.0)".
 //
-// Returns an error if the intersection is empty (no versions satisfy both
-// constraints). This can happen when the constraints are incompatible.
+// Combined groups that fail validation are dropped. Returns
+// [ErrIncompatibleConstraints] when no group remains, and [ErrNilConstraint]
+// when either constraint is nil. It does not check whether a combined group
+// can match any version, so the result may match nothing.
 func (vc *VersionConstraint) Intersect(other *VersionConstraint) (*VersionConstraint, error) {
 	if vc == nil || other == nil {
 		return nil, ErrNilConstraint
@@ -488,12 +490,12 @@ func requiresUpperBound(op string) bool {
 
 // Whether the operator provides an implicit upper bound.
 //
-// Equality (=), inequality (!=), less-than (<, <=), tilde (~), and caret (^)
+// Equality (=), less-than (<, <=), tilde (~), and caret (^)
 // operators all constrain the upper version either explicitly or implicitly.
 // Hyphen ranges are expanded before validation, so <= appears directly.
 func hasUpperBound(op string) bool {
 	switch op {
-	case opEqual, opNotEqual, opLess, opLessEqual, opTilde, opCaret:
+	case opEqual, opLess, opLessEqual, opTilde, opCaret:
 		return true
 	}
 	return false

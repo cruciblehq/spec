@@ -7,8 +7,8 @@ import "github.com/cruciblehq/utils-go/crex"
 // Used as the request body for channel creation and update operations. For
 // update requests, the name field must match the URL path parameter or update
 // context. The version field is a simple string reference to an existing
-// version; changing it updates where the channel points. Contains only user-
-// modifiable fields. The media type is [MediaTypeChannelInfo].
+// version; changing it updates where the channel points. Contains only fields
+// the user can change. The media type is [MediaTypeChannelInfo].
 type ChannelInfo struct {
 	Name        string `codec:"name"`        // Channel name.
 	Version     string `codec:"version"`     // Version this channel points to.

@@ -8,6 +8,8 @@ import (
 //
 // Each field configures one aspect of the process's environment. Fields with
 // zero values fall back to defaults from the OCI spec or image configuration.
+// HostNetwork is a placeholder for future network policy controls. Until
+// Crucible's security policy exists, it is the only way to relax the network.
 type Options struct {
 	OCI     specs.Spec        `codec:"oci,omitempty"`     // OCI runtime spec applied as the base configuration at container start.
 	Shell   string            `codec:"shell,omitempty"`   // Shell for "shell -c command" invocation; defaults to /bin/sh.

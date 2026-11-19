@@ -34,12 +34,12 @@ func TestStepValidate_Unpack(t *testing.T) {
 		{
 			name: "unpack rejects shell",
 			step: Step{Unpack: "rootfs.tar.gz /", Shell: "/bin/bash"},
-			want: ErrShellWithCopy,
+			want: ErrShellWithCopyOrUnpack,
 		},
 		{
 			name: "unpack rejects env",
 			step: Step{Unpack: "rootfs.tar.gz /", Env: map[string]string{"A": "1"}},
-			want: ErrEnvWithCopy,
+			want: ErrEnvWithCopyOrUnpack,
 		},
 	}
 
@@ -70,8 +70,8 @@ func TestStepValidate(t *testing.T) {
 		{"mutually exclusive ops", Step{Run: "x", Copy: "y"}, ErrMutuallyExclusiveOps},
 		{"steps without platform", Step{Steps: []Step{{Run: "x"}}}, ErrStepsWithoutPlatform},
 		{"platform with operation", Step{Run: "x", Platform: "linux/arm64", Steps: []Step{{Run: "y"}}}, ErrPlatformWithOperation},
-		{"shell with copy", Step{Copy: "a b", Shell: "sh"}, ErrShellWithCopy},
-		{"env with copy", Step{Copy: "a b", Env: map[string]string{"K": "V"}}, ErrEnvWithCopy},
+		{"shell with copy", Step{Copy: "a b", Shell: "sh"}, ErrShellWithCopyOrUnpack},
+		{"env with copy", Step{Copy: "a b", Env: map[string]string{"K": "V"}}, ErrEnvWithCopyOrUnpack},
 		{
 			"nested platform group",
 			Step{Platform: "linux/arm64", Steps: []Step{{Platform: "linux/amd64", Steps: []Step{{Run: "x"}}}}},

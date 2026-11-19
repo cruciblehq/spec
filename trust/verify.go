@@ -52,11 +52,11 @@ func VerifyServer(chains [][]*x509.Certificate, crl *x509.RevocationList) error 
 			return err
 		}
 		if revoked(crl, chain[0]) {
-			return crex.Newf(ErrRevoked, "machine %q is revoked by CRL number %s", chain[0].Subject.CommonName, crl.Number)
+			return crex.Newf(ErrRevoked, "agent certificate %q is revoked by CRL number %s", chain[0].Subject.CommonName, crl.Number)
 		}
 		return nil
 	}
-	return crex.Newf(ErrInvalidChain, "machine certificate is not signed by the root")
+	return crex.Newf(ErrInvalidChain, "agent certificate is not signed by the root")
 }
 
 // Checks that leaf holds an Ed25519 key.

@@ -4,8 +4,9 @@ import "fmt"
 
 // Error response from the registry API.
 //
-// Provides both machine-readable error classification through the Code field
-// and context through the Message field. The media type is [MediaTypeError].
+// Classifies the error through the Code field, which programs can branch on,
+// and describes it through the Message field. The media type is
+// [MediaTypeError].
 type Error struct {
 	Code    ErrorCode `codec:"code"`    // Error code (see [ErrorCode]).
 	Message string    `codec:"message"` // Error description.

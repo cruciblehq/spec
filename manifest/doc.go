@@ -19,9 +19,10 @@
 // Build steps within a stage are classified as operations or modifiers:
 //
 // Operations are the actions that produce side effects in the build container.
-// [Step.Run] executes a command through a shell, and [Step.Copy] copies files
-// from the host or from another stage into the image. These two are mutually
-// exclusive within a single step.
+// [Step.Run] executes a command through a shell, [Step.Copy] copies files from
+// the host or from another stage into the image, and [Step.Unpack] extracts a
+// tar archive from the host into the image. They are mutually exclusive within
+// a single step.
 //
 // Modifiers adjust the build environment. [Step.Shell] selects the shell for
 // run commands, [Step.Env] sets environment variables, [Step.Workdir] sets the
@@ -30,9 +31,9 @@
 // with each other. When paired with an operation, they apply to that single
 // step. When set alone, they persist in the image for subsequent steps.
 //
-// Some modifier-operation combinations are invalid. [Step.Shell] and [Step.Env]
-// cannot be paired with [Step.Copy], since copy operations do not involve shell
-// execution or environment variables.
+// Some combinations of modifier and operation are invalid. [Step.Shell] and
+// [Step.Env] cannot be paired with [Step.Copy] or [Step.Unpack], since neither
+// runs a shell or uses environment variables.
 //
 // Setting [Step.Platform] together with [Step.Steps] creates a platform group:
 // a set of child steps that all execute under the specified platform. Modifiers
@@ -43,7 +44,7 @@
 // resource to use as the starting point for the build. When no base image is
 // specified, the stage starts from an empty filesystem (scratch).
 //
-// Every type in the package exposes a Validate method that checks structural
+// Most types in the package have a Validate method that checks structural
 // correctness. Validation cascades from [Manifest.Validate] down through
 // [Resource], the config type, [Recipe], [Stage], [Step], and [Ref].
 //

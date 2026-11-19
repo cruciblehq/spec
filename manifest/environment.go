@@ -6,12 +6,8 @@ package manifest
 // The specific environment to use is selected at build time, impacting the
 // resulting deployment plan.
 type Environment struct {
-
-	// Unique identifier for this environment.
-	ID string `codec:"id"`
-
-	// Key-value pairs for this environment.
-	Variables map[string]string `codec:"variables"`
+	ID        string            `codec:"id"`        // Unique identifier for this environment.
+	Variables map[string]string `codec:"variables"` // Variable names and their values.
 }
 
 // Validates the environment entry.

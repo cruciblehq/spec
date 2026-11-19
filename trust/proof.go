@@ -18,9 +18,11 @@ const exporterLabel = "EXPORTER-crucible-enrollment"
 // Number of bytes exported from the TLS session for channel binding.
 const exporterSize = 32
 
-// Kind of evidence an agent offers to prove it runs on the machine the client created.
+// Kind of evidence an agent offers to prove it runs on the machine the client
+// created.
 type ProofType string
 
+// Known proof types.
 const (
 
 	// Proof made with the enrollment token the client placed on the machine.
@@ -70,7 +72,7 @@ func TokenProof(token, ekm []byte) Proof {
 // ekm.
 func (p Proof) VerifyToken(token, ekm []byte) error {
 	if p.Type != ProofToken {
-		return crex.Newf(ErrInvalidProof, "proof type %q is not %q", p.Type, ProofToken)
+		return crex.Newf(ErrInvalidProof, "proof has type %q where %q is expected", p.Type, ProofToken)
 	}
 	if !hmac.Equal(p.Value, tokenMAC(token, ekm)) {
 		return crex.Newf(ErrInvalidProof, "token proof does not match")

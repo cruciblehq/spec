@@ -18,7 +18,8 @@ var platformPattern = regexp.MustCompile(`^[a-z][a-z0-9]*/[a-z][a-z0-9_/]*$`)
 //
 // Must start with a forward slash and contain only unreserved path characters:
 // letters, digits, hyphens, underscores, dots, tildes, and forward slashes.
-// Query strings, fragments, and consecutive slashes are not permitted.
+// Query strings and fragments are not permitted. Consecutive slashes match
+// here and are rejected by [isValidRoutePattern].
 var routePatternRe = regexp.MustCompile(`^/[a-zA-Z0-9\-._~/]*$`)
 
 // Whether s is a valid name identifier.
@@ -33,8 +34,8 @@ func isValidPlatform(s string) bool {
 
 // Whether s is a valid route pattern.
 //
-// Returns false for empty strings, patterns containing "//" or do not start
-// with "/", and patterns containing query or fragment markers.
+// Returns false for an empty string, a pattern that does not start with "/",
+// a pattern that contains "//", and a pattern with query or fragment markers.
 func isValidRoutePattern(s string) bool {
 	if !routePatternRe.MatchString(s) {
 		return false

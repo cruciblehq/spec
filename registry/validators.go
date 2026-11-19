@@ -19,7 +19,7 @@ var (
 	digestPattern = regexp.MustCompile(`^[a-z0-9]+:[a-f0-9]+$`)
 )
 
-// Whether a name is valid for namespace, resource, channel names.
+// Checks that a name is valid for a namespace, resource, or channel.
 //
 // Names may include lowercase letters, digits, and hyphens, must start and end
 // with an alphanumeric character, and must not exceed 63 characters.
@@ -36,9 +36,9 @@ func ValidateName(name string) error {
 	return nil
 }
 
-// Whether a version string is valid.
+// Checks that a version string is valid.
 //
-// Uses proper semantic version validation from the reference package.
+// The version must parse with [reference.ParseVersion].
 func ValidateVersionString(version string) error {
 	if _, err := reference.ParseVersion(version); err != nil {
 		return ErrVersionInvalid
@@ -46,7 +46,7 @@ func ValidateVersionString(version string) error {
 	return nil
 }
 
-// Whether timestamps are valid.
+// Checks that timestamps are valid.
 //
 // Both createdAt and updatedAt must be positive unix epochs, and updatedAt
 // must not precede createdAt.
@@ -63,10 +63,10 @@ func ValidateTimestamps(createdAt, updatedAt int64) error {
 	return nil
 }
 
-// Whether a resource type string is valid.
+// Checks that a resource type string is valid.
 //
-// The type must not be empty. The type is not validated against a specific
-// pattern to allow flexibility, but it must be a non-empty string to ensure
+// The type must not be empty or only whitespace. It is not checked against a
+// specific pattern, to allow flexibility, but it must be set to ensure
 // meaningful categorization. Client implementations may choose to enforce
 // additional constraints on the type string as needed.
 func ValidateResourceType(t string) error {
@@ -76,7 +76,7 @@ func ValidateResourceType(t string) error {
 	return nil
 }
 
-// Whether a digest string is valid.
+// Checks that a digest string is valid.
 //
 // Must follow the algorithm:hex format (e.g., "sha256:abcdef...").
 func ValidateDigest(digest string) error {
@@ -86,7 +86,7 @@ func ValidateDigest(digest string) error {
 	return nil
 }
 
-// Whether archive fields are valid.
+// Checks that archive fields are valid.
 //
 // Archive, size, and digest must either all be nil (not uploaded) or all be
 // set with valid values: archive non-empty, size positive, digest in
@@ -117,7 +117,7 @@ func ValidateArchiveFields(archive *string, size *int64, digest *string) error {
 	return ValidateDigest(*digest)
 }
 
-// Whether a count is valid.
+// Checks that a count is valid.
 //
 // Counts must not be negative.
 func ValidateCount(n int) error {

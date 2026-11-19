@@ -4,14 +4,14 @@ Normative data models and wire contracts for Crucible.
 
 ## Purpose
 
-This project defines the data models that multiple projects must agree on,
-including schema, validation behavior, reference parsing, manifest and plan
-semantics.
+This project defines what Crucible programs must agree on: protocols, contracts,
+and formats. This includes schemas, validation behavior, reference parsing, and
+// the semantics of manifests and plans.
 
 ## Package Layout
 
-- `agent`: Protocol for talking to the agent on each machine
-- `manifest`: Resource manifest types
+- `agent`: Protocol between a client and the agent on each machine
+- `manifest`: Resource manifests, deployment plans, and deployment state
 - `reference`: Resource reference grammar and version constraints
-- `registry`: Registry contract types
-- `trust`: Machine identity, enrollment, and mutual TLS
+- `registry`: Registry API contract and types
+- `trust`: Machine identity, enrollment, revocation, and mutual TLS

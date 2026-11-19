@@ -13,14 +13,18 @@ import (
 type Interface struct {
 }
 
-// Validates the Interface.
+// Validates the interface configuration.
 //
-// Currently a no-op.
+// An interface has no fields, so it is always valid.
 func (i *Interface) Validate() error {
 	return nil
 }
 
 // Whether the given implementation reference satisfies the required interface.
+//
+// Both must name the same interface. Returns an error when either reference
+// is invalid or has no version, or when the implementation version is not
+// exact.
 func InterfaceReferenceMatches(requirement, implementation string) (bool, error) {
 	reqRef, err := reference.Parse(requirement, string(TypeInterface))
 	if err != nil {

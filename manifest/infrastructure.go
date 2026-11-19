@@ -8,12 +8,11 @@ package manifest
 // configurations when deploying the services.
 type Infrastructure struct {
 
-	// Allocated compute units.
+	// Allocated machines, by compute entry ID.
 	//
-	// Each compute unit defines the virtual machine where a service runs. The
-	// map associates compute unit IDs with their configurations, which can be
-	// referenced by deployments. The executor provisions the compute units and
-	// schedules services onto them according to the deployment specifications.
+	// Each compute entry describes a machine where services run. Deployments
+	// refer to entries by ID. The executor provisions the machines and
+	// schedules services onto them according to the deployments.
 	Computes map[string]Compute `codec:"computes,omitempty"`
 
 	// Allocated network configurations.

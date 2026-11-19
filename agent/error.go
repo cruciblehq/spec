@@ -6,12 +6,12 @@ import "fmt"
 //
 // Returned with [MediaTypeError] and the status given by [ErrorCode.HTTPStatus]
 // when a unary operation cannot complete. Code classifies the failure and
-// Message describes it. A mid-stream failure of a streaming operation is
-// reported instead by a terminal [ExecError] message, because the response
-// status is already committed once streaming has begun.
+// Message describes it. A failure of a streaming operation during the stream
+// is reported instead by a terminal [ExecError] message, because the response
+// status is already sent once streaming has begun.
 type Error struct {
-	Code    ErrorCode `codec:"code"`    // Machine-readable classification.
-	Message string    `codec:"message"` // Human-readable description.
+	Code    ErrorCode `codec:"code"`    // Classification that programs can branch on.
+	Message string    `codec:"message"` // Description for people.
 }
 
 // Implements the error interface.

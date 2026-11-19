@@ -1,12 +1,13 @@
 package registry
 
-// Platform-specific error code for machine-readable error classification.
+// Classification of a registry error.
 //
 // Provides granular error information beyond HTTP status codes, enabling
 // clients to implement specific error handling logic. Used in the Code field
 // of [Error] responses.
 type ErrorCode string
 
+// Known error codes.
 const (
 	ErrorCodeBadRequest           ErrorCode = "bad_request"                     // Request validation failed (malformed body, invalid fields).
 	ErrorCodeNotFound             ErrorCode = "not_found"                       // Requested namespace, resource, version, or channel does not exist.

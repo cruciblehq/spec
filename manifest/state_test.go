@@ -27,7 +27,7 @@ func TestStateValidate(t *testing.T) {
 				Instances:   []InstanceRecord{{ID: "i", Image: "img", Provider: "local", Compute: "c"}},
 				Volumes:     []VolumeRecord{{ID: "v", Service: "s"}},
 				Networks:    []NetworkRecord{{ID: "n", Subnet: "10.0.0.0/8"}},
-				Attachments: []AttachmentRecord{{Unit: "u", Network: "n"}},
+				Attachments: []AttachmentRecord{{Container: "c", Network: "n"}},
 			},
 			nil,
 		},
@@ -53,7 +53,7 @@ func TestStateValidate(t *testing.T) {
 		},
 		{
 			"attachment missing field",
-			State{Version: StateVersion, Attachments: []AttachmentRecord{{Unit: "u"}}},
+			State{Version: StateVersion, Attachments: []AttachmentRecord{{Container: "c"}}},
 			ErrMissingRequiredField,
 		},
 	}

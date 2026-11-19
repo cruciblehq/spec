@@ -4,10 +4,10 @@ import (
 	"github.com/cruciblehq/utils-go/crex"
 )
 
-// Widget resources are frontend components that can be embedded into apps.
+// Frontend component that can be embedded into apps.
 //
 // This structure defines configurations that are unique to widget resource
-// manifests. It is used as [Manifest.Config] for [ResourceType.Widget].
+// manifests. It is used as [Manifest.Config] for [TypeWidget].
 type Widget struct {
 
 	// Declared parameters for this widget.

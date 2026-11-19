@@ -2,7 +2,6 @@ package reference
 
 import "testing"
 
-// Parses a digest string and fatally fails the test if it returns an error.
 func mustParseDigest(t *testing.T, s string) *Digest {
 	t.Helper()
 	d, err := ParseDigest(s)
