@@ -87,9 +87,7 @@ func (ns *Namespace) Validate() error {
 // Namespaces may be empty if the registry contains no namespaces. The media
 // type is [MediaTypeNamespaceList].
 type NamespaceList struct {
-
-	// List of namespaces.
-	Namespaces []NamespaceSummary `codec:"namespaces"`
+	Namespaces []NamespaceSummary `codec:"namespaces"` // List of namespaces.
 }
 
 // Validates the namespace list.

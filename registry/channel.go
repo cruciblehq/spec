@@ -100,9 +100,7 @@ func (ch *Channel) Validate() error {
 //
 // The media type is [MediaTypeChannelList].
 type ChannelList struct {
-
-	// List of channels.
-	Channels []ChannelSummary `codec:"channels"`
+	Channels []ChannelSummary `codec:"channels"` // List of channels.
 }
 
 // Validates the channel list.
