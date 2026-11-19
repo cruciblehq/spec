@@ -36,7 +36,7 @@ type Reference struct {
 // The digest is optional and follows the format algorithm:hash (e.g.,
 // "sha256:abcd1234"). When present, it freezes the reference to a specific
 // content version.
-func Parse(s string, contextType string) (*Reference, error) {
+func Parse(s, contextType string) (*Reference, error) {
 	p := &referenceParser{
 		tokens: strings.Fields(s),
 	}

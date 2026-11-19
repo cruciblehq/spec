@@ -70,7 +70,7 @@ func TestMustParseIdentifier(t *testing.T) {
 
 func TestMustParseIdentifier_Panic(t *testing.T) {
 	defer func() {
-		if r := recover(); r == nil {
+		if recover() == nil {
 			t.Error("expected panic")
 		}
 	}()
