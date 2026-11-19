@@ -8,11 +8,11 @@ import (
 
 // Parses a certificate revocation list and checks that root signed it.
 //
-// The list is a standard X.509 CRL (RFC 5280) naming the issuer and machine
-// certificates the root has revoked. Its CRL Number orders lists, and a machine keeps the
-// list with the highest number it has seen ([Newer]). The root certificate
-// must allow CRL signing. Machines do not check NextUpdate, because crux sends
-// its newest list on every handshake.
+// The list is a standard X.509 CRL (RFC 5280) naming the issuer and agent
+// certificates the root has revoked. Its CRL Number orders lists, and an agent
+// keeps the list with the highest number it has seen ([Newer]). The root
+// certificate must allow CRL signing. Agents do not check NextUpdate, because
+// the client sends its newest list on every handshake.
 func ParseRevocations(der []byte, root *x509.Certificate) (*x509.RevocationList, error) {
 	crl, err := x509.ParseRevocationList(der)
 	if err != nil {

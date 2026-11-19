@@ -10,10 +10,10 @@ import (
 // Lengths of the certificate chains that TLS verifies.
 const (
 	clientChainLength = 3 // Client leaf, issuer, and root.
-	serverChainLength = 2 // Machine leaf and root.
+	serverChainLength = 2 // Agent leaf and root.
 )
 
-// Checks the chains crypto/tls verified for a crux client certificate.
+// Checks the chains crypto/tls verified for a client certificate.
 //
 // TLS has already checked that each chain reaches the root, is in its validity
 // period, and is for client authentication. This adds the rules TLS does not
@@ -35,12 +35,12 @@ func VerifyClient(chains [][]*x509.Certificate, crl *x509.RevocationList) error 
 	return crex.Newf(ErrInvalidChain, "client certificate is not signed by an issuer")
 }
 
-// Checks the chains crypto/tls verified for a machine certificate.
+// Checks the chains crypto/tls verified for an agent certificate.
 //
 // TLS has already checked that each chain reaches the root, names the machine,
 // and is for server authentication. This adds the rules TLS does not know: the
 // leaf is an Ed25519 key signed by the root directly, and it is not listed in
-// crl. Machine certificates last for the life of the machine, so revocation is
+// crl. Agent certificates last for the life of their machine, so revocation is
 // the only way to withdraw one. Call it from [tls.Config.VerifyConnection]
 // with the connection's verified chains.
 func VerifyServer(chains [][]*x509.Certificate, crl *x509.RevocationList) error {

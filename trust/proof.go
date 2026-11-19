@@ -18,20 +18,20 @@ const exporterLabel = "EXPORTER-crucible-enrollment"
 // Number of bytes exported from the TLS session for channel binding.
 const exporterSize = 32
 
-// Kind of evidence a machine offers to prove it is the machine crux created.
+// Kind of evidence an agent offers to prove it runs on the machine the client created.
 type ProofType string
 
 const (
 
-	// Proof made with the enrollment token crux provisioned on the machine.
+	// Proof made with the enrollment token the client placed on the machine.
 	ProofToken ProofType = "token"
 )
 
-// Evidence that a machine is the one crux created.
+// Evidence that an agent runs on the machine the client created.
 //
 // The proof is bound to the TLS session it is sent over through a TLS exporter
 // ([Exporter]), so it cannot be replayed on another connection or moved to
-// another machine key.
+// another agent key.
 type Proof struct {
 	Type  ProofType `codec:"type"`  // Kind of evidence.
 	Value []byte    `codec:"value"` // Evidence, interpreted according to Type.

@@ -5,7 +5,7 @@ import (
 	"crypto/x509"
 )
 
-// Returns the TLS settings shared by every crux and cruxd connection.
+// Returns the TLS settings shared by every connection between a client and an agent.
 //
 // Only TLS 1.3 is allowed, and the key exchange is restricted to the hybrid of
 // X25519 and ML-KEM-768, so recorded traffic stays protected against a future
@@ -17,13 +17,13 @@ func baseConfig() *tls.Config {
 	}
 }
 
-// Returns the TLS settings for cruxd.
+// Returns the TLS settings for an agent.
 //
-// cruxd presents the certificate cert returns, which is its own key signed by
-// itself before enrollment and the machine certificate after. Every client must
-// present a certificate that TLS verifies against root and that passes
+// The agent presents the certificate cert returns, which is its own key signed
+// by itself before enrollment and its agent certificate after. Every client
+// must present a certificate that TLS verifies against root and that passes
 // [VerifyClient] with the list crl returns. Both functions are called on every
-// handshake, so cruxd can install a new certificate or list while serving.
+// handshake, so the agent can install a new certificate or list while serving.
 func ServerConfig(cert func() *tls.Certificate, root *x509.Certificate, crl func() *x509.RevocationList) *tls.Config {
 	roots := x509.NewCertPool()
 	roots.AddCert(root)
@@ -40,12 +40,12 @@ func ServerConfig(cert func() *tls.Certificate, root *x509.Certificate, crl func
 	return cfg
 }
 
-// Returns the TLS settings for crux connecting to an enrolled machine.
+// Returns the TLS settings for a client connecting to the agent on machine id.
 //
-// crux presents cert, its client certificate followed by its issuer. The
-// machine must present a certificate that TLS verifies against root and the
-// name of id, and that passes [VerifyServer] with crl. The name is checked
-// instead of the address crux dials.
+// The client presents cert, its client certificate followed by its issuer. The
+// agent must present a certificate that TLS verifies against root and the name
+// of id, and that passes [VerifyServer] with crl. The name is checked instead
+// of the address the client dials.
 func ClientConfig(cert tls.Certificate, root *x509.Certificate, crl *x509.RevocationList, id MachineID) *tls.Config {
 	roots := x509.NewCertPool()
 	roots.AddCert(root)
@@ -60,15 +60,15 @@ func ClientConfig(cert tls.Certificate, root *x509.Certificate, crl *x509.Revoca
 	return cfg
 }
 
-// Returns the TLS settings for crux enrolling a new machine.
+// Returns the TLS settings for a client enrolling the agent on a new machine.
 //
-// A machine that has not enrolled presents a certificate it signed itself, so
-// TLS cannot verify it. crux instead trusts the machine through the token
+// An agent that has not enrolled presents a certificate it signed itself, so
+// TLS cannot verify it. The client instead trusts the agent through the token
 // proof, which is bound to this TLS session, and checks that the key in the
-// certificate request is the key the machine presented ([VerifyEnrollment]).
+// certificate request is the key the agent presented ([VerifyEnrollment]).
 func EnrollConfig(cert tls.Certificate) *tls.Config {
 	cfg := baseConfig()
 	cfg.Certificates = []tls.Certificate{cert}
-	cfg.InsecureSkipVerify = true // NOSONAR: the machine is authenticated by the token proof.
+	cfg.InsecureSkipVerify = true // NOSONAR: the agent is authenticated by the token proof.
 	return cfg
 }

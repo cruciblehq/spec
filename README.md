@@ -10,7 +10,8 @@ semantics.
 
 ## Package Layout
 
-- `affordance`: Subsystem models
+- `agent`: Protocol for talking to the agent on each machine
 - `manifest`: Resource manifest types
 - `reference`: Resource reference grammar and version constraints
 - `registry`: Registry contract types
+- `trust`: Machine identity, enrollment, and mutual TLS

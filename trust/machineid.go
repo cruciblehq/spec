@@ -15,7 +15,7 @@ const machineIDSize = 16
 // DNS suffix of every machine name.
 const machineDomain = "machine.crucible"
 
-// Identifier crux assigns to a machine when it creates it.
+// Identifier the client assigns to a machine when it creates it.
 //
 // The identifier is 16 random bytes in lowercase hexadecimal. It
 // never changes for the life of the machine and does not depend on the
@@ -27,10 +27,10 @@ func NewMachineID() MachineID {
 	return MachineID(randHex(machineIDSize))
 }
 
-// Returns the DNS name that identifies the machine in its server certificate.
+// Returns the DNS name that identifies the machine in its agent's certificate.
 //
-// crux checks this name on every connection instead of the address it dialed,
-// so port forwards and address changes do not affect identity.
+// The client checks this name on every connection instead of the address it
+// dialed, so port forwards and address changes do not affect identity.
 func (id MachineID) Name() string {
 	return fmt.Sprintf("%s.%s", id, machineDomain)
 }
