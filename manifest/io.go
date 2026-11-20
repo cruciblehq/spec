@@ -1,11 +1,10 @@
 package manifest
 
 import (
-	"os"
+	"io"
 
 	"github.com/cruciblehq/utils-go/codec"
 	"github.com/cruciblehq/utils-go/crex"
-	"github.com/cruciblehq/utils-go/file"
 )
 
 // Returns the manifest config as T.
@@ -20,98 +19,62 @@ func As[T any](m *Manifest) (T, error) {
 	return cfg, nil
 }
 
-// Reads and decodes the manifest at the given path.
-func Read(path string) (*Manifest, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, crex.SystemError("cannot read manifest", "the manifest file could not be read").
-			Reclassify(err)
-	}
+// Decodes a YAML manifest from r.
+//
+// Returns [ErrDecodeFailed] when r cannot be read or does not hold a manifest.
+func Decode(r io.Reader) (*Manifest, error) {
 	var m Manifest
-	if err := codec.Decode(data, &m, codec.YAML); err != nil {
-		return nil, crex.SystemError("cannot read manifest", "the manifest file is invalid or malformed").
-			Reclassify(crex.Wrap(ErrDecodeFailed, err))
+	if err := decode(r, &m); err != nil {
+		return nil, err
 	}
 	return &m, nil
 }
 
-// Reads and decodes the manifest from dir/crucible.yaml.
-func ReadAt(dir string) (*Manifest, error) {
-	return Read(Path(dir))
-}
-
-// Reads the manifest at path and asserts its config to T.
+// Encodes m as YAML to w.
 //
-// Returns an error if the file cannot be read, decoded, or if the config
-// type does not match T.
-func ReadAs[T any](path string) (T, error) {
-	m, err := Read(path)
-	if err != nil {
-		var zero T
-		return zero, err
-	}
-	return As[T](m)
+// Returns [ErrEncodeFailed] when m cannot be encoded. Errors from w are
+// returned as they are.
+func Encode(w io.Writer, m *Manifest) error {
+	return encode(w, m)
 }
 
-// Reads the manifest from dir/crucible.yaml and asserts its config to T.
-func ReadAsAt[T any](dir string) (T, error) {
-	return ReadAs[T](Path(dir))
-}
-
-// Encodes a manifest and writes it to the given path.
-func Write(m *Manifest, path string) error {
-	data, err := codec.Encode(m, codec.YAML)
-	if err != nil {
-		return crex.SystemError("cannot write manifest", "the manifest could not be encoded").
-			Reclassify(crex.Wrap(ErrEncodeFailed, err))
-	}
-	if err := os.WriteFile(path, data, file.DefaultFileMode); err != nil {
-		return crex.SystemError("cannot write manifest", "the manifest file could not be written").
-			Reclassify(err)
-	}
-	return nil
-}
-
-// Encodes a manifest and writes it to dir/crucible.yaml.
-func WriteAt(m *Manifest, dir string) error {
-	return Write(m, Path(dir))
-}
-
-// Reads and decodes the plan at the given path.
-func ReadPlan(path string) (*Plan, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, crex.SystemError("cannot read plan", "the plan file could not be read").
-			Reclassify(err)
-	}
+// Decodes a YAML plan from r.
+//
+// Returns [ErrDecodeFailed] when r cannot be read or does not hold a plan.
+func DecodePlan(r io.Reader) (*Plan, error) {
 	var p Plan
-	if err := codec.Decode(data, &p, codec.YAML); err != nil {
-		return nil, crex.SystemError("cannot read plan", "the plan file is invalid or malformed").
-			Reclassify(crex.Wrap(ErrDecodeFailed, err))
+	if err := decode(r, &p); err != nil {
+		return nil, err
 	}
 	return &p, nil
 }
 
-// Reads and decodes the plan from dir/plan.yaml.
-func ReadPlanAt(dir string) (*Plan, error) {
-	return ReadPlan(PlanPath(dir))
+// Encodes p as YAML to w.
+//
+// Returns [ErrEncodeFailed] when p cannot be encoded. Errors from w are
+// returned as they are.
+func EncodePlan(w io.Writer, p *Plan) error {
+	return encode(w, p)
 }
 
-// Encodes a plan and writes it to the given path.
-func WritePlan(p *Plan, path string) error {
-	data, err := codec.Encode(p, codec.YAML)
+// Reads all of r and decodes it as YAML into v.
+func decode(r io.Reader, v any) error {
+	data, err := io.ReadAll(r)
 	if err != nil {
-		return crex.SystemError("cannot write plan", "the plan could not be encoded").
-			Reclassify(crex.Wrap(ErrEncodeFailed, err))
+		return crex.Wrap(ErrDecodeFailed, err)
 	}
-	if err := os.WriteFile(path, data, file.DefaultFileMode); err != nil {
-		return crex.SystemError("cannot write plan", "the plan file could not be written").
-			Reclassify(err)
+	if err := codec.Decode(data, v, codec.YAML); err != nil {
+		return crex.Wrap(ErrDecodeFailed, err)
 	}
 	return nil
 }
 
-// Encodes a plan and writes it to dir/plan.yaml.
-func WritePlanAt(p *Plan, dir string) error {
-	return WritePlan(p, PlanPath(dir))
+// Encodes v as YAML and writes it to w.
+func encode(w io.Writer, v any) error {
+	data, err := codec.Encode(v, codec.YAML)
+	if err != nil {
+		return crex.Wrap(ErrEncodeFailed, err)
+	}
+	_, err = w.Write(data)
+	return err
 }

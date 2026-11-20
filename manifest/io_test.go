@@ -1,8 +1,9 @@
 package manifest
 
 import (
+	"bytes"
 	"errors"
-	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -20,17 +21,15 @@ func TestAs(t *testing.T) {
 	}
 }
 
-func TestManifestReadWriteRoundTrip(t *testing.T) {
+func TestManifestEncodeDecodeRoundTrip(t *testing.T) {
 	m := validManifest()
-	path := filepath.Join(t.TempDir(), "crucible.yaml")
-
-	if err := Write(&m, path); err != nil {
-		t.Fatalf("Write: %v", err)
+	var buf bytes.Buffer
+	if err := Encode(&buf, &m); err != nil {
+		t.Fatalf("Encode: %v", err)
 	}
-
-	got, err := Read(path)
+	got, err := Decode(&buf)
 	if err != nil {
-		t.Fatalf("Read: %v", err)
+		t.Fatalf("Decode: %v", err)
 	}
 	if err := got.Validate(); err != nil {
 		t.Fatalf("round-tripped manifest invalid: %v", err)
@@ -38,50 +37,23 @@ func TestManifestReadWriteRoundTrip(t *testing.T) {
 	if _, err := As[*Service](got); err != nil {
 		t.Fatalf("round-tripped config type: %v", err)
 	}
+}
 
-	svc, err := ReadAs[*Service](path)
-	if err != nil {
-		t.Fatalf("ReadAs: %v", err)
-	}
-	if len(svc.Entrypoint) == 0 {
-		t.Fatal("ReadAs service missing entrypoint")
+func TestManifestDecodeError(t *testing.T) {
+	if _, err := Decode(strings.NewReader("version: [")); !errors.Is(err, ErrDecodeFailed) {
+		t.Fatalf("Decode(malformed) = %v, want ErrDecodeFailed", err)
 	}
 }
 
-func TestManifestReadWriteAt(t *testing.T) {
-	m := validManifest()
-	dir := t.TempDir()
-
-	if err := WriteAt(&m, dir); err != nil {
-		t.Fatalf("WriteAt: %v", err)
-	}
-	if _, err := ReadAt(dir); err != nil {
-		t.Fatalf("ReadAt: %v", err)
-	}
-	if _, err := ReadAsAt[*Service](dir); err != nil {
-		t.Fatalf("ReadAsAt: %v", err)
-	}
-}
-
-func TestManifestReadErrors(t *testing.T) {
-	if _, err := Read(filepath.Join(t.TempDir(), "missing.yaml")); err == nil {
-		t.Fatal("Read of missing file should fail")
-	}
-	if _, err := ReadAs[*Service](filepath.Join(t.TempDir(), "missing.yaml")); err == nil {
-		t.Fatal("ReadAs of missing file should fail")
-	}
-}
-
-func TestPlanReadWriteRoundTrip(t *testing.T) {
+func TestPlanEncodeDecodeRoundTrip(t *testing.T) {
 	p := validPlan()
-	path := filepath.Join(t.TempDir(), "plan.yaml")
-
-	if err := WritePlan(&p, path); err != nil {
-		t.Fatalf("WritePlan: %v", err)
+	var buf bytes.Buffer
+	if err := EncodePlan(&buf, &p); err != nil {
+		t.Fatalf("EncodePlan: %v", err)
 	}
-	got, err := ReadPlan(path)
+	got, err := DecodePlan(&buf)
 	if err != nil {
-		t.Fatalf("ReadPlan: %v", err)
+		t.Fatalf("DecodePlan: %v", err)
 	}
 	if got.Version != p.Version {
 		t.Fatalf("round-tripped plan version = %d, want %d", got.Version, p.Version)
@@ -91,20 +63,8 @@ func TestPlanReadWriteRoundTrip(t *testing.T) {
 	}
 }
 
-func TestPlanReadWriteAt(t *testing.T) {
-	p := validPlan()
-	dir := t.TempDir()
-
-	if err := WritePlanAt(&p, dir); err != nil {
-		t.Fatalf("WritePlanAt: %v", err)
-	}
-	if _, err := ReadPlanAt(dir); err != nil {
-		t.Fatalf("ReadPlanAt: %v", err)
-	}
-}
-
-func TestPlanReadError(t *testing.T) {
-	if _, err := ReadPlan(filepath.Join(t.TempDir(), "missing.yaml")); err == nil {
-		t.Fatal("ReadPlan of missing file should fail")
+func TestPlanDecodeError(t *testing.T) {
+	if _, err := DecodePlan(strings.NewReader("version: [")); !errors.Is(err, ErrDecodeFailed) {
+		t.Fatalf("DecodePlan(malformed) = %v, want ErrDecodeFailed", err)
 	}
 }

@@ -1,8 +1,8 @@
 package manifest
 
 import (
+	"bytes"
 	"errors"
-	"path/filepath"
 	"testing"
 
 	"github.com/cruciblehq/utils-go/codec"
@@ -77,11 +77,11 @@ func checkManifestRoundTrip(t *testing.T, typ ResourceType, config any) {
 	if err := m.Validate(); err != nil {
 		t.Fatalf("validate: %v", err)
 	}
-	path := filepath.Join(t.TempDir(), "crucible.yaml")
-	if err := Write(&m, path); err != nil {
-		t.Fatalf("write: %v", err)
+	var buf bytes.Buffer
+	if err := Encode(&buf, &m); err != nil {
+		t.Fatalf("encode: %v", err)
 	}
-	got, err := Read(path)
+	got, err := Decode(&buf)
 	if err != nil {
 		t.Fatalf("read: %v", err)
 	}

@@ -63,3 +63,10 @@ func (e *ExecWriter) Output(ch Channel, p []byte) error {
 	}
 	return nil
 }
+
+// Returns a writer that sends each write as output on channel ch.
+//
+// Large writes are split as in [ExecWriter.Output].
+func (e *ExecWriter) Channel(ch Channel) io.Writer {
+	return &channelWriter{stream: e, channel: ch}
+}
