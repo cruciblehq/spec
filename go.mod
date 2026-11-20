@@ -3,7 +3,7 @@ module github.com/cruciblehq/spec
 go 1.25.1
 
 require (
-	github.com/cruciblehq/utils-go v0.0.0-20261110174431-c1f0c1b90143
+	github.com/cruciblehq/utils-go v0.0.0-20261120132316-d8af996aee7d
 	github.com/opencontainers/image-spec v1.1.1
 	github.com/opencontainers/runtime-spec v1.2.0
 )
