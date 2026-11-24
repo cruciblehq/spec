@@ -6,12 +6,6 @@ import (
 )
 
 func TestStateValidate(t *testing.T) {
-	validDeployment := Deployment{
-		Service:   "svc",
-		Container: "ctr",
-		Compute:   "cmp",
-		Network:   "net",
-	}
 	cases := []struct {
 		name  string
 		state State
@@ -22,19 +16,11 @@ func TestStateValidate(t *testing.T) {
 		{
 			"valid records",
 			State{
-				Version:     StateVersion,
-				Deployments: []Deployment{validDeployment},
-				Instances:   []InstanceRecord{{ID: "i", Image: "img", Provider: "local", Compute: "c"}},
-				Volumes:     []VolumeRecord{{ID: "v", Service: "s"}},
-				Networks:    []NetworkRecord{{ID: "n", Subnet: "10.0.0.0/8"}},
-				Attachments: []AttachmentRecord{{Container: "c", Network: "n"}},
+				Version:   StateVersion,
+				Instances: []InstanceRecord{{ID: "i", Image: "img", Provider: "local", Compute: "c"}},
+				Volumes:   []VolumeRecord{{ID: "v", Service: "s"}},
 			},
 			nil,
-		},
-		{
-			"invalid deployment",
-			State{Version: StateVersion, Deployments: []Deployment{{}}},
-			ErrInvalidState,
 		},
 		{
 			"instance missing field",
@@ -44,16 +30,6 @@ func TestStateValidate(t *testing.T) {
 		{
 			"volume missing field",
 			State{Version: StateVersion, Volumes: []VolumeRecord{{ID: "v"}}},
-			ErrMissingRequiredField,
-		},
-		{
-			"network missing field",
-			State{Version: StateVersion, Networks: []NetworkRecord{{ID: "n"}}},
-			ErrMissingRequiredField,
-		},
-		{
-			"attachment missing field",
-			State{Version: StateVersion, Attachments: []AttachmentRecord{{Container: "c"}}},
 			ErrMissingRequiredField,
 		},
 	}
