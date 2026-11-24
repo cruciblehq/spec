@@ -46,6 +46,8 @@ func TestError_Validate_AllCodes(t *testing.T) {
 		ErrorCodeResourceExists,
 		ErrorCodeResourceHasPublished,
 		ErrorCodeVersionExists,
+		ErrorCodeVersionPublic,
+		ErrorCodeVersionSuperseded,
 		ErrorCodeVersionPublished,
 		ErrorCodeChannelExists,
 		ErrorCodePreconditionFailed,

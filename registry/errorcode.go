@@ -14,9 +14,11 @@ const (
 	ErrorCodeNamespaceExists      ErrorCode = "namespace_exists"                // Cannot create namespace: name already in use.
 	ErrorCodeNamespaceNotEmpty    ErrorCode = "namespace_not_empty"             // Cannot delete namespace: contains resources.
 	ErrorCodeResourceExists       ErrorCode = "resource_exists"                 // Cannot create resource: name already in use within namespace.
-	ErrorCodeResourceHasPublished ErrorCode = "resource_has_published_versions" // Cannot delete resource: contains published versions.
+	ErrorCodeResourceHasPublished ErrorCode = "resource_has_published_versions" // Cannot delete resource: contains versions published on the marketplace.
 	ErrorCodeVersionExists        ErrorCode = "version_exists"                  // Cannot create version: version string already in use.
-	ErrorCodeVersionPublished     ErrorCode = "version_published"               // Cannot modify or delete version: already published and immutable.
+	ErrorCodeVersionPublic        ErrorCode = "version_public"                  // Cannot change version: it is public and final.
+	ErrorCodeVersionSuperseded    ErrorCode = "version_superseded"              // Cannot push or make public: a public version with the same major and minor is higher.
+	ErrorCodeVersionPublished     ErrorCode = "version_published"               // Cannot delete version: published on the marketplace.
 	ErrorCodeChannelExists        ErrorCode = "channel_exists"                  // Cannot create channel: name already in use.
 	ErrorCodePreconditionFailed   ErrorCode = "precondition_failed"             // Request precondition not met (e.g., If-Match header mismatch).
 	ErrorCodeInternalError        ErrorCode = "internal_error"                  // Unexpected server error occurred.
@@ -31,6 +33,8 @@ var validErrorCodes = map[ErrorCode]bool{
 	ErrorCodeResourceExists:       true,
 	ErrorCodeResourceHasPublished: true,
 	ErrorCodeVersionExists:        true,
+	ErrorCodeVersionPublic:        true,
+	ErrorCodeVersionSuperseded:    true,
 	ErrorCodeVersionPublished:     true,
 	ErrorCodeChannelExists:        true,
 	ErrorCodePreconditionFailed:   true,

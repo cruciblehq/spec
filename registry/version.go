@@ -2,14 +2,15 @@ package registry
 
 import "github.com/cruciblehq/utils-go/crex"
 
-// Mutable properties of a version for creation or update.
+// Properties of a version for creation or update.
 //
 // Used as the request body for version creation and update operations. For
 // update requests, the version field must match the URL path parameter or
-// context. Contains only fields the user can change. The media type is
-// [MediaTypeVersionInfo].
+// context. Setting Public makes a private version public, which cannot be
+// undone. The media type is [MediaTypeVersionInfo].
 type VersionInfo struct {
-	String string `codec:"string"` // Version string (e.g., "1.0.0").
+	String string `codec:"string"`           // Version string (e.g., "1.0.0").
+	Public bool   `codec:"public,omitempty"` // Whether the version is public.
 }
 
 // Validates the version info.
@@ -30,6 +31,7 @@ func (info *VersionInfo) Validate() error {
 // fields like timestamps.
 type VersionSummary struct {
 	String    string `codec:"string"`    // Version string (e.g., "1.0.0").
+	Public    bool   `codec:"public"`    // Whether the version is public.
 	CreatedAt int64  `codec:"createdAt"` // When the version was created.
 	UpdatedAt int64  `codec:"updatedAt"` // When the version was last updated.
 }
@@ -48,14 +50,15 @@ func (s *VersionSummary) Validate() error {
 // Complete version with archive details.
 //
 // The archive, size, and digest fields are null before archive upload and
-// populated afterward. Unpublished versions support archive replacement for
-// iterative development, while published versions ensure immutability for
-// stable dependency resolution. Includes scoping information to identify the
-// version's location. The media type is [MediaTypeVersion].
+// populated afterward. A private version can have its archive replaced for
+// iterative development. A public version is final, so a dependency that
+// names it always gets the same archive. Includes scoping information to
+// identify the version's location. The media type is [MediaTypeVersion].
 type Version struct {
 	Namespace string  `codec:"namespace"` // Namespace this version belongs to.
 	Resource  string  `codec:"resource"`  // Resource this version belongs to.
 	String    string  `codec:"string"`    // Version string (e.g., "1.0.0").
+	Public    bool    `codec:"public"`    // Whether the version is public.
 	Archive   *string `codec:"archive"`   // Download URL or null if not uploaded.
 	Size      *int64  `codec:"size"`      // Archive size in bytes (null if not uploaded).
 	Digest    *string `codec:"digest"`    // Archive digest (e.g., "sha256:abc...", null if not uploaded).

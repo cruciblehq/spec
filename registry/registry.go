@@ -8,8 +8,8 @@ import (
 // Interface for artifact registry operations.
 //
 // Provides hierarchical storage and retrieval of versioned artifacts organized
-// into namespaces and resources. Supports published (immutable) and unpublished
-// (mutable) versions, version channels, and compressed archive distribution.
+// into namespaces and resources. Supports private (changeable) and public
+// (final) versions, version channels, and compressed archive distribution.
 // Every operation takes a context for cancellation and timeouts.
 type Registry interface {
 
@@ -89,8 +89,9 @@ type Registry interface {
 	//
 	// If a version with the given string already exists, an error is returned.
 	// The response includes the created version's metadata. Archive fields
-	// remain null until an archive is uploaded. Versions are created in an
-	// unpublished state.
+	// remain null until an archive is uploaded. Versions are created private.
+	// If a public version with the same major and minor is higher, the
+	// operation fails with [ErrorCodeVersionSuperseded].
 	CreateVersion(ctx context.Context, namespace, resource string, info VersionInfo) (*Version, error)
 
 	// Retrieves version metadata with archive details.
@@ -100,17 +101,19 @@ type Registry interface {
 	// is returned.
 	ReadVersion(ctx context.Context, namespace, resource, version string) (*Version, error)
 
-	// Updates mutable version metadata.
+	// Updates a version.
 	//
-	// Only unpublished versions can be updated. Immutable identifiers cannot
-	// be changed. If the version does not exist or is published, the operation
-	// fails.
+	// Only private versions can be updated; a public version fails with
+	// [ErrorCodeVersionPublic]. Setting Public makes the version public, which
+	// requires an uploaded archive, a version that is not a prerelease, and no
+	// higher public version with the same major and minor
+	// ([ErrorCodeVersionSuperseded]).
 	UpdateVersion(ctx context.Context, namespace, resource, version string, info VersionInfo) (*Version, error)
 
 	// Permanently deletes a version.
 	//
-	// Only unpublished versions can be deleted. The operation is idempotent,
-	// returning success if the version does not exist.
+	// The operation is idempotent, returning success if the version does not
+	// exist.
 	DeleteVersion(ctx context.Context, namespace, resource, version string) error
 
 	// Lists all versions for a resource.
@@ -122,10 +125,11 @@ type Registry interface {
 
 	// Uploads a version archive.
 	//
-	// Uploads the archive data for a version. The archive can be replaced by
-	// uploading again. The digest is calculated from the archive data using
-	// SHA-256 for integrity verification. Returns the updated version with
-	// populated archive metadata.
+	// Uploads the archive data for a version. A private version's archive can
+	// be replaced by uploading again; a public version fails with
+	// [ErrorCodeVersionPublic]. The digest is calculated from the archive data
+	// using SHA-256 for integrity verification. Returns the updated version
+	// with populated archive metadata.
 	UploadArchive(ctx context.Context, namespace, resource, version string, archive io.Reader) (*Version, error)
 
 	// Downloads a version archive.
