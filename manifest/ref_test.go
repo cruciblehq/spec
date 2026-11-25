@@ -15,6 +15,8 @@ func TestRefValidate(t *testing.T) {
 		{"valid with id", Ref{ID: "svc", Ref: "ns/name 1.0.0"}, nil},
 		{"bad id", Ref{ID: "Bad", Ref: "ns/name 1.0.0"}, ErrInvalidRefID},
 		{"missing target", Ref{Ref: ""}, ErrMissingRefTarget},
+		{"valid path", Ref{ID: "svc", Path: "/src/svc"}, nil},
+		{"ref and path", Ref{ID: "svc", Ref: "ns/name 1.0.0", Path: "/src/svc"}, ErrRefAndPath},
 		{"bad arg key", Ref{Ref: "ns/name 1.0.0", Args: Args{"Bad-Key": "v"}}, ErrInvalidArgKey},
 	}
 	for _, c := range cases {

@@ -34,6 +34,7 @@ var (
 	ErrInvalidPlatform            = crex.New("invalid platform selector")
 	ErrInvalidRef                 = crex.New("invalid ref")
 	ErrMissingRefTarget           = crex.New("missing ref target")
+	ErrRefAndPath                 = crex.New("ref and path are both set")
 	ErrInvalidRefID               = crex.New("invalid ref id")
 	ErrInvalidArgKey              = crex.New("invalid arg key")
 	ErrInvalidParam               = crex.New("invalid param")
