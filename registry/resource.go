@@ -30,17 +30,16 @@ func (info *ResourceInfo) Validate() error {
 
 // Lightweight resource representation for listings.
 //
-// Provides resource metadata without nested version and channel details. Used
-// in namespace listings and resource lists to keep payloads compact. Includes
-// read-only fields like timestamps, statistics, and latest version information
-// to help with navigation decisions.
+// Provides resource metadata without nested version details. Used in namespace
+// listings and resource lists to keep payloads compact. Includes read-only
+// fields like timestamps, statistics, and latest version information to help
+// with navigation decisions.
 type ResourceSummary struct {
 	Name          string  `codec:"name"`          // Resource name.
 	Type          string  `codec:"type"`          // Resource type (e.g., "widget", "service").
 	Description   string  `codec:"description"`   // Description.
 	LatestVersion *string `codec:"latestVersion"` // Most recent version string (null if no versions).
 	VersionCount  int     `codec:"versionCount"`  // Number of versions for this resource.
-	ChannelCount  int     `codec:"channelCount"`  // Number of channels for this resource.
 	CreatedAt     int64   `codec:"createdAt"`     // When the resource was created.
 	UpdatedAt     int64   `codec:"updatedAt"`     // When the resource was last updated.
 }
@@ -61,20 +60,17 @@ func (s *ResourceSummary) Validate() error {
 	if err := ValidateCount(s.VersionCount); err != nil {
 		return crex.Wrap(ErrInvalidResource, err)
 	}
-	if err := ValidateCount(s.ChannelCount); err != nil {
-		return crex.Wrap(ErrInvalidResource, err)
-	}
 	if err := ValidateTimestamps(s.CreatedAt, s.UpdatedAt); err != nil {
 		return crex.Wrap(ErrInvalidResource, err)
 	}
 	return nil
 }
 
-// Complete resource with all its versions and channels.
+// Complete resource with all its versions.
 //
-// Provides comprehensive resource information including metadata, versions, and
-// channels. The versions and channels lists contain lightweight summary entries
-// without full archive details. For complete version information, fetch version
+// Provides comprehensive resource information including metadata and versions.
+// The versions list contains lightweight summary entries without full archive
+// details. For complete version information, fetch version
 // details. Includes scoping information to identify the resource's location. The
 // media type is [MediaTypeResource].
 type Resource struct {
@@ -83,7 +79,6 @@ type Resource struct {
 	Type        string           `codec:"type"`        // Resource type (e.g., "widget", "service").
 	Description string           `codec:"description"` // Description.
 	Versions    []VersionSummary `codec:"versions"`    // List of versions (summary form).
-	Channels    []ChannelSummary `codec:"channels"`    // List of channels (summary form).
 	CreatedAt   int64            `codec:"createdAt"`   // When the resource was created.
 	UpdatedAt   int64            `codec:"updatedAt"`   // When the resource was last updated.
 }
@@ -104,11 +99,6 @@ func (r *Resource) Validate() error {
 	}
 	for i := range r.Versions {
 		if err := r.Versions[i].Validate(); err != nil {
-			return crex.Wrap(ErrInvalidResource, err)
-		}
-	}
-	for i := range r.Channels {
-		if err := r.Channels[i].Validate(); err != nil {
 			return crex.Wrap(ErrInvalidResource, err)
 		}
 	}

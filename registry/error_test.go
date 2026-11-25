@@ -40,6 +40,7 @@ func TestError_Validate_Invalid_EmptyMessage(t *testing.T) {
 func TestError_Validate_AllCodes(t *testing.T) {
 	codes := []ErrorCode{
 		ErrorCodeBadRequest,
+		ErrorCodeUnauthorized,
 		ErrorCodeNotFound,
 		ErrorCodeNamespaceExists,
 		ErrorCodeNamespaceNotEmpty,
@@ -49,7 +50,6 @@ func TestError_Validate_AllCodes(t *testing.T) {
 		ErrorCodeVersionPublic,
 		ErrorCodeVersionSuperseded,
 		ErrorCodeVersionPublished,
-		ErrorCodeChannelExists,
 		ErrorCodePreconditionFailed,
 		ErrorCodeInternalError,
 	}

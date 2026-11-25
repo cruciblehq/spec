@@ -9,8 +9,8 @@ import (
 //
 // Provides hierarchical storage and retrieval of versioned artifacts organized
 // into namespaces and resources. Supports private (changeable) and public
-// (final) versions, version channels, and compressed archive distribution.
-// Every operation takes a context for cancellation and timeouts.
+// (final) versions, and compressed archive distribution. Every operation takes
+// a context for cancellation and timeouts.
 type Registry interface {
 
 	// Creates a new namespace.
@@ -55,13 +55,13 @@ type Registry interface {
 	// Resource names follow the same constraints as namespace names. If a
 	// resource with the given name already exists in the namespace, an error
 	// is returned. The response includes the created resource's metadata with
-	// empty version and channel lists.
+	// an empty version list.
 	CreateResource(ctx context.Context, namespace string, info ResourceInfo) (*Resource, error)
 
-	// Retrieves resource metadata with version and channel summaries.
+	// Retrieves resource metadata with version summaries.
 	//
 	// Returns resource information along with lightweight summaries of all
-	// versions and channels. Summaries exclude full archive details. If the
+	// versions. Summaries exclude full archive details. If the
 	// namespace or resource does not exist, an error is returned.
 	ReadResource(ctx context.Context, namespace, resource string) (*Resource, error)
 
@@ -138,40 +138,4 @@ type Registry interface {
 	// closing the reader. If the namespace, resource, or version does not
 	// exist, or if the version has no uploaded archive, an error is returned.
 	DownloadArchive(ctx context.Context, namespace, resource, version string) (io.ReadCloser, error)
-
-	// Creates a new channel.
-	//
-	// Channel names follow the same constraints as namespace names. The
-	// referenced version must exist. Returns an error if a channel with the
-	// same name already exists. The response includes the channel's metadata
-	// with the full version object it points to.
-	CreateChannel(ctx context.Context, namespace, resource string, info ChannelInfo) (*Channel, error)
-
-	// Updates a channel's mutable metadata.
-	//
-	// The target version and description can be modified. The channel name
-	// cannot be changed after creation. Returns an error if the channel does
-	// not exist. The response includes the updated channel's metadata with the
-	// full version object it points to.
-	UpdateChannel(ctx context.Context, namespace, resource, channel string, info ChannelInfo) (*Channel, error)
-
-	// Retrieves channel metadata with full version details.
-	//
-	// Returns channel information including the complete version object it
-	// currently points to, with all archive details. If the namespace, resource,
-	// or channel does not exist, an error is returned.
-	ReadChannel(ctx context.Context, namespace, resource, channel string) (*Channel, error)
-
-	// Permanently deletes a channel.
-	//
-	// The operation is idempotent, returning success if the channel does not
-	// exist.
-	DeleteChannel(ctx context.Context, namespace, resource, channel string) error
-
-	// Lists all channels for a resource.
-	//
-	// Returns a list of channel summaries including current version targets
-	// and timestamps. The list is empty if the resource has no channels. If
-	// the namespace or resource does not exist, an error is returned.
-	ListChannels(ctx context.Context, namespace, resource string) (*ChannelList, error)
 }

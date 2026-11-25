@@ -2,10 +2,9 @@
 // the Crucible artifact registry.
 //
 // The registry organizes versioned artifacts into a three-level hierarchy:
-// namespaces contain resources, resources contain versions. Channels provide
-// named pointers to specific versions within a resource. Versions are private
-// when pushed and can still change; a version made public is final. Each
-// version can hold a compressed archive artifact.
+// namespaces contain resources, resources contain versions. Versions are
+// private when pushed and can still change; a version made public is final.
+// Each version can hold a compressed archive artifact.
 //
 // Each entity in the hierarchy is represented by four types. Info types carry
 // mutable fields for create and update requests. Summary types provide

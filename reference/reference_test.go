@@ -114,20 +114,6 @@ func TestReference_Version(t *testing.T) {
 	}
 }
 
-func TestReference_Channel(t *testing.T) {
-	ref, err := Parse("namespace/name :stable", "template")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if ref.Channel() == nil {
-		t.Fatal("expected channel, got nil")
-	}
-	if *ref.Channel() != "stable" {
-		t.Errorf("expected channel %q, got %q", "stable", *ref.Channel())
-	}
-}
-
 func TestReference_Digest(t *testing.T) {
 	ref, err := Parse("namespace/name 1.0.0 sha256:abcd1234", "template")
 	if err != nil {
@@ -161,64 +147,8 @@ func TestReference_IsFrozen_False(t *testing.T) {
 	}
 }
 
-func TestReference_IsChannelBased_True(t *testing.T) {
-	ref, err := Parse("namespace/name :stable", "template")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !ref.IsChannelBased() {
-		t.Error("expected IsChannelBased to be true")
-	}
-}
-
-func TestReference_IsChannelBased_False(t *testing.T) {
-	ref, err := Parse("namespace/name 1.0.0", "template")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if ref.IsChannelBased() {
-		t.Error("expected IsChannelBased to be false")
-	}
-}
-
-func TestReference_IsVersionBased_True(t *testing.T) {
-	ref, err := Parse("namespace/name 1.0.0", "template")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !ref.IsVersionBased() {
-		t.Error("expected IsVersionBased to be true")
-	}
-}
-
-func TestReference_IsVersionBased_False(t *testing.T) {
-	ref, err := Parse("namespace/name :stable", "template")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if ref.IsVersionBased() {
-		t.Error("expected IsVersionBased to be false")
-	}
-}
-
 func TestReference_String_WithVersion(t *testing.T) {
 	ref, err := Parse("namespace/name 1.0.0", "template")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	s := ref.String()
-	if s == "" {
-		t.Error("expected non-empty string")
-	}
-}
-
-func TestReference_String_WithChannel(t *testing.T) {
-	ref, err := Parse("namespace/name :stable", "template")
 	if err != nil {
 		t.Fatal(err)
 	}

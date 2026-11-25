@@ -1,6 +1,9 @@
 package reference
 
-import "testing"
+import (
+	"errors"
+	"testing"
+)
 
 func mustParseConstraint(t *testing.T, s string) *VersionConstraint {
 	t.Helper()
@@ -537,6 +540,39 @@ func TestParseVersionConstraint_PrereleaseRejected(t *testing.T) {
 	_, err := ParseVersionConstraint("1.0.0-alpha")
 	if err == nil {
 		t.Error("expected error for prerelease version")
+	}
+}
+
+func TestParseVersionConstraint_ExactPrerelease(t *testing.T) {
+	for _, s := range []string{"1.2.3-alpha.1", "=1.2.3-alpha.1", "v1.2.3-alpha.1"} {
+		vc := mustParseConstraint(t, s)
+		if vc.String() != "=1.2.3-alpha.1" {
+			t.Errorf("%s: String() = %q, want %q", s, vc.String(), "=1.2.3-alpha.1")
+		}
+		v, ok := vc.ExactVersion()
+		if !ok {
+			t.Fatalf("%s: ExactVersion() ok = false, want true", s)
+		}
+		if v.String() != "1.2.3-alpha.1" {
+			t.Errorf("%s: ExactVersion() = %q, want %q", s, v.String(), "1.2.3-alpha.1")
+		}
+		if !mustMatch(t, vc, "1.2.3-alpha.1") {
+			t.Errorf("%s: should match 1.2.3-alpha.1", s)
+		}
+		if mustMatch(t, vc, "1.2.3-alpha.2") {
+			t.Errorf("%s: should not match 1.2.3-alpha.2", s)
+		}
+		if mustMatch(t, vc, "1.2.3") {
+			t.Errorf("%s: should not match 1.2.3", s)
+		}
+	}
+}
+
+func TestParseVersionConstraint_PrereleaseOutsideExactRejected(t *testing.T) {
+	for _, s := range []string{"^1.2.3-alpha.1", "~1.2.3-alpha.1", "!=1.2.3-alpha.1", "<=1.2.3-alpha.1", "1.2-alpha.1"} {
+		if _, err := ParseVersionConstraint(s); !errors.Is(err, ErrPrereleaseInConstraint) {
+			t.Errorf("%s: expected ErrPrereleaseInConstraint, got %v", s, err)
+		}
 	}
 }
 

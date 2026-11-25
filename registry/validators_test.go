@@ -331,39 +331,3 @@ func TestValidateReference_Invalid_Version(t *testing.T) {
 		t.Errorf("expected ErrVersionInvalid, got %v", err)
 	}
 }
-
-func TestValidateChannelReference_Valid(t *testing.T) {
-	if err := ValidateChannelReference("my-namespace", "my-resource", "stable"); err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
-}
-
-func TestValidateChannelReference_Invalid_Channel(t *testing.T) {
-	err := ValidateChannelReference("my-namespace", "my-resource", "")
-	if !errors.Is(err, ErrNameEmpty) {
-		t.Errorf("expected ErrNameEmpty, got %v", err)
-	}
-}
-
-func TestValidateChannelInfo_Valid(t *testing.T) {
-	info := ChannelInfo{Name: "stable", Version: "1.0.0"}
-	if err := ValidateChannelInfo("my-namespace", "my-resource", info); err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
-}
-
-func TestValidateChannelInfo_Invalid_ChannelName(t *testing.T) {
-	info := ChannelInfo{Name: "", Version: "1.0.0"}
-	err := ValidateChannelInfo("my-namespace", "my-resource", info)
-	if !errors.Is(err, ErrNameEmpty) {
-		t.Errorf("expected ErrNameEmpty, got %v", err)
-	}
-}
-
-func TestValidateChannelInfo_Invalid_Version(t *testing.T) {
-	info := ChannelInfo{Name: "stable", Version: "bad"}
-	err := ValidateChannelInfo("my-namespace", "my-resource", info)
-	if !errors.Is(err, ErrVersionInvalid) {
-		t.Errorf("expected ErrVersionInvalid, got %v", err)
-	}
-}

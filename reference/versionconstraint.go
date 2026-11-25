@@ -12,7 +12,7 @@ import (
 var (
 
 	// Matches version numbers with optional prefix and prerelease. Prerelease
-	// identifiers are accepted by the pattern and rejected afterward.
+	// identifiers are accepted by the pattern and checked afterward.
 	versionPattern = regexp.MustCompile(`^v?(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:-([a-zA-Z0-9.-]+))?$`)
 
 	// Matches version operators.
@@ -76,9 +76,10 @@ func (vc *VersionConstraint) ExactVersion() (*Version, bool) {
 	}
 
 	return &Version{
-		Major: c.major,
-		Minor: c.minor,
-		Patch: c.patch,
+		Major:      c.major,
+		Minor:      c.minor,
+		Patch:      c.patch,
+		Prerelease: c.prerelease,
 	}, true
 }
 
@@ -156,7 +157,9 @@ func (vc *VersionConstraint) Intersect(other *VersionConstraint) (*VersionConstr
 // Supports exact versions (1.2.3, =1.2.3), comparison operators (>, >=, <, <=,
 // !=), hyphen ranges (1.2.3 - 2.0.0), wildcards (1.x, 1.2.x), tilde constraints
 // (~1.2.3 for patch-level changes), caret constraints (^1.2.3 for minor-level
-// changes), and logical operators (|| for OR, space for AND).
+// changes), and logical operators (|| for OR, space for AND). A prerelease is
+// allowed only in an exact version (1.2.3-alpha.1, =1.2.3-alpha.1), which then
+// matches only that prerelease.
 //
 // Hyphen ranges are expanded during parsing into >= and <= constraints. For
 // example, "1.2.3 - 2.0.0" becomes ">=1.2.3 <=2.0.0".
@@ -367,7 +370,8 @@ func parseConstraint(s string) (constraint, error) {
 func parseSingleConstraint(op, version string) (constraint, error) {
 	c := constraint{operator: op}
 
-	if strings.Contains(version, "x") || strings.Contains(version, "X") {
+	core, _, _ := strings.Cut(version, "-")
+	if strings.Contains(core, "x") || strings.Contains(core, "X") {
 		return parseWildcard(fmt.Sprintf("%s%s", op, version))
 	}
 
@@ -401,7 +405,13 @@ func parseSingleConstraint(op, version string) (constraint, error) {
 	}
 
 	if match[4] != "" {
-		return c, crex.Wrap(ErrInvalidReference, ErrPrereleaseInConstraint)
+		if op != opEqual || !c.patchSet {
+			return c, crex.Wrap(ErrInvalidReference, ErrPrereleaseInConstraint)
+		}
+		if !prereleasePattern.MatchString(match[4]) {
+			return c, crex.Wrap(ErrInvalidReference, ErrInvalidPrereleaseFormat)
+		}
+		c.prerelease = match[4]
 	}
 
 	return c, nil

@@ -7,14 +7,8 @@ import (
 	"github.com/cruciblehq/utils-go/crex"
 )
 
-var (
-
-	// Channel: colon prefix, lowercase alphanumeric with hyphens.
-	channelPattern = regexp.MustCompile(`^:[a-z][a-z0-9-]*$`)
-
-	// Digest: algorithm:hexhash (e.g., sha256:abc123).
-	digestPattern = regexp.MustCompile(`^[a-z0-9]+:[a-f0-9]+$`)
-)
+// Digest: algorithm:hexhash (e.g., sha256:abc123).
+var digestPattern = regexp.MustCompile(`^[a-z0-9]+:[a-f0-9]+$`)
 
 // Whitespace-tokenized reference string parser.
 type referenceParser struct {
@@ -25,7 +19,7 @@ type referenceParser struct {
 // Parses the tokens into a Reference.
 func (p *referenceParser) parse(contextType string) (*Reference, error) {
 
-	// Find where the identifier ends and version/channel begins
+	// Find where the identifier ends and the version begins
 	idEnd := p.findIdentifierEnd()
 	if idEnd == 0 {
 		return nil, crex.Wrap(ErrInvalidReference, ErrEmptyReference)
@@ -48,7 +42,7 @@ func (p *referenceParser) parse(contextType string) (*Reference, error) {
 	// Advance past identifier tokens
 	p.pos = idEnd
 
-	if err := p.parseVersionOrChannel(ref); err != nil {
+	if err := p.parseVersion(ref); err != nil {
 		return nil, err
 	}
 
@@ -65,12 +59,9 @@ func (p *referenceParser) parse(contextType string) (*Reference, error) {
 
 // Finds the end position of identifier tokens.
 //
-// The identifier ends when we encounter a version constraint, channel, or digest.
+// The identifier ends when we encounter a version constraint or digest.
 func (p *referenceParser) findIdentifierEnd() int {
 	for i, tok := range p.tokens {
-		if channelPattern.MatchString(tok) {
-			return i
-		}
 		if digestPattern.MatchString(tok) {
 			return i
 		}
@@ -103,22 +94,10 @@ func (p *referenceParser) remaining() int {
 	return len(p.tokens) - p.pos
 }
 
-// Parses version constraint or channel (required).
-func (p *referenceParser) parseVersionOrChannel(ref *Reference) error {
-	tok, ok := p.peek()
-	if !ok {
-		return crex.Wrap(ErrInvalidReference, ErrMissingVersionChannel)
-	}
-
-	// Check for channel
-	if channelPattern.MatchString(tok) {
-		channel := strings.TrimPrefix(tok, ":")
-		ref.channel = &channel
-		p.next()
-		return nil
-	}
-
-	// Parse version constraint (may span multiple tokens)
+// Parses the version constraint (required).
+//
+// The constraint may span multiple tokens and ends at the digest, if any.
+func (p *referenceParser) parseVersion(ref *Reference) error {
 	var versionTokens []string
 	for p.remaining() > 0 {
 		tok, _ := p.peek()
@@ -130,7 +109,7 @@ func (p *referenceParser) parseVersionOrChannel(ref *Reference) error {
 	}
 
 	if len(versionTokens) == 0 {
-		return crex.Wrap(ErrInvalidReference, ErrMissingVersionChannel)
+		return crex.Wrap(ErrInvalidReference, ErrMissingVersion)
 	}
 
 	versionStr := strings.Join(versionTokens, " ")

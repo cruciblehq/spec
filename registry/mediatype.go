@@ -22,13 +22,10 @@ const (
 	MediaTypeNamespace     mediatype.MediaType = "application/vnd.crucible.namespace.v0"      // Complete namespace with resource summaries.
 	MediaTypeNamespaceList mediatype.MediaType = "application/vnd.crucible.namespace-list.v0" // Collection of namespace summaries.
 	MediaTypeResourceInfo  mediatype.MediaType = "application/vnd.crucible.resource-info.v0"  // Resource create/update requests.
-	MediaTypeResource      mediatype.MediaType = "application/vnd.crucible.resource.v0"       // Complete resource with version/channel summaries.
+	MediaTypeResource      mediatype.MediaType = "application/vnd.crucible.resource.v0"       // Complete resource with version summaries.
 	MediaTypeResourceList  mediatype.MediaType = "application/vnd.crucible.resource-list.v0"  // Collection of resource summaries.
 	MediaTypeVersionInfo   mediatype.MediaType = "application/vnd.crucible.version-info.v0"   // Version create/update requests.
 	MediaTypeVersion       mediatype.MediaType = "application/vnd.crucible.version.v0"        // Complete version with archive details.
 	MediaTypeVersionList   mediatype.MediaType = "application/vnd.crucible.version-list.v0"   // Collection of version summaries.
-	MediaTypeChannelInfo   mediatype.MediaType = "application/vnd.crucible.channel-info.v0"   // Channel create/update requests.
-	MediaTypeChannel       mediatype.MediaType = "application/vnd.crucible.channel.v0"        // Complete channel with full version object.
-	MediaTypeChannelList   mediatype.MediaType = "application/vnd.crucible.channel-list.v0"   // Collection of channel summaries.
 	MediaTypeArchive       mediatype.MediaType = "application/vnd.crucible.archive.v0"        // Binary archive data (tar.zst format).
 )

@@ -109,20 +109,6 @@ func TestResourceSummary_Validate_Invalid_NegativeVersionCount(t *testing.T) {
 	}
 }
 
-func TestResourceSummary_Validate_Invalid_NegativeChannelCount(t *testing.T) {
-	s := ResourceSummary{
-		Name:         "my-resource",
-		Type:         "widget",
-		ChannelCount: -1,
-		CreatedAt:    1,
-		UpdatedAt:    1,
-	}
-	err := s.Validate()
-	if !errors.Is(err, ErrInvalidResource) {
-		t.Errorf("expected ErrInvalidResource, got %v", err)
-	}
-}
-
 func TestResourceSummary_Validate_Invalid_Timestamps(t *testing.T) {
 	s := ResourceSummary{
 		Name:      "my-resource",
@@ -149,16 +135,13 @@ func TestResource_Validate_Valid(t *testing.T) {
 	}
 }
 
-func TestResource_Validate_Valid_WithVersionsAndChannels(t *testing.T) {
+func TestResource_Validate_Valid_WithVersions(t *testing.T) {
 	r := Resource{
 		Namespace: "my-namespace",
 		Name:      "my-resource",
 		Type:      "widget",
 		Versions: []VersionSummary{
 			{String: "1.0.0", CreatedAt: 1, UpdatedAt: 1},
-		},
-		Channels: []ChannelSummary{
-			{Name: "stable", Version: "1.0.0", CreatedAt: 1, UpdatedAt: 1},
 		},
 		CreatedAt: 1,
 		UpdatedAt: 1,
@@ -231,23 +214,6 @@ func TestResource_Validate_Invalid_NestedVersion(t *testing.T) {
 		Type:      "widget",
 		Versions: []VersionSummary{
 			{String: "bad", CreatedAt: 1, UpdatedAt: 1},
-		},
-		CreatedAt: 1,
-		UpdatedAt: 1,
-	}
-	err := r.Validate()
-	if !errors.Is(err, ErrInvalidResource) {
-		t.Errorf("expected ErrInvalidResource, got %v", err)
-	}
-}
-
-func TestResource_Validate_Invalid_NestedChannel(t *testing.T) {
-	r := Resource{
-		Namespace: "my-namespace",
-		Name:      "my-resource",
-		Type:      "widget",
-		Channels: []ChannelSummary{
-			{Name: "", Version: "1.0.0", CreatedAt: 1, UpdatedAt: 1},
 		},
 		CreatedAt: 1,
 		UpdatedAt: 1,

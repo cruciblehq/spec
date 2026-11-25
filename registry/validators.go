@@ -19,7 +19,7 @@ var (
 	digestPattern = regexp.MustCompile(`^[a-z0-9]+:[a-f0-9]+$`)
 )
 
-// Checks that a name is valid for a namespace, resource, or channel.
+// Checks that a name is valid for a namespace or resource.
 //
 // Names may include lowercase letters, digits, and hyphens, must start and end
 // with an alphanumeric character, and must not exceed 63 characters.
@@ -156,34 +156,4 @@ func ValidateReference(namespace, resource, version string) error {
 		return err
 	}
 	return ValidateVersionString(version)
-}
-
-// Validates a channel reference (namespace + resource + channel).
-//
-// Ensures namespace, resource, and channel names all follow naming conventions.
-func ValidateChannelReference(namespace, resource, channel string) error {
-	if err := ValidateName(namespace); err != nil {
-		return err
-	}
-	if err := ValidateName(resource); err != nil {
-		return err
-	}
-	return ValidateName(channel)
-}
-
-// Validates channel info (namespace + resource + channel name + version).
-//
-// Ensures namespace, resource, and channel names follow naming conventions,
-// and the target version string is a valid semantic version.
-func ValidateChannelInfo(namespace, resource string, info ChannelInfo) error {
-	if err := ValidateName(namespace); err != nil {
-		return err
-	}
-	if err := ValidateName(resource); err != nil {
-		return err
-	}
-	if err := ValidateName(info.Name); err != nil {
-		return err
-	}
-	return ValidateVersionString(info.Version)
 }

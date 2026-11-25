@@ -779,11 +779,42 @@ func TestConstraint_String_CaretPartial(t *testing.T) {
 	}
 }
 
-func TestConstraint_Matches_PrereleaseNeverMatches(t *testing.T) {
+func TestConstraint_Matches_PrereleaseNotMatchedByStableExact(t *testing.T) {
 	c := constraint{operator: "=", major: 1, minor: 2, patch: 3, minorSet: true, patchSet: true}
 	v := mustParseVersion(t, "1.2.3-alpha.1")
 	if c.matches(v) {
 		t.Error("prerelease version should not match constraint")
+	}
+}
+
+func TestConstraint_Matches_ExactPrerelease(t *testing.T) {
+	c := constraint{operator: "=", major: 1, minor: 2, patch: 3, minorSet: true, patchSet: true, prerelease: "alpha.1"}
+	v := mustParseVersion(t, "1.2.3-alpha.1")
+	if !c.matches(v) {
+		t.Error("exact prerelease constraint should match the same prerelease")
+	}
+}
+
+func TestConstraint_Matches_ExactPrereleaseRejectsOtherPrerelease(t *testing.T) {
+	c := constraint{operator: "=", major: 1, minor: 2, patch: 3, minorSet: true, patchSet: true, prerelease: "alpha.1"}
+	v := mustParseVersion(t, "1.2.3-alpha.2")
+	if c.matches(v) {
+		t.Error("exact prerelease constraint should not match another prerelease")
+	}
+}
+
+func TestConstraint_Matches_ExactPrereleaseRejectsStable(t *testing.T) {
+	c := constraint{operator: "=", major: 1, minor: 2, patch: 3, minorSet: true, patchSet: true, prerelease: "alpha.1"}
+	v := mustParseVersion(t, "1.2.3")
+	if c.matches(v) {
+		t.Error("exact prerelease constraint should not match a stable version")
+	}
+}
+
+func TestConstraint_String_ExactPrerelease(t *testing.T) {
+	c := constraint{operator: "=", major: 1, minor: 2, patch: 3, minorSet: true, patchSet: true, prerelease: "alpha.1"}
+	if got := c.String(); got != "=1.2.3-alpha.1" {
+		t.Errorf("String() = %q, want %q", got, "=1.2.3-alpha.1")
 	}
 }
 

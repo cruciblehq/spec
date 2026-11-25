@@ -83,9 +83,9 @@ func TestReferenceParser_Parse_RegistryNamespaceNameAndVersion(t *testing.T) {
 	}
 }
 
-func TestReferenceParser_Parse_WithChannel(t *testing.T) {
+func TestReferenceParser_Parse_WithExactPrerelease(t *testing.T) {
 	p := &referenceParser{
-		tokens: []string{"namespace/name", ":stable"},
+		tokens: []string{"namespace/name", "1.2.3-alpha.1"},
 	}
 
 	ref, err := p.parse("template")
@@ -93,14 +93,23 @@ func TestReferenceParser_Parse_WithChannel(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if ref.channel == nil {
-		t.Fatal("expected channel, got nil")
+	v, ok := ref.version.ExactVersion()
+	if !ok {
+		t.Fatal("expected exact version")
 	}
-	if *ref.channel != "stable" {
-		t.Errorf("expected channel %q, got %q", "stable", *ref.channel)
+	if v.String() != "1.2.3-alpha.1" {
+		t.Errorf("expected version %q, got %q", "1.2.3-alpha.1", v.String())
 	}
-	if ref.version != nil {
-		t.Error("expected version to be nil")
+}
+
+func TestReferenceParser_Parse_ColonTokenRejected(t *testing.T) {
+	p := &referenceParser{
+		tokens: []string{"namespace/name", ":stable"},
+	}
+
+	_, err := p.parse("template")
+	if err == nil {
+		t.Fatal("expected error")
 	}
 }
 
@@ -134,24 +143,6 @@ func TestReferenceParser_Parse_WithDigest(t *testing.T) {
 	}
 }
 
-func TestReferenceParser_Parse_ChannelWithDigest(t *testing.T) {
-	p := &referenceParser{
-		tokens: []string{"namespace/name", ":stable", "sha256:abcd1234"},
-	}
-
-	ref, err := p.parse("template")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if ref.channel == nil {
-		t.Fatal("expected channel, got nil")
-	}
-	if ref.digest == nil {
-		t.Fatal("expected digest, got nil")
-	}
-}
-
 func TestReferenceParser_Parse_EmptyTokens(t *testing.T) {
 	p := &referenceParser{
 		tokens: []string{},
@@ -179,6 +170,9 @@ func TestReferenceParser_Parse_MissingVersion(t *testing.T) {
 
 	if !errors.Is(err, ErrInvalidReference) {
 		t.Errorf("expected ErrInvalidReference, got %v", err)
+	}
+	if !errors.Is(err, ErrMissingVersion) {
+		t.Errorf("expected ErrMissingVersion, got %v", err)
 	}
 }
 
@@ -223,17 +217,6 @@ func TestReferenceParser_FindIdentifierEnd_WithVersion(t *testing.T) {
 	}
 }
 
-func TestReferenceParser_FindIdentifierEnd_WithChannel(t *testing.T) {
-	p := &referenceParser{
-		tokens: []string{"namespace/name", ":stable"},
-	}
-
-	end := p.findIdentifierEnd()
-	if end != 1 {
-		t.Errorf("expected end 1, got %d", end)
-	}
-}
-
 func TestReferenceParser_FindIdentifierEnd_WithDigest(t *testing.T) {
 	p := &referenceParser{
 		tokens: []string{"namespace/name", "sha256:abcd1234"},
@@ -256,7 +239,7 @@ func TestReferenceParser_FindIdentifierEnd_WithTypeAndVersion(t *testing.T) {
 	}
 }
 
-func TestReferenceParser_FindIdentifierEnd_NoVersionOrChannel(t *testing.T) {
+func TestReferenceParser_FindIdentifierEnd_NoVersion(t *testing.T) {
 	p := &referenceParser{
 		tokens: []string{"namespace/name"},
 	}
@@ -335,55 +318,30 @@ func TestReferenceParser_Remaining(t *testing.T) {
 	}
 }
 
-func TestReferenceParser_ParseVersionOrChannel_Version(t *testing.T) {
+func TestReferenceParser_ParseVersion(t *testing.T) {
 	p := &referenceParser{
 		tokens: []string{"1.0.0"},
 		pos:    0,
 	}
 
 	ref := &Reference{}
-	if err := p.parseVersionOrChannel(ref); err != nil {
+	if err := p.parseVersion(ref); err != nil {
 		t.Fatal(err)
 	}
 
 	if ref.version == nil {
 		t.Fatal("expected version, got nil")
 	}
-	if ref.channel != nil {
-		t.Error("expected channel to be nil")
-	}
 }
 
-func TestReferenceParser_ParseVersionOrChannel_Channel(t *testing.T) {
-	p := &referenceParser{
-		tokens: []string{":stable"},
-		pos:    0,
-	}
-
-	ref := &Reference{}
-	if err := p.parseVersionOrChannel(ref); err != nil {
-		t.Fatal(err)
-	}
-
-	if ref.channel == nil {
-		t.Fatal("expected channel, got nil")
-	}
-	if *ref.channel != "stable" {
-		t.Errorf("expected channel %q, got %q", "stable", *ref.channel)
-	}
-	if ref.version != nil {
-		t.Error("expected version to be nil")
-	}
-}
-
-func TestReferenceParser_ParseVersionOrChannel_MultipleTokens(t *testing.T) {
+func TestReferenceParser_ParseVersion_MultipleTokens(t *testing.T) {
 	p := &referenceParser{
 		tokens: []string{">=1.0.0", "<2.0.0"},
 		pos:    0,
 	}
 
 	ref := &Reference{}
-	if err := p.parseVersionOrChannel(ref); err != nil {
+	if err := p.parseVersion(ref); err != nil {
 		t.Fatal(err)
 	}
 
@@ -392,14 +350,14 @@ func TestReferenceParser_ParseVersionOrChannel_MultipleTokens(t *testing.T) {
 	}
 }
 
-func TestReferenceParser_ParseVersionOrChannel_StopsAtDigest(t *testing.T) {
+func TestReferenceParser_ParseVersion_StopsAtDigest(t *testing.T) {
 	p := &referenceParser{
 		tokens: []string{"1.0.0", "sha256:abcd1234"},
 		pos:    0,
 	}
 
 	ref := &Reference{}
-	if err := p.parseVersionOrChannel(ref); err != nil {
+	if err := p.parseVersion(ref); err != nil {
 		t.Fatal(err)
 	}
 
@@ -408,14 +366,14 @@ func TestReferenceParser_ParseVersionOrChannel_StopsAtDigest(t *testing.T) {
 	}
 }
 
-func TestReferenceParser_ParseVersionOrChannel_Empty(t *testing.T) {
+func TestReferenceParser_ParseVersion_Empty(t *testing.T) {
 	p := &referenceParser{
 		tokens: []string{},
 		pos:    0,
 	}
 
 	ref := &Reference{}
-	err := p.parseVersionOrChannel(ref)
+	err := p.parseVersion(ref)
 	if err == nil {
 		t.Fatal("expected error")
 	}

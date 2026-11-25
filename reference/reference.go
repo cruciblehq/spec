@@ -15,7 +15,6 @@ import (
 type Reference struct {
 	Identifier                    // Resource identifier (registry, namespace, name).
 	version    *VersionConstraint // Semantic version constraint.
-	channel    *string            // The release track.
 	digest     *Digest            // Content digest for pinning to an exact version.
 }
 
@@ -25,17 +24,15 @@ type Reference struct {
 // string does not include one, or to validate the type when it does. When
 // the reference string includes a type, it must match the context type. The
 // expected string format is [<type>] [[[registry/]namespace/]name]
-// (<version-constraint> | <channel>) [<digest>]. The type is optional and
-// must be lowercase alphabetic. When omitted, the context type is used. When
-// present, it must match the context type exactly. The location is a single
-// token with up to three slash-separated segments (registry/namespace/name).
-// When segments are omitted, the corresponding fields are empty. Callers
-// apply defaults where needed. Either a version constraint or a channel is
-// required, but not both. Version constraints may span multiple tokens (e.g.,
-// ">=1.0.0 <2.0.0"). Channels are prefixed with a colon (e.g., ":stable").
-// The digest is optional and follows the format algorithm:hash (e.g.,
-// "sha256:abcd1234"). When present, it freezes the reference to a specific
-// content version.
+// <version-constraint> [<digest>]. The type is optional and must be lowercase
+// alphabetic. When omitted, the context type is used. When present, it must
+// match the context type exactly. The location is a single token with up to
+// three slash-separated segments (registry/namespace/name). When segments are
+// omitted, the corresponding fields are empty. Callers apply defaults where
+// needed. A version constraint is required and may span multiple tokens
+// (e.g., ">=1.0.0 <2.0.0"). The digest is optional and follows the format
+// algorithm:hash (e.g., "sha256:abcd1234"). When present, it freezes the
+// reference to a specific content version.
 func Parse(s, contextType string) (*Reference, error) {
 	p := &referenceParser{
 		tokens: strings.Fields(s),
@@ -43,39 +40,30 @@ func Parse(s, contextType string) (*Reference, error) {
 	return p.parse(contextType)
 }
 
-// Creates a reference from an identifier, version or channel, and optional
+// Creates a reference from an identifier, version constraint, and optional
 // digest.
 //
 // Useful for programmatically building references when you already have the
 // parsed components, avoiding the overhead of formatting and re-parsing a
-// reference string. The versionOrChannel parameter should be either a version
-// constraint string (e.g., "1.2.3", ">=1.0.0 <2.0.0") or a channel name
-// (e.g., ":stable", ":latest"). The digest parameter is optional. When provided,
-// the reference becomes frozen, pointing to an exact immutable resource version.
-func New(id *Identifier, versionOrChannel string, digest *Digest) (*Reference, error) {
+// reference string. The version parameter is a version constraint string
+// (e.g., "1.2.3", ">=1.0.0 <2.0.0"). The digest parameter is optional. When
+// provided, the reference becomes frozen, pointing to an exact immutable
+// resource version.
+func New(id *Identifier, version string, digest *Digest) (*Reference, error) {
 	if id == nil {
 		return nil, crex.Wrap(ErrInvalidReference, ErrEmptyReference)
 	}
 
-	ref := &Reference{
+	vc, err := ParseVersionConstraint(version)
+	if err != nil {
+		return nil, crex.Wrap(ErrInvalidReference, err)
+	}
+
+	return &Reference{
 		Identifier: *id,
+		version:    vc,
 		digest:     digest,
-	}
-
-	// Check for channel using the same pattern as the parser
-	if channelPattern.MatchString(versionOrChannel) {
-		channelName := strings.TrimPrefix(versionOrChannel, ":")
-		ref.channel = &channelName
-	} else {
-		// Parse as version constraint
-		vc, err := ParseVersionConstraint(versionOrChannel)
-		if err != nil {
-			return nil, crex.Wrap(ErrInvalidReference, err)
-		}
-		ref.version = vc
-	}
-
-	return ref, nil
+	}, nil
 }
 
 // Returns a copy of this reference with defaults applied for any empty fields.
@@ -89,14 +77,9 @@ func (r *Reference) WithDefaults(defaultRegistry, defaultNamespace string) *Refe
 	return &clone
 }
 
-// Semantic version constraint. Nil if channel-based.
+// Semantic version constraint.
 func (r *Reference) Version() *VersionConstraint {
 	return r.version
-}
-
-// Named release track. Nil if version-based.
-func (r *Reference) Channel() *string {
-	return r.channel
 }
 
 // Cryptographic hash for content verification. Nil if not frozen.
@@ -111,20 +94,10 @@ func (r *Reference) IsFrozen() bool {
 	return r.digest != nil
 }
 
-// Whether the reference uses a channel instead of a version constraint.
-func (r *Reference) IsChannelBased() bool {
-	return r.channel != nil
-}
-
-// Whether the reference uses a version constraint.
-func (r *Reference) IsVersionBased() bool {
-	return r.version != nil
-}
-
 // Returns a string representation of the reference.
 //
 // Includes only the fields that are set. Registry and namespace appear only
-// when present on the underlying identifier. Version or channel is included
+// when present on the underlying identifier. The version constraint is included
 // when set, and digest is appended if present. This is not necessarily a
 // canonical form that parses back to the same reference. A reference parsed
 // without applying defaults may omit the registry and namespace.
@@ -136,10 +109,7 @@ func (r *Reference) String() string {
 
 	sb.WriteString(r.Identifier.String())
 
-	if r.IsChannelBased() {
-		sb.WriteString(" :")
-		sb.WriteString(*r.channel)
-	} else if r.IsVersionBased() {
+	if r.version != nil {
 		sb.WriteByte(' ')
 		sb.WriteString(r.version.String())
 	}

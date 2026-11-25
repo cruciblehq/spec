@@ -55,9 +55,9 @@ func (s *NamespaceSummary) Validate() error {
 // Complete namespace with its resource listings.
 //
 // Groups resources under one name. The resources list
-// contains lightweight [ResourceSummary] entries without full version and channel
-// details. For complete resource information, fetch individual resources. The
-// media type is [MediaTypeNamespace].
+// contains lightweight [ResourceSummary] entries without full version details.
+// For complete resource information, fetch individual resources. The media type
+// is [MediaTypeNamespace].
 type Namespace struct {
 	Name        string            `codec:"name"`        // Namespace name.
 	Description string            `codec:"description"` // Description.

@@ -20,5 +20,4 @@ var (
 	ErrInvalidNamespace  = crex.New("invalid namespace")
 	ErrInvalidResource   = crex.New("invalid resource")
 	ErrInvalidVersion    = crex.New("invalid version")
-	ErrInvalidChannel    = crex.New("invalid channel")
 )

@@ -33,23 +33,26 @@ const (
 //	~	tilde range, allows patch changes
 //	^	caret range, allows minor changes within major
 //
-// Pre-release and build metadata are not supported in constraints.
+// Build metadata is not supported in constraints. A prerelease is supported
+// only in an exact version (= with major, minor, and patch set).
 type constraint struct {
-	operator string // The comparison operator.
-	major    int    // The major version (always set).
-	minor    int    // The minor version (only valid if minorSet is true).
-	patch    int    // The patch version (only valid if patchSet is true).
-	minorSet bool   // Whether the minor version is set.
-	patchSet bool   // Whether the patch version is set.
+	operator   string // The comparison operator.
+	major      int    // The major version (always set).
+	minor      int    // The minor version (only valid if minorSet is true).
+	patch      int    // The patch version (only valid if patchSet is true).
+	minorSet   bool   // Whether the minor version is set.
+	patchSet   bool   // Whether the patch version is set.
+	prerelease string // Prerelease of an exact version, or empty.
 }
 
 // Whether a version satisfies this constraint.
 //
-// Prerelease versions never match constraints. A prerelease like "1.2.3-alpha"
-// must be explicitly selected via a channel, not a version constraint.
+// A prerelease version matches only an exact constraint with the same
+// prerelease, so a prerelease like "1.2.3-alpha.1" is selected by its exact
+// version. An exact prerelease constraint matches only that prerelease.
 func (c constraint) matches(v *Version) bool {
-	if v.Prerelease != "" {
-		return false
+	if v.Prerelease != "" || c.prerelease != "" {
+		return c.operator == opEqual && c.prerelease == v.Prerelease && c.matchEqual(v)
 	}
 
 	switch c.operator {
@@ -230,6 +233,11 @@ func (c constraint) String() string {
 	if c.patchSet {
 		b.WriteByte('.')
 		b.WriteString(strconv.Itoa(c.patch))
+	}
+
+	if c.prerelease != "" {
+		b.WriteByte('-')
+		b.WriteString(c.prerelease)
 	}
 
 	return b.String()

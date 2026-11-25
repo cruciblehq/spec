@@ -18,9 +18,6 @@ func TestPaths(t *testing.T) {
 		{VersionListPath("ns", "res"), "/namespaces/ns/resources/res/versions"},
 		{VersionPath("ns", "res", "1.0.0"), "/namespaces/ns/resources/res/versions/1.0.0"},
 		{ArchivePath("ns", "res", "1.0.0"), "/namespaces/ns/resources/res/versions/1.0.0/archive"},
-		{ChannelListPath("ns", "res"), "/namespaces/ns/resources/res/channels"},
-		{ChannelPath("ns", "res", "stable"), "/namespaces/ns/resources/res/channels/stable"},
-		{ChannelArchivePath("ns", "res", "stable"), "/namespaces/ns/resources/res/channels/stable/archive"},
 	}
 	for _, tt := range tests {
 		if tt.got != tt.want {
