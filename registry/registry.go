@@ -112,8 +112,8 @@ type Registry interface {
 
 	// Permanently deletes a version.
 	//
-	// The operation is idempotent, returning success if the version does not
-	// exist.
+	// A public version cannot be deleted and fails with [ErrorCodeVersionPublic].
+	// The operation is idempotent.
 	DeleteVersion(ctx context.Context, namespace, resource, version string) error
 
 	// Lists all versions for a resource.

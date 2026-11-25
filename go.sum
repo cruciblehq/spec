@@ -1,8 +1,9 @@
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
-github.com/cruciblehq/utils-go v0.0.0-20261120132316-d8af996aee7d h1:R7hzDeKJGpAOkL6jFSlS97XeAhBaL2OIUeWUYp3irIA=
-github.com/cruciblehq/utils-go v0.0.0-20261120132316-d8af996aee7d/go.mod h1:aRYEXgnI/sv6wZraDMjNHZrF2I8n1zSi8cUsF1TFrZI=
+github.com/cruciblehq/utils-go v0.0.0-20261125183600-ea62fb1fb4a9 h1:cbxx0qPA4sopI2MvC5yx7ILNQPKiIgBLke7DKBnUwXA=
+github.com/cruciblehq/utils-go v0.0.0-20261125183600-ea62fb1fb4a9/go.mod h1:o1/d5/TOuxjMuimpjfBefvWvKwNRq5PbVS6tqRjYzoo=
 github.com/go-viper/mapstructure/v2 v2.5.0 h1:vM5IJoUAy3d7zRSVtIwQgBj7BiWtMPfmPEgAXnvj1Ro=
 github.com/go-viper/mapstructure/v2 v2.5.0/go.mod h1:oJDH3BJKyqBA2TXFhDsKDGDTlndYOZ6rGS0BRZIxGhM=
+github.com/klauspost/compress v1.18.4 h1:RPhnKRAQ4Fh8zU2FY/6ZFDwTVTxgJ/EMydqSTzE9a2c=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
 github.com/kr/pretty v0.3.1/go.mod h1:hoEshYVHaxMs3cyo3Yncou5ZscifuDolrwPKZanG3xk=
 github.com/kr/text v0.2.0 h1:5Nx0Ya0ZqY2ygV366QzturHI13Jq95ApcVaJBhpS+AY=

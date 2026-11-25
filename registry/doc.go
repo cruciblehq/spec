@@ -25,6 +25,12 @@
 // entity types, including archive upload and download. A client implements it
 // by calling a registry over HTTP, and a server implements it over its store.
 //
+// The package also provides that HTTP client ([Client]), version resolution
+// ([ResolveVersion]), and pulling through a local archive cache ([Pull], with
+// the cache in package cache). [Source] applies a default registry and
+// namespace to references, and pulls and pushes resources through a local
+// cache directory. Pushing creates the resource and version when needed.
+//
 // All wire types implement a Validate method that checks field constraints:
 // name format, version string format, timestamp ordering, resource type,
 // archive field consistency, digest format, and count bounds.
