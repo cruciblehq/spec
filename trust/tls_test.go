@@ -9,8 +9,6 @@ import (
 	"net"
 	"testing"
 	"time"
-
-	"github.com/cruciblehq/utils-go/pki"
 )
 
 type session struct {
@@ -70,7 +68,7 @@ func tlsCert(key ed25519.PrivateKey, chain ...*x509.Certificate) tls.Certificate
 func selfSigned(t *testing.T) tls.Certificate {
 	t.Helper()
 	pub, key, _ := ed25519.GenerateKey(rand.Reader)
-	return tlsCert(key, createCert(t, pki.LeafTemplate("machine", validFor(ClientLifetime), x509.ExtKeyUsageServerAuth), nil, pub, key))
+	return tlsCert(key, createCert(t, LeafTemplate("machine", validFor(ClientLifetime), x509.ExtKeyUsageServerAuth), nil, pub, key))
 }
 
 func serverConfig(ca testCA, cert tls.Certificate, crl *x509.RevocationList) *tls.Config {

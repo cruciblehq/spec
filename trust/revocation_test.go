@@ -6,8 +6,6 @@ import (
 	"errors"
 	"math/big"
 	"testing"
-
-	"github.com/cruciblehq/utils-go/pki"
 )
 
 func (ca testCA) revocations(t *testing.T, number int64, revoked ...*x509.Certificate) []byte {
@@ -16,7 +14,7 @@ func (ca testCA) revocations(t *testing.T, number int64, revoked ...*x509.Certif
 	for _, cert := range revoked {
 		entries = append(entries, x509.RevocationListEntry{SerialNumber: cert.SerialNumber, RevocationTime: testNow})
 	}
-	crl, err := pki.SignRevocationList(number, pki.Validity{NotBefore: testNow, NotAfter: testNow.Add(IssuerLifetime)}, entries, ca.root, ca.rootKey)
+	crl, err := SignRevocationList(number, Validity{NotBefore: testNow, NotAfter: testNow.Add(IssuerLifetime)}, entries, ca.root, ca.rootKey)
 	if err != nil {
 		t.Fatal(err)
 	}

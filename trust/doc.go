@@ -20,4 +20,8 @@
 // Every key is Ed25519. Every connection uses TLS 1.3 with the hybrid X25519
 // and ML-KEM-768 key exchange ([ServerConfig], [ClientConfig], and
 // [EnrollConfig]).
+//
+// The package also provides the certificate templates, signing, and key
+// encoding that both sides use ([AuthorityTemplate], [LeafTemplate], [Sign],
+// [SignRevocationList], [EncodeKey], and [DecodeKey]).
 package trust

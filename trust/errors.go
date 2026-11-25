@@ -9,4 +9,5 @@ var (
 	ErrInvalidEnrollment  = crex.New("invalid enrollment")
 	ErrInvalidChain       = crex.New("invalid certificate chain")
 	ErrRevoked            = crex.New("certificate revoked")
+	ErrInvalidKey         = crex.New("invalid key")
 )

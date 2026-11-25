@@ -10,8 +10,6 @@ import (
 	"errors"
 	"testing"
 	"time"
-
-	"github.com/cruciblehq/utils-go/pki"
 )
 
 var testNow = time.Date(2025, 6, 1, 0, 0, 0, 0, time.UTC)
@@ -25,13 +23,13 @@ type testCA struct {
 	issuerKey ed25519.PrivateKey
 }
 
-func validFor(d time.Duration) pki.Validity {
-	return pki.Validity{NotBefore: testNow.Add(-time.Hour), NotAfter: testNow.Add(d)}
+func validFor(d time.Duration) Validity {
+	return Validity{NotBefore: testNow.Add(-time.Hour), NotAfter: testNow.Add(d)}
 }
 
 func createCert(t *testing.T, tmpl, parent *x509.Certificate, pub crypto.PublicKey, signer crypto.Signer) *x509.Certificate {
 	t.Helper()
-	cert, err := pki.Sign(tmpl, parent, pub, signer)
+	cert, err := Sign(tmpl, parent, pub, signer)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -41,14 +39,14 @@ func createCert(t *testing.T, tmpl, parent *x509.Certificate, pub crypto.PublicK
 func newTestCA(t *testing.T) testCA {
 	t.Helper()
 	rootPub, rootKey, _ := ed25519.GenerateKey(rand.Reader)
-	root := createCert(t, pki.AuthorityTemplate("root", validFor(RootLifetime), false), nil, rootPub, rootKey)
+	root := createCert(t, AuthorityTemplate("root", validFor(RootLifetime), false), nil, rootPub, rootKey)
 	issuerPub, issuerKey, _ := ed25519.GenerateKey(rand.Reader)
-	issuer := createCert(t, pki.AuthorityTemplate("issuer", validFor(IssuerLifetime), true), root, issuerPub, rootKey)
+	issuer := createCert(t, AuthorityTemplate("issuer", validFor(IssuerLifetime), true), root, issuerPub, rootKey)
 	return testCA{root: root, rootKey: rootKey, issuer: issuer, issuerKey: issuerKey}
 }
 
 func leafTemplate(usage x509.ExtKeyUsage, names []string) *x509.Certificate {
-	return pki.LeafTemplate("leaf", validFor(ClientLifetime), usage, names...)
+	return LeafTemplate("leaf", validFor(ClientLifetime), usage, names...)
 }
 
 func (ca testCA) client(t *testing.T) (*x509.Certificate, ed25519.PrivateKey) {
